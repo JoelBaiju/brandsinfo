@@ -13,6 +13,13 @@ admin.site.register(Product_pics)
 admin.site.register(Products)
 admin.site.register(City)
 admin.site.register(Locality)
+admin.site.register(Services)
+admin.site.register(Popular_General_Cats)
+admin.site.register(Home_Titles)
+admin.site.register(Home_Popular_Cities)
+admin.site.register(Home_Popular_Des_Cats)
+admin.site.register(Home_Popular_General_Cats)
+admin.site.register(Home_Popular_Product_Cats)
 
 
 

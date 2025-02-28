@@ -9,14 +9,42 @@ class UserSerializer(serializers.ModelSerializer):
         fields=['mobile_number','first_name']
         
 
+
+
+class Popular_general_cats_serializer(serializers.ModelSerializer):
+    name = serializers.StringRelatedField(source='general_cat', read_only=True)
+    id = serializers.PrimaryKeyRelatedField(source='general_cat', read_only=True)  # Returns the ID
+    
+    class Meta:
+        model = Popular_General_Cats
+        fields = ['name', 'id']
+        
+
+
+class BuisnessPicsSerializer(serializers.ModelSerializer):
+    buisness    = serializers.PrimaryKeyRelatedField(
+                    queryset = Buisnesses.objects.all()
+                )
+    image       = serializers.ImageField()
+    
+    class Meta:
+        model  = Buisness_pics
+        fields  = [
+                    'image' ,
+                    'buisness' ,
+                  ]
+
+
+
 class BuisnessesSerializer(serializers.ModelSerializer):
-    # profile_pic = serializers.ImageField()
-    city = serializers.PrimaryKeyRelatedField(
-            queryset=City.objects.all()
-        ) 
-    locality = serializers.PrimaryKeyRelatedField(
-            queryset=Locality.objects.all()
-        ) 
+    image       = serializers.ImageField(required=False)
+    city        = serializers.StringRelatedField()
+    locality    = serializers.PrimaryKeyRelatedField(queryset=Locality.objects.all())
+    user        = serializers.PrimaryKeyRelatedField(
+                    queryset=Extended_User.objects.all()
+                    )
+    image_gallery = BuisnessPicsSerializer(many=True, read_only=True)
+
     
     class Meta:
         model = Buisnesses
@@ -39,10 +67,25 @@ class BuisnessesSerializer(serializers.ModelSerializer):
                 'instagram_link',
                 'facebook_link',
                 'web_link',
+                'x_link',
+                'youtube_link',
                 'whatsapp_number',
                 'incharge_number',
-                'user'
+                'user',
+                'score',
+                'image',
+                'sa_rate',  
+                'no_of_enquiries',
+                'email'
                 ]
+        
+        
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['images'] = BuisnessPicsSerializer(
+            instance.buisness_pics_set.all(), many=True
+        ).data
+        return representation
     
     def create(self, validated_data):
         user=validated_data.pop('owner', None)  
@@ -52,65 +95,157 @@ class BuisnessesSerializer(serializers.ModelSerializer):
         return Buisnesses.objects.create(**validated_data)
     
     
-class ProductCreateSerializer(serializers.ModelSerializer):
+    
+
+class BuisnessesSerializerFull(serializers.ModelSerializer):
+    image       = serializers.ImageField(required=False)
+    city        = serializers.StringRelatedField()
+    locality    = serializers.StringRelatedField()
+    user        = serializers.PrimaryKeyRelatedField(
+                    queryset=Extended_User.objects.all()
+                    )
+
+    
     class Meta:
-        model = Products
-        fields = ['name', 'price', 'image', 'cat', 'description']
+        model = Buisnesses
+        fields=['id',
+                'name',
+                'description',
+                'buisness_type',
+                'manager_name',
+                'building_name',
+                'locality',
+                'city',
+                'state',
+                'pincode',
+                'latittude',
+                'longitude',
+                'opens_at',
+                'closes_at',
+                'since',
+                'no_of_views',
+                'instagram_link',
+                'facebook_link',
+                'web_link',
+                'x_link',
+                'youtube_link',
+                'whatsapp_number',
+                'incharge_number',
+                'user',
+                'score',
+                'image',
+                'sa_rate',  
+                'no_of_enquiries',
+                'email'
+                ]
+    
+    
 
 
 
-# class ProductRetrieveSerializer(serializers.ModelSerializer):
-#     images = serializers.SerializerMethodField()
-#     categories = serializers.Serializer
+class BuisnessesSerializerCustomers(serializers.ModelSerializer):
+    image       = serializers.ImageField()
+    city        = serializers.StringRelatedField()
+    locality    = serializers.StringRelatedField()
+    user        = serializers.PrimaryKeyRelatedField(
+                    queryset=Extended_User.objects.all()
+                    )
+    image_gallery = BuisnessPicsSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model   = Buisnesses
+        fields  = [  'id',
+                    'name',
+                    'description',
+                    'buisness_type',
+                    'manager_name',
+                    'building_name',
+                    'locality',
+                    'city',
+                    'state',
+                    'pincode',
+                    'latittude',
+                    'longitude',
+                    'opens_at',
+                    'closes_at',
+                    'since',
+                    'no_of_views',
+                    'instagram_link',
+                    'facebook_link',
+                    'web_link',
+                    'x_link',
+                    'youtube_link',
+                    'whatsapp_number',
+                    'incharge_number',
+                    'user',
+                    'image',
+                    'image_gallery'
+                 ]
+    
+
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['image_gallery'] = BuisnessPicsSerializer(
+            instance.buisness_pics_set.all(), many=True
+        ).data
+        return representation
+
+
+class BuisnessesSerializerMini(serializers.ModelSerializer):
+    image       = serializers.ImageField()        
+    city        = serializers.StringRelatedField()
+    locality    = serializers.StringRelatedField()
+    user        = serializers.PrimaryKeyRelatedField(
+                    queryset=Extended_User.objects.all()
+                )
+    
+    class Meta:
+        model   = Buisnesses
+        fields  = [  
+                    'id',
+                    'name',
+                    'buisness_type',
+                    'locality',
+                    'city',
+                    'state',
+                    'no_of_views',
+                    'user',
+                    'score',
+                    'image'
+                 ]
+    
 
 
 
 
-# class ProductAddSerializer(serializers.ModelSerializer):
-#     images = serializers.ListField(
-#         child=serializers.ImageField(), write_only=True, required=False
-#     )
-#     categories = serializers.ListField(
-#         child=serializers.IntegerField(), write_only=True, required=False
-#     )
 
-#     class Meta:
-#         model = Products
-#         fields = ['name', 'price', 'image', 'cat', 'description', 'images', 'categories']
 
-#     def create(self, validated_data):
-#         images_data = validated_data.pop('images', [])
-#         categories_data = validated_data.pop('categories', [])
 
-#         product = Products.objects.create(**validated_data)
 
-#         # Save additional product images
-#         for image in images_data:
-#             Product_pics.objects.create(product=product, pic=image)
-
-#         # Save product categories
-#         for cat_id in categories_data:
-#             category = Product_category.objects.create(product=product, cat_name=cat_id)
-
-#         return product
 
 
 class ProductPicsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Product_pics
-        fields = ['image']
+        model   = Product_pics
+        fields  = ['image']
 
-class ProductSerializer(serializers.ModelSerializer):
+class ProductCreateSerializer(serializers.ModelSerializer):
     images = serializers.ListField(
             child=serializers.ImageField(), write_only=True
         )  
+  
     sub_cat = serializers.PrimaryKeyRelatedField(
-            queryset=Product_Sub_category.objects.all()
-        ) 
+    queryset=Product_Sub_category.objects.all(),
+)
+
+    
+    product_images = ProductPicsSerializer(source='product_pics_set', many=True, read_only=True)
+
 
     class Meta:
         model = Products
-        fields = ['name', 'price', 'sub_cat', 'description', 'buisness', 'images']
+        fields = ['id','name', 'price', 'sub_cat', 'description', 'buisness', 'images','searched','product_images']
 
     def create(self, validated_data):
         images_data = validated_data.pop('images', [])
@@ -123,11 +258,44 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 
+class ProductSerializer(serializers.ModelSerializer):
+    images = serializers.ListField(
+            child=serializers.ImageField(), write_only=True
+        )  
+  
+    sub_cat = serializers.StringRelatedField()
+    product_images = ProductPicsSerializer(source='product_pics_set', many=True, read_only=True)
 
-class ServiceSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Products
+        fields = ['id','name', 'price', 'sub_cat', 'description', 'buisness', 'images','searched','product_images']
+
+
+
+
+
+
+
+class CreateServiceSerializer(serializers.ModelSerializer):
+
+    cat = serializers.PrimaryKeyRelatedField(
+    queryset=Service_Cats.objects.all(),
+)    
     class Meta:
         model = Services
         fields = '__all__'  # Includes all fields in the model
+
+
+
+class ServiceSerializer(serializers.ModelSerializer):
+
+    cat = serializers.StringRelatedField()
+
+    class Meta:
+        model = Services
+        fields = '__all__'  # Includes all fields in the model
+
 
 
 class ServiceCatsSerializer(serializers.ModelSerializer):
@@ -152,3 +320,70 @@ class LocalitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Locality
         fields =['locality_name' , 'id']
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+from rest_framework import serializers
+
+class HomeTitlesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Home_Titles
+        fields = ['id', 'name', 'title']
+
+
+class HomePopularGeneralCatsSerializer(serializers.ModelSerializer):
+    name = serializers.StringRelatedField()  # To show the actual category name
+    title = serializers.StringRelatedField()
+
+    class Meta:
+        model = Home_Popular_General_Cats
+        fields = ['image', 'name', 'title']
+
+
+class HomePopularDesCatsSerializer(serializers.ModelSerializer):
+    name = serializers.StringRelatedField()
+    title = serializers.StringRelatedField()
+
+    class Meta:
+        model = Home_Popular_Des_Cats
+        fields = ['name', 'title']
+
+
+class HomePopularProductCatsSerializer(serializers.ModelSerializer):
+    name = serializers.StringRelatedField()
+    title = serializers.StringRelatedField()
+
+    class Meta:
+        model = Home_Popular_Product_Cats
+        fields = ['image', 'name', 'title']
+
+
+class HomePopularCitiesSerializer(serializers.ModelSerializer):
+    name = serializers.StringRelatedField()
+    title = serializers.StringRelatedField()
+
+    class Meta:
+        model = Home_Popular_Cities
+        fields = ['image', 'name', 'title']
