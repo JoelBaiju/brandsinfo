@@ -1,11 +1,9 @@
 from django.db import models
-from mongodb import db
 from django.contrib.auth.models import AbstractUser
 
 
 # Mongo DB Collections:-
 
-catalogue = db['catalogue']
 
 
 
@@ -13,7 +11,9 @@ catalogue = db['catalogue']
 
 class Extended_User(AbstractUser):
     mobile_number   = models.CharField(max_length=15, null=True, blank=True)
-
+    is_customer     = models.BooleanField(default=False)
+    is_vendor       = models.BooleanField(default=False)
+    
     def __str__(self):
         return self.username
 
@@ -73,6 +73,7 @@ class Buisnesses(models.Model):
     buisness_type               = models.CharField(max_length=50)
     manager_name                = models.CharField(max_length=100 , blank=True) 
     building_name               = models.CharField(max_length=50 , blank=True , null=True)
+    landmark                    = models.CharField(max_length=50 , blank=True , null=True)
     locality                    = models.ForeignKey(Locality , on_delete=models.CASCADE)
     city                        = models.ForeignKey(City , on_delete=models.CASCADE , null=True , blank=True)
     state                       = models.CharField(max_length=50 , blank=False , null=False)
@@ -95,12 +96,30 @@ class Buisnesses(models.Model):
     sa_rate                     = models.CharField(max_length=12 , default='15' ,)
     no_of_enquiries             = models.IntegerField(default=0 , blank=True)  
     no_of_views                 = models.IntegerField(default=0 , blank=True)
-    
+    verified                    = models.BooleanField(default=False)
+    assured                     = models.BooleanField(default=False)    
+    rating                      = models.FloatField(default=0)    
+    total_no_of_ratings         = models.IntegerField(default=0)
 
 
     def __str__(self):
         return self.name
     
+    
+    
+    
+
+
+class Buisness_Offers(models.Model):
+    buisness                = models.ForeignKey(Buisnesses , on_delete = models.CASCADE)
+    offer                   = models.IntegerField(default = 0 , blank = False)
+    is_percent              = models.BooleanField(default = False)
+    is_flat                 = models.BooleanField(default = False)
+    minimum_bill_amount     = models.IntegerField(blank = True)
+    valid_upto              = models.DateField(blank=True)    
+    
+
+
 
 class Buisness_pics(models.Model):
     image             = models.ImageField(upload_to='Photo_gallery/' , default='')
@@ -220,31 +239,53 @@ class Home_Titles (models.Model):
 
 class Home_Popular_General_Cats (models.Model):
    
-    image           = models.ImageField(upload_to='Home_pics/' , default='' , null=True , blank=True )
-    name             = models.ForeignKey(General_cats , on_delete=models.CASCADE)
-    title           = models.ForeignKey(Home_Titles , on_delete=models.CASCADE)
+    image           = models.ImageField(upload_to = 'Home_pics/' , default='' , null = True , blank = True )
+    name            = models.ForeignKey(General_cats , on_delete = models.CASCADE)
+    title           = models.ForeignKey(Home_Titles , on_delete = models.CASCADE)
 
 class Home_Popular_Des_Cats (models.Model):
    
     # image           = models.ImageField(upload_to='Home_pics/' , default='' , null=True , blank=True )
-    name             = models.ForeignKey(Descriptive_cats , on_delete=models.CASCADE)
-    title           = models.ForeignKey(Home_Titles , on_delete=models.CASCADE)
+    name            = models.ForeignKey(Descriptive_cats , on_delete = models.CASCADE)
+    title           = models.ForeignKey(Home_Titles , on_delete = models.CASCADE)
 
 class Home_Popular_Product_Cats (models.Model): 
    
-    image           = models.ImageField(upload_to='Home_pics/' , default='' , null=True , blank=True )
-    name             = models.ForeignKey(Product_Sub_category , on_delete=models.CASCADE)
-    title           = models.ForeignKey(Home_Titles , on_delete=models.CASCADE)
+    image           = models.ImageField(upload_to = 'Home_pics/' , default='' , null = True , blank = True )
+    name            = models.ForeignKey(Product_Sub_category , on_delete = models.CASCADE)
+    title           = models.ForeignKey(Home_Titles , on_delete = models.CASCADE)
 
 
 class Home_Popular_Cities (models.Model):
    
-    image           = models.ImageField(upload_to='Home_pics/' , default='' , null=True , blank=True )
-    name             = models.ForeignKey(City , on_delete=models.CASCADE)
-    title           = models.ForeignKey(Home_Titles , on_delete=models.CASCADE)
+    image           = models.ImageField(upload_to = 'Home_pics/' , default = '' , null = True , blank = True )
+    name            = models.ForeignKey(City , on_delete = models.CASCADE)
+    title           = models.ForeignKey(Home_Titles , on_delete = models.CASCADE)
+    
+    
+class Home_Meta_data (models.Model):
+   
+    meta_title             = models.CharField(max_length=400 , null=True)
+    meta_description       = models.CharField(max_length=400 , null=True)
+    meta_keywords          = models.CharField(max_length=400 , null=True)
+    meta_author            = models.CharField(max_length=400 , null=True)
+    page_title             = models.CharField(max_length=400 , null=True)
+    meta_og_title          = models.CharField(max_length=400 , null=True)
+    meta_og_description    = models.CharField(max_length=400 , null=True)
+    meta_og_image          = models.ImageField(upload_to='Home_pics/' , default='' , null=True , blank=True )
+    meta_og_url            = models.CharField(max_length=400 , null=True)
+    meta_og_type           = models.CharField(max_length=400 , null=True)
+    meta_og_site_name      = models.CharField(max_length=400 , null=True)
+    meta_og_locale         = models.CharField(max_length=400 , null=True)
+    meta_og_image_width    = models.CharField(max_length=400 , null=True)
+    meta_og_image_height   = models.CharField(max_length=400 , null=True)
+    meta_og_image_alt      = models.CharField(max_length=400 , null=True)
     
     
     
+class Home_Ads(models.Model):
+    name    = models.CharField(max_length=100)
+    banner   = models.ImageField(upload_to = 'Home_Ad_Banners/' , default='' , null = True , blank = True )
     
 
 # class HomeTitles (models.Model):
@@ -260,3 +301,115 @@ class Home_Popular_Cities (models.Model):
 #     body            = models.CharField(max_length=70)
 #     footer          = models.CharField(max_length=70)
     
+    
+    
+    
+    
+    
+#=============================================================================================================================
+
+# users liked Buisnesses
+
+class Liked_Buisnesses_Group(models.Model):
+    name = models.CharField(max_length=70)
+    user = models.ForeignKey('Extended_User', on_delete=models.CASCADE, related_name='business_groups')
+
+    def __str__(self):
+        return f"{self.name} - {self.user.username}"
+
+class Liked_Buisnesses(models.Model):
+    buisness = models.ForeignKey('Buisnesses', on_delete=models.CASCADE, related_name='liked_by_groups')
+    group = models.ForeignKey('Liked_Buisnesses_Group', on_delete=models.CASCADE, related_name='liked_buisnesses')
+    user = models.ForeignKey('Extended_User', on_delete=models.CASCADE , default=None)
+    
+    class Meta:
+        unique_together = ('buisness', 'group')  
+        verbose_name = 'Liked Buisness'
+        verbose_name_plural = 'Liked Buisnesses'
+
+    def __str__(self):
+        return f"{self.buisness.name} in {self.group.name}"
+
+
+
+
+
+#=======================================================================================
+
+
+
+# SEO
+
+
+class Sitemap_Links(models.Model):
+    link                    = models.CharField(max_length=300 ,null=True)
+    share_link              = models.CharField(max_length=100 ,null=True)
+    single_buisness         = models.BooleanField(default=False)
+    cc_combination          = models.BooleanField(default=False)
+    city                    = models.ForeignKey(City , on_delete=models.CASCADE , null=True)
+    dcat                    = models.ForeignKey(Descriptive_cats , on_delete=models.CASCADE , null=True)
+    buisness                = models.ForeignKey(Buisnesses , on_delete=models.CASCADE , null=True ,related_name="sitemap_link")
+    meta_title              = models.CharField(max_length=400 , null=True)
+    meta_description        = models.CharField(max_length=400 , null=True)
+    meta_keywords           = models.CharField(max_length=400 , null=True)
+    meta_author             = models.CharField(max_length=400 , null=True)
+    meta_og_title           = models.CharField(max_length=400 , null=True)
+    meta_og_description     = models.CharField(max_length=400 , null=True)
+    meta_og_image           = models.ImageField(upload_to='Home_pics/' , default='' , null=True , blank=True )
+    meta_og_url             = models.CharField(max_length=400 , null=True)
+    meta_og_site_name       = models.CharField(max_length=400 , null=True)
+    page_title              = models.CharField(max_length=400 , null=True)
+    last_mod                = models.DateField( auto_now=True)
+    change_freq             = models.CharField(max_length=50 , null=True)
+    priority                = models.FloatField(default=0.5)    
+    
+    
+    def __str__(self):
+        return self.link
+
+
+
+
+
+
+
+# ================================
+
+class Keywords(models.Model):
+    keyword         = models.CharField(max_length=200)
+    dcat            = models.ForeignKey(Descriptive_cats , on_delete=models.CASCADE)
+    
+
+
+
+
+# ================================
+
+class Enquiries (models.Model):
+    name            = models.CharField(max_length=50)
+    mobile_number   = models.CharField(max_length=15)
+    message         = models.CharField(max_length=500 , null=True , blank= True)
+    buisness        = models.ForeignKey(Buisnesses , on_delete=models.CASCADE)
+    user            = models.ForeignKey(Extended_User , on_delete=models.CASCADE , null=True)
+    date            = models.DateField(auto_now=True)
+    time            = models.TimeField(auto_now=True)
+    is_read         = models.BooleanField(default=False)
+        
+    def __str__(self):
+        return f'{self.name} , {self.mobile_number} , {self.buisness}'
+
+# ===============================
+
+class Reviews_Ratings(models.Model):
+    buisness        = models.ForeignKey(Buisnesses , on_delete=models.CASCADE)
+    user            = models.ForeignKey(Extended_User , on_delete=models.CASCADE)
+    review          = models.CharField(max_length=500 , null=True , default='')
+    rating          = models.IntegerField(default=0 )
+    date            = models.DateField(auto_now=True)
+    time            = models.TimeField(auto_now=True)
+    def __str__(self):
+        return f'{self.buisness} , {self.user} , {self.review}'
+    
+class Review_pics(models.Model):
+    image           = models.ImageField(upload_to='Review_pics/' , default='')
+    review          = models.ForeignKey(Reviews_Ratings , on_delete=models.CASCADE)

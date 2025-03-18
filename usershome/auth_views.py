@@ -1,0 +1,240 @@
+import json
+import secrets
+import string
+
+# Django imports
+
+from django.core.cache import cache
+from django.shortcuts import get_object_or_404
+
+
+
+# DRF imports
+from rest_framework import generics, filters, status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
+
+from usershome.fast2_sms_service import send_otp
+
+
+# Local app imports
+from .models import *
+from .serializers import * 
+
+
+
+
+
+
+
+def generate_random_otp(length=6):
+    otp=''.join(secrets.choice(string.digits) for _ in range(length))
+    print(otp)
+    return otp
+
+
+@api_view(['POST'])
+def signup_request_1(request):
+    try:
+        data = json.loads(request.body)
+        phone = data.get('phone')
+
+        if not phone:
+            return Response({'message': 'Phone number is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Check if user already exists
+        exists = Extended_User.objects.filter(username=phone).exists()
+        
+        # Generate OTP
+        otp = generate_random_otp()
+        
+        # Store OTP and phone number in cache with timeout (10 minutes)
+        cache.set(
+            f'otp_{phone}',
+            value={'otp': otp, 'phone': phone, 'exists': exists , 'name':'' },
+            timeout=600  # Timeout in seconds (10 minutes)
+        )
+        # send_otp(phone, otp)
+        return Response({'exists': exists,'otp':otp},status=status.HTTP_200_OK)
+
+    except json.JSONDecodeError:
+        return Response({'success': False, 'message': 'Invalid JSON format.'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    except Exception as e:
+        # Log or print error for debugging purposes
+        print(f"Error in signup_request_1: {str(e)}")
+        return Response({'success': False, 'message': 'An error occurred while processing your request.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+
+
+def create_new_user(phone, cache_data, utype):
+    user = Extended_User.objects.create_user(
+        username=phone,
+        password=phone + cache_data['name'],
+        mobile_number=phone,
+        first_name=cache_data['name']
+    )
+    if utype == 'customer':
+        user.is_customer = True
+    elif utype == 'buisness':
+        user.is_vendor = True
+    user.save()
+    return user
+
+def link_user_to_enquiry(cache_data, user):
+    enquiry_id = cache_data.get('enquiry_id')
+    if enquiry_id:
+        enquiry = get_object_or_404(Enquiries, id=enquiry_id)
+        enquiry.user = user
+        enquiry.save()
+
+
+def verifyotp(request, utype, from_enquiry=False):
+    try:
+        data = json.loads(request.body)
+        phone = data.get('phone')
+        otp = data.get('otp')
+        print(otp)
+
+        if not phone or not otp:
+            return Response({'message': 'Phone and OTP are required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        cache_data = cache.get(f'otp_{phone}')
+        if cache_data is None:
+            return Response({'message': 'OTP Expired'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if otp != cache_data['otp']:
+            return Response({'message': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if cache_data['exists']:
+            user = get_object_or_404(Extended_User, username=cache_data['phone'])
+        else:
+            user = create_new_user(phone, cache_data, utype)
+
+        if from_enquiry:
+            link_user_to_enquiry(cache_data, user)
+
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'message': 'OTP Verified',
+            'exists': cache_data['exists'],
+            'sessionid': str(refresh.access_token),
+            'refresh_token': str(refresh)
+        }, status=status.HTTP_201_CREATED)
+
+    except json.JSONDecodeError:
+        return Response({'message': 'Invalid JSON data'}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+@api_view(['POST'])
+def verifyotp_customers(request):
+    return verifyotp(request , utype = 'customer')
+
+
+@api_view(['POST'])
+def verifyotp_buisnesses(request):
+    return verifyotp(request , utype = 'buisness')
+
+
+@api_view(['POST'])
+def verifyotp_from_enquiry(request):
+    return verifyotp(request , utype = 'customer' ,from_enquiry=True)
+
+
+
+
+@api_view(['POST'])    
+def signup_request_2(request):
+    
+    data=json.loads(request.body)
+    phone=data.get('phone')
+    name=data.get('name')
+    cache_data=cache.get(f'otp_{phone}')
+    try:
+        cache.set(f'otp_{phone}', value={
+                                    'otp': cache_data['otp'],
+                                    'name': name,
+                                    'exists': cache_data['exists'],
+                                    'phone':phone
+                                    }, timeout=600) 
+        return Response({
+                     'message':'Name Saved',
+                    } ,status=status.HTTP_200_OK)  
+    except:
+        return Response({
+                     'message':'Something Went Wrong',
+                    } ,status=status.HTTP_400_BAD_REQUEST)  
+
+  
+    
+     
+
+
+
+@api_view(['POST'])
+def resendotp(request):
+    data=json.loads(request.body)
+    phone=data.get('phone')
+    cache_data=cache.get(f'otp_{phone}')   
+    otp=generate_random_otp()
+    cache.set(f'otp_{phone}', value={
+                                    'otp': otp,
+                                    'phone': phone,
+                                    'exists': cache_data['exists'],
+                                    'name':cache_data['name']
+                                    }, timeout=600) 
+    print(otp)
+                                    
+    return Response({'message':'Otp sent sucessfully'},status=status.HTTP_200_OK)
+    
+    
+    
+    
+# =================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def signup_request_from_enquiry(name,phone,enquiry_id):
+   
+    try:
+        exists = Extended_User.objects.filter(username=phone).exists()
+        
+        otp = generate_random_otp()
+        
+        cache.set(
+            f'otp_{phone}',
+            value={'otp': otp,'name':name,'enquiry_id':enquiry_id, 'phone': phone, 'exists': exists , 'name':'' },
+            timeout=600  
+        )
+        # send_otp(phone, otp)
+        return Response({'exists': exists,'otp':otp},status=status.HTTP_200_OK)
+
+
+    except Exception as e:
+
+        print(f"Error in signup_request_1: {str(e)}")
+        return Response({'success': False, 'message': 'An error occurred while processing your request.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+

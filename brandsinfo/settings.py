@@ -56,7 +56,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     'corsheaders.middleware.CorsMiddleware',
 
+
 ]
+
 
 ROOT_URLCONF = "brandsinfo.urls"
 
@@ -119,7 +121,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 
@@ -142,6 +144,8 @@ AUTH_USER_MODEL = 'usershome.Extended_User'
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    'https://f509rzm8-3000.inc1.devtunnels.ms',
+
 ]
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
@@ -157,7 +161,9 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+
     ),
+   
 
 }
 
@@ -169,12 +175,12 @@ SIMPLE_JWT = {
 
 
 
-# ELASTICSEARCH_DSL = {
-#     'default': {
-#         'hosts': ['http://elastic:Z0NLsQ1r6OEnfGdTh2qr@localhost:9200/'],
-#     },
-# }
-
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': ['http://elastic:Z0NLsQ1r6OEnfGdTh2qr@localhost:9200/'],
+    },
+}
+    
 
 
 MEDIA_URL = '/media/'  # URL path used to serve media files
@@ -195,3 +201,26 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'brandsinfoguide@gmail.com'  # Your Gmail account
 EMAIL_HOST_PASSWORD = 'cpav vbda pjjk lmxs'  # App Password or Gmail password
 DEFAULT_FROM_EMAIL = 'brandsinfoguide@gmail.com'  # Default from email (can be your Gmail or another verified email)
+
+
+
+
+
+
+
+
+
+
+
+FRONTEND_BASE_URL_FOR_SM = 'https://45jfqx2q-3000.inc1.devtunnels.ms'
+BACKEND_BASE_URL_FOR_SM = 'http://mq459llx-8000.inc1.devtunnels.ms'
+BACKEND_BASE_URL_FOR_SM_SECURE = 'https://mq459llx-8000.inc1.devtunnels.ms'
+OPENAI_API_KEY='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'
+FAST2SMS_API_KEY='TNuYH9rIb5d7cM6UhWglVmB2vQEieXFKD314RJsStPCLGk08fAOnKw9RlTU30emkyMSD8uXqtfbJgcvW'
+
+
+
+
+
+
+
