@@ -215,8 +215,8 @@ DEFAULT_FROM_EMAIL = 'brandsinfoguide@gmail.com'  # Default from email (can be y
 FRONTEND_BASE_URL_FOR_SM = 'https://45jfqx2q-3000.inc1.devtunnels.ms'
 BACKEND_BASE_URL_FOR_SM = 'http://mq459llx-8000.inc1.devtunnels.ms'
 BACKEND_BASE_URL_FOR_SM_SECURE = 'https://mq459llx-8000.inc1.devtunnels.ms'
-OPENAI_KEY=''
-FAST2SMS_KEY=''
+# OPENAI_KEY=''
+# FAST2SMS_KEY=''
 
 
 
