@@ -1,6 +1,6 @@
 from openai import OpenAI
-# from brandsinfo.settings import OPENAI_KEY as OPENAI_API_KEY
-OPENAI_API_KEY=''
+from brandsinfo.settings import OPENAI_KEY as OPENAI_API_KEY
+
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Sitemap_Links, City, Descriptive_cats, Buisnesses
