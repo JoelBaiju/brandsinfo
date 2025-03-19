@@ -215,8 +215,8 @@ DEFAULT_FROM_EMAIL = 'brandsinfoguide@gmail.com'  # Default from email (can be y
 FRONTEND_BASE_URL_FOR_SM = 'https://45jfqx2q-3000.inc1.devtunnels.ms'
 BACKEND_BASE_URL_FOR_SM = 'http://mq459llx-8000.inc1.devtunnels.ms'
 BACKEND_BASE_URL_FOR_SM_SECURE = 'https://mq459llx-8000.inc1.devtunnels.ms'
-OPENAI_API_KEY='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'
-FAST2SMS_API_KEY='TNuYH9rIb5d7cM6UhWglVmB2vQEieXFKD314RJsStPCLGk08fAOnKw9RlTU30emkyMSD8uXqtfbJgcvW'
+OPENAI_API_KEY=''
+FAST2SMS_API_KEY=''
 
 
 
