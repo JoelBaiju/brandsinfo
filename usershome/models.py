@@ -5,7 +5,7 @@ from django.contrib.auth.models import AbstractUser
 # Mongo DB Collections:-
 
 
-
+       
 
 # Django Models:-
 
@@ -377,7 +377,7 @@ class Sitemap_Links(models.Model):
 
 class Keywords(models.Model):
     keyword         = models.CharField(max_length=200)
-    dcat            = models.ForeignKey(Descriptive_cats , on_delete=models.CASCADE)
+    dcat            = models.ForeignKey(Descriptive_cats , on_delete=models.CASCADE , null=True)
     
 
 
@@ -413,3 +413,16 @@ class Reviews_Ratings(models.Model):
 class Review_pics(models.Model):
     image           = models.ImageField(upload_to='Review_pics/' , default='')
     review          = models.ForeignKey(Reviews_Ratings , on_delete=models.CASCADE)
+    
+    
+    
+    
+# -------------------------------------------------------------------------------
+
+
+class Auth_OTPs(models.Model):
+    otp             = models.IntegerField()
+    phone           = models.CharField(max_length=11 )
+    name            = models.CharField(max_length=60 , null= True)
+    exists          = models.BooleanField(default=False)
+    enquiry         = models.CharField(max_length=500 , null=True)

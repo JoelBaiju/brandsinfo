@@ -50,6 +50,14 @@ def signup_request_1(request):
         otp = generate_random_otp()
         
         # Store OTP and phone number in cache with timeout (10 minutes)
+        try:
+            auth=Auth_OTPs.objects.get(phone=phone)
+        except:
+            auth=Auth_OTPs.objects.create(phone=phone,otp=otp)
+        auth.exists=exists
+        auth.otp=otp
+        auth.save()
+        
         cache.set(
             f'otp_{phone}',
             value={'otp': otp, 'phone': phone, 'exists': exists , 'name':'' },
@@ -71,12 +79,12 @@ def signup_request_1(request):
 
 
 
-def create_new_user(phone, cache_data, utype):
+def create_new_user(phone, auth, utype):
     user = Extended_User.objects.create_user(
         username=phone,
-        password=phone + cache_data['name'],
+        password=phone + auth.name,
         mobile_number=phone,
-        first_name=cache_data['name']
+        first_name=auth.name
     )
     if utype == 'customer':
         user.is_customer = True
@@ -85,8 +93,8 @@ def create_new_user(phone, cache_data, utype):
     user.save()
     return user
 
-def link_user_to_enquiry(cache_data, user):
-    enquiry_id = cache_data.get('enquiry_id')
+def link_user_to_enquiry(auth, user):
+    enquiry_id = auth.enquiry
     if enquiry_id:
         enquiry = get_object_or_404(Enquiries, id=enquiry_id)
         enquiry.user = user
@@ -103,25 +111,29 @@ def verifyotp(request, utype, from_enquiry=False):
         if not phone or not otp:
             return Response({'message': 'Phone and OTP are required'}, status=status.HTTP_400_BAD_REQUEST)
 
-        cache_data = cache.get(f'otp_{phone}')
-        if cache_data is None:
+        # cache_data = cache.get(f'otp_{phone}')
+        auth = Auth_OTPs.objects.get(phone=phone)
+        
+        if auth is None:
             return Response({'message': 'OTP Expired'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if otp != cache_data['otp']:
+        # print(type(otp))
+        # print(type(auth.otp))
+        if str(otp) != str(auth.otp):
             return Response({'message': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if cache_data['exists']:
-            user = get_object_or_404(Extended_User, username=cache_data['phone'])
+        if auth.exists:
+            user = get_object_or_404(Extended_User, username=auth.phone)
         else:
-            user = create_new_user(phone, cache_data, utype)
+            user = create_new_user(phone, auth, utype)
 
         if from_enquiry:
-            link_user_to_enquiry(cache_data, user)
+            link_user_to_enquiry(auth, user)
 
         refresh = RefreshToken.for_user(user)
         return Response({
             'message': 'OTP Verified',
-            'exists': cache_data['exists'],
+            'exists': auth.exists,
             'sessionid': str(refresh.access_token),
             'refresh_token': str(refresh)
         }, status=status.HTTP_201_CREATED)
@@ -129,6 +141,7 @@ def verifyotp(request, utype, from_enquiry=False):
     except json.JSONDecodeError:
         return Response({'message': 'Invalid JSON data'}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
+        print('message', str(e))
         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -165,6 +178,9 @@ def signup_request_2(request):
                                     'exists': cache_data['exists'],
                                     'phone':phone
                                     }, timeout=600) 
+        auth = Auth_OTPs.objects.get(phone=phone)
+        auth.name = name
+        auth.save()
         return Response({
                      'message':'Name Saved',
                     } ,status=status.HTTP_200_OK)  
@@ -183,6 +199,7 @@ def signup_request_2(request):
 def resendotp(request):
     data=json.loads(request.body)
     phone=data.get('phone')
+    
     cache_data=cache.get(f'otp_{phone}')   
     otp=generate_random_otp()
     cache.set(f'otp_{phone}', value={
@@ -191,6 +208,10 @@ def resendotp(request):
                                     'exists': cache_data['exists'],
                                     'name':cache_data['name']
                                     }, timeout=600) 
+    
+    auth = Auth_OTPs.objects.get(phone=phone)
+    auth.otp = otp
+    auth.save()
     print(otp)
                                     
     return Response({'message':'Otp sent sucessfully'},status=status.HTTP_200_OK)
@@ -229,6 +250,15 @@ def signup_request_from_enquiry(name,phone,enquiry_id):
             timeout=600  
         )
         # send_otp(phone, otp)
+        try:
+            auth=Auth_OTPs.objects.get(phone=phone)
+        except:
+            auth=Auth_OTPs.objects.create(phone=phone,otp=otp)
+        auth.name=name
+        auth.enquiry=enquiry_id
+        auth.exists=exists
+        auth.otp=otp
+        auth.save()
         return Response({'exists': exists,'otp':otp},status=status.HTTP_200_OK)
 
 

@@ -85,16 +85,32 @@ WSGI_APPLICATION = "brandsinfo.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'brandsinfo',   
+#         'USER': 'root',       
+#         'PASSWORD': 'root123',  
+#         'HOST': 'localhost',    
+#         'PORT': '3306',         
+#     }
+# }
+
+
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'brandsinfo',   
         'USER': 'root',       
-        'PASSWORD': 'root123',  
+        'PASSWORD': 'Root@1234',  
         'HOST': 'localhost',    
         'PORT': '3306',         
     }
 }
+
+
 
 
 # Password validation
@@ -131,7 +147,14 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
+
 STATIC_URL = "static/"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -174,10 +197,19 @@ SIMPLE_JWT = {
 }
 
 
+# dev
+# ELASTICSEARCH_DSL = {
+#     'default': {
+#         'hosts': ['http://elastic:Z0NLsQ1r6OEnfGdTh2qr@localhost:9200/'],
+#     },
+# }
 
+
+
+# production
 ELASTICSEARCH_DSL = {
     'default': {
-        'hosts': ['http://elastic:Z0NLsQ1r6OEnfGdTh2qr@localhost:9200/'],
+        'hosts': ['http://elastic:tlTHrONRrteZRwDmhHoP@localhost:9200/'],
     },
 }
     
@@ -187,7 +219,6 @@ MEDIA_URL = '/media/'  # URL path used to serve media files
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Directory where media files are stored
 MAIN_CATEGORY_IMAGES_DIR = os.path.join(MEDIA_ROOT, 'Main_category_images')
 
-AUDIO_NOTES=os.path.join(MEDIA_ROOT,'Issue_Audios')
 
 
 
@@ -211,14 +242,21 @@ DEFAULT_FROM_EMAIL = 'brandsinfoguide@gmail.com'  # Default from email (can be y
 
 
 
+# dev
+# FRONTEND_BASE_URL_FOR_SM = 'https://45jfqx2q-3000.inc1.devtunnels.ms'
+# BACKEND_BASE_URL_FOR_SM = 'http://mq459llx-8000.inc1.devtunnels.ms'
+# BACKEND_BASE_URL_FOR_SM_SECURE = 'https://mq459llx-8000.inc1.devtunnels.ms'
+# OPENAI_API_KEY='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'
+# FAST2SMS_API_KEY='TNuYH9rIb5d7cM6UhWglVmB2vQEieXFKD314RJsStPCLGk08fAOnKw9RlTU30emkyMSD8uXqtfbJgcvW'
 
-FRONTEND_BASE_URL_FOR_SM = 'https://45jfqx2q-3000.inc1.devtunnels.ms'
-BACKEND_BASE_URL_FOR_SM = 'http://mq459llx-8000.inc1.devtunnels.ms'
-BACKEND_BASE_URL_FOR_SM_SECURE = 'https://mq459llx-8000.inc1.devtunnels.ms'
+
+
+# production
+FRONTEND_BASE_URL_FOR_SM = 'http://brandsinfo.in'
+BACKEND_BASE_URL_FOR_SM = 'http://3.109.186.201'
+BACKEND_BASE_URL_FOR_SM_SECURE = 'https://3.109.186.201'
 OPENAI_API_KEY=''
 FAST2SMS_API_KEY=''
-
-
 
 
 

@@ -1042,10 +1042,14 @@ def add_des_category(request):
     data=json.loads(request.body)
     dcid=data.get('dcid')
     bid=data.get('bid')
+    print('hereerererersso only ')
+    
     if not dcid or not bid:
         return Response('',status=status.HTTP_400_BAD_REQUEST)
     buisness=Buisnesses.objects.get(id=bid)
     for i in dcid:
+        print(Descriptive_cats.objects.get(id=i))
+        
         Buisness_Descriptive_cats.objects.create(dcat=Descriptive_cats.objects.get(id=i) , buisness=buisness).save()
     
     Site_Map_Generator_ALLATONCE_SB_single(buisness=buisness)

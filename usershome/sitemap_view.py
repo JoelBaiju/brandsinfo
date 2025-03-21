@@ -130,27 +130,28 @@ def Site_Map_Generator_ALLATONCE_SB_single(buisness):
     descriptive_category_qset = Buisness_Descriptive_cats.objects.filter(buisness=buisness)
     descriptive_category_str = ", ".join([cat.dcat.cat_name for cat in descriptive_category_qset])
 
-    metadata = generate_metadata_for_SB(
-        buisness_name=buisness.name,
-        description=buisness.description,
-        general_category=Buisness_General_cats.objects.get(buisness=buisness),
-        descriptive_category=descriptive_category_str,
-        city=buisness.city
-    )
+    # metadata = generate_metadata_for_SB(
+    #     buisness_name=buisness.name,
+    #     description=buisness.description,
+    #     general_category=Buisness_General_cats.objects.filter(buisness=buisness)[0],
+    #     descriptive_category=descriptive_category_str,
+    #     city=buisness.city
+    # )
 
-    meta_title = metadata.get("meta_title", "")
-    meta_description = metadata.get("meta_description", "")
-    meta_keywords = metadata.get("meta_keywords", "")
+    # meta_title = metadata.get("meta_title", "")
+    # meta_description = metadata.get("meta_description", "")
+    # meta_keywords = metadata.get("meta_keywords", "")
 
     sitemap_obj = Sitemap_Links.objects.create(
         buisness=buisness,
-        meta_title=meta_title,
-        meta_description=meta_description,
-        meta_keywords=meta_keywords
+        # meta_title=meta_title,
+        # meta_description=meta_description,
+        # meta_keywords=meta_keywords
     )
     sitemap_obj.single_buisness = True
     sitemap_obj.City = Buisnesses.city 
-    sitemap_obj.link = f"{FRONTEND_BASE_URL_FOR_SM}/{buisness.city}/{buisness.name}{(buisness.landmark) if buisness.landmark is not None else ''}/{sitemap_obj.id}?keywords={meta_keywords}"
+    # sitemap_obj.link = f"{FRONTEND_BASE_URL_FOR_SM}/{buisness.city}/{buisness.name}{(buisness.landmark) if buisness.landmark is not None else ''}/{sitemap_obj.id}?keywords={meta_keywords}"
+    sitemap_obj.link = f"{FRONTEND_BASE_URL_FOR_SM}/{buisness.city}/{buisness.name}{(buisness.landmark) if buisness.landmark is not None else ''}/{sitemap_obj.id}"
     sitemap_obj.share_link = f"{BACKEND_BASE_URL_FOR_SM}/mapper/{sitemap_obj.id}/"
     sitemap_obj.save()
 

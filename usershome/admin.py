@@ -61,6 +61,7 @@ admin.site.register(Product_linked_sub_category)
 admin.site.register(Reviews_Ratings)
 admin.site.register(Review_pics)
 admin.site.register(Home_Ads)
+admin.site.register(Auth_OTPs)
 
 
 admin.site.register(Sitemap_Links)
