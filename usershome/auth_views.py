@@ -111,7 +111,6 @@ def verifyotp(request, utype, from_enquiry=False):
         if not phone or not otp:
             return Response({'message': 'Phone and OTP are required'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # cache_data = cache.get(f'otp_{phone}')
         auth = Auth_OTPs.objects.get(phone=phone)
         
         if auth is None:

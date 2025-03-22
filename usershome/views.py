@@ -812,6 +812,15 @@ def addemail(request):
             value={'otp': otp, 'phone': email , 'bid':bid},
             timeout=600 
         )
+        
+        try:
+            eotp=Email_OTPs.objects.get(email=email)
+        except:
+            eotp=Email_OTPs.objects.create(email=email,otp=otp)
+        eotp.bid=bid
+        eotp.otp=otp
+        eotp.save()
+        
         cache_data=cache.get(f'otp_{email}')
         print(cache_data)
         send_otp_email(request.user,otp,email)
@@ -825,39 +834,52 @@ def addemail(request):
 def resendemailotp(request):
     data = json.loads(request.body)
     email = data.get('email')
-    cache_data=cache.get(f'otp_{email}')
-    if cache_data is None:
+    otp=auth_views.generate_random_otp()
+    try: 
+        eotp=Email_OTPs.objects.get(email=email)   
+    except:
         return Response(status=status.HTTP_400_BAD_REQUEST)
-    else:
-        otp=auth_views.generate_random_otp()
-        cache_data['otp']=otp
-        cache.set(f'otp_{email}',value=cache_data, timeout=600)
-        send_otp_email(request.user,otp,email)
-        return Response(status=status.HTTP_200_OK)
+    
+    eotp.otp=otp    
+    send_otp_email(request.user,otp,email)
+    return Response(status=status.HTTP_200_OK)
     
     
     
     
 @api_view(['POST'])
 def verifyemailotp(request):
-    data    = json.loads(request.body)
-    email   = data.get('email')
-    otp     = data.get('otp')
-    cache_data=cache.get(f'otp_{email}')
-    print(cache_data)
-    if cache_data is None:
-        return Response('otp expired',status=status.HTTP_400_BAD_REQUEST)
-    else:
-        print(cache_data['otp'])
+    try:
+        data = json.loads(request.body)
+        email = data.get('email')
+        otp = data.get('otp')
         print(otp)
-        if otp == cache_data['otp'] :
-            buisness=Buisnesses.objects.get(id=cache_data['bid'])
-            buisness.email=email
-            buisness.save()
-            return Response(status=status.HTTP_200_OK)
-        else:
-            return Response(status=status.HTTP_406_NOT_ACCEPTABLE)
-            
+
+        if not email or not otp:
+            return Response({'message': 'email and OTP are required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        eotp = Email_OTPs.objects.get(email=email)
+        
+        if eotp is None:
+            return Response({'message': 'Unknown Error , probably you are invalid'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # print(type(otp))
+        # print(type(auth.otp))
+        if str(otp) != str(eotp.otp):
+            return Response({'message': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
+
+        
+        user = Extended_User.objects.get(username=request.user)
+        user.email=email
+        user.save()
+
+
+    except json.JSONDecodeError:
+        return Response({'message': 'Invalid JSON data'}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        print('message', str(e))
+        return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     
     
     

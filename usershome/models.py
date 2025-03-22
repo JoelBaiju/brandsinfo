@@ -426,3 +426,7 @@ class Auth_OTPs(models.Model):
     name            = models.CharField(max_length=60 , null= True)
     exists          = models.BooleanField(default=False)
     enquiry         = models.CharField(max_length=500 , null=True)
+class Email_OTPs(models.Model):
+    otp             = models.IntegerField()
+    email           = models.CharField(max_length=100 )
+    bid             = models.CharField(max_length=50, null=True)
