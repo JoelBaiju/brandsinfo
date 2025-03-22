@@ -246,9 +246,13 @@ DEFAULT_FROM_EMAIL = 'brandsinfoguide@gmail.com'  # Default from email (can be y
 # FRONTEND_BASE_URL_FOR_SM = 'https://45jfqx2q-3000.inc1.devtunnels.ms'
 # BACKEND_BASE_URL_FOR_SM = 'http://mq459llx-8000.inc1.devtunnels.ms'
 # BACKEND_BASE_URL_FOR_SM_SECURE = 'https://mq459llx-8000.inc1.devtunnels.ms'
-# OPENAI_API_KEY='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'
+# OPENAI_API_KEY='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'
 # FAST2SMS_API_KEY='TNuYH9rIb5d7cM6UhWglVmB2vQEieXFKD314RJsStPCLGk08fAOnKw9RlTU30emkyMSD8uXqtfbJgcvW'
 
+GEMINI_API_KEYS=['AIzaSyBZX8VGvu3udJ80zyexe78s7qrAZgAPneM',
+                 'AIzaSyDwPLJew4URfzgMdQ43BEG-A7ldVs83_2w',
+                 'AIzaSyDbM8NSNv49EX63BqC1alukSm0eS_8rtJ0',
+                ]
 
 
 # production
@@ -256,7 +260,7 @@ FRONTEND_BASE_URL_FOR_SM = 'http://brandsinfo.in'
 BACKEND_BASE_URL_FOR_SM = 'http://3.109.186.201'
 BACKEND_BASE_URL_FOR_SM_SECURE = 'https://3.109.186.201'
 OPENAI_API_KEY='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'
-FAST2SMS_API_KEY=''
+FAST2SMS_API_KEY='TNuYH9rIb5d7cM6UhWglVmB2vQEieXFKD314RJsStPCLGk08fAOnKw9RlTU30emkyMSD8uXqtfbJgcvW'
 
 
 

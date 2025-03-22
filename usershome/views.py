@@ -32,7 +32,7 @@ from rest_framework.views import APIView
 
 
 # Local app imports
-from .sitemap_view import Site_Map_Generator_ALLATONCE_SB_single
+from .sitemap_view import Site_Map_Generator_SB
 from .models import *
 from .serializers import * 
 from .searcher import find_closest 
@@ -1075,7 +1075,7 @@ def add_des_category(request):
         
         Buisness_Descriptive_cats.objects.create(dcat=Descriptive_cats.objects.get(id=i) , buisness=buisness).save()
     
-    Site_Map_Generator_ALLATONCE_SB_single(buisness=buisness)
+    Site_Map_Generator_SB(buisness=buisness)
 
     
     return Response('',status=status.HTTP_200_OK)

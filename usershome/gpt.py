@@ -28,6 +28,7 @@ def generate_metadata(prompt):
 
     completion = client.chat.completions.create(
         model="gpt-4o-mini",
+        # model="text-embedding-3-small",
         messages=[{"role": "user", "content": prompt}]
     )
     
@@ -59,37 +60,24 @@ def generate_metadata(prompt):
 
 def generate_metadata_for_CC(category , city):
     
+
     prompt = f"""
-    Generate structured SEO metadata for a website's listing page that lists buisnesses which peoples search for 
-    in a particular category in a particular city with the following details :
+    Generate SEO metadata for a business listing page on **BrandsInfo**. The page features businesses in **{category}** within **{city}**.
 
-    Website Name : BrandsInfo
-    City: {city}
-    Category: {category}
+    ### **Output Format (strictly follow):**
+    - **Meta Title** (≤ 60 characters): Must include **category** and **city**.
+    - **Meta Description** (≤ 160 characters): Summarize services naturally and SEO-optimized.
+    - **Meta Keywords**: Comma-separated, highly relevant search terms.
 
-    **Output Format (strict adherence required):**  
-    - Meta Title: (Max 60 characters)  
-    - Meta Description: (Max 160 characters)  
-    - Meta Keywords: (Comma-separated, only highly relevant SEO keywords)
-
-    **Guidelines:**  
-    - Strictly make the entire metadata SEO-friendly and in natural language. 
-    - The meta title should be concise, engaging, and include the business name , category and city.  
-    - The meta description must summarize the services offered while being compelling and SEO-friendly.  
-    - The meta keywords should focus on primary search terms for the business, avoiding unnecessary words.  
-
- 
-    **Output Format (strict adherence required):**  
+    ### **Return JSON Format:**
     ```json
     {{
         "meta_title": "<Generated Meta Title>",
         "meta_description": "<Generated Meta Description>",
         "meta_keywords": "<Comma-separated keywords>"
     }}
-    ```
-    
     """
-
+    
     return generate_metadata(prompt)
 
 
@@ -108,37 +96,30 @@ def generate_metadata_for_CC(category , city):
 
 def generate_metadata_for_SB(city,general_category,buisness_name,descriptive_category,description):
 
-    prompt = f"""
-    Generate structured SEO metadata for a buisness  with the following details:
-
-    City: {city}
-    Buisness_name : {buisness_name}
-    General category: {general_category}
-    Descriptive_category: {descriptive_category}
-    Description: {description}
-
-    **Output Format (strict adherence required):**  
-    - Meta Title: (Max 60 characters)  
-    - Meta Description: (Max 160 characters)  
-    - Meta Keywords: (Comma-separated, only highly relevant SEO keywords)
-
-    **Guidelines:**  
-    - Strictly make the entire metadata SEO-friendly and in natural language. 
-    - The meta title should be concise, engaging, and include the business name , category and city.  
-    - The meta description must summarize the services offered while being compelling and SEO-friendly.  
-    - The meta keywords should focus on primary search terms for the business, avoiding unnecessary words.  
-
- 
-    **Output Format (strict adherence required):**  
-    ```json
-    {{
-        "meta_title": "<Generated Meta Title>",
-        "meta_description": "<Generated Meta Description>",
-        "meta_keywords": "<Comma-separated keywords>"
-    }}
-    ```
     
-    """
+    prompt = f"""
+        Generate SEO metadata for a business in **{city}**.
+
+        ### **Business Details:**  
+        - **Name:** {buisness_name}  
+        - **Category:** {general_category} ({descriptive_category})  
+        - **Description:** {description}  
+
+        ### **Output Format (strictly follow):**  
+        - **Meta Title** (≤ 60 characters): Include **business name, category, city**.  
+        - **Meta Description** (≤ 160 characters): Summarize services, SEO-optimized.  
+        - **Meta Keywords**: Comma-separated, highly relevant search terms.  
+
+        ### **Return JSON Format:**  
+        ```json
+        {{
+            "meta_title": "<Generated Meta Title>",
+            "meta_description": "<Generated Meta Description>",
+            "meta_keywords": "<Comma-separated keywords>"
+        }}
+
+
+        """
     return generate_metadata(prompt)
 
 
