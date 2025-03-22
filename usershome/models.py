@@ -375,9 +375,9 @@ class Sitemap_Links(models.Model):
 
 # ================================
 
-class Keywords(models.Model):
-    keyword         = models.CharField(max_length=200)
-    dcat            = models.ForeignKey(Descriptive_cats , on_delete=models.CASCADE , null=True)
+# class Keywords(models.Model):
+#     keyword         = models.CharField(max_length=200)
+#     dcat            = models.ForeignKey(Descriptive_cats , on_delete=models.CASCADE , null=True)
     
 
 

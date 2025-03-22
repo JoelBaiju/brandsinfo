@@ -881,6 +881,7 @@ def verifyemailotp(request):
         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     
+    return Response('',status=status.HTTP_200_OK)
     
     
     

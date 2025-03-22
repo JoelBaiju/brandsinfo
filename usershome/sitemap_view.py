@@ -107,7 +107,7 @@ def Site_Map_Generator_ALLATONCE_SB(request):
         )
         sitemap_obj.single_buisness = True
         sitemap_obj.City = Buisnesses.city 
-        # sitemap_obj.link = f"{FRONTEND_BASE_URL_FOR_SM}/{buisness.city}/{buisness.name}{(buisness.landmark) if buisness.landmark is not None else ''}/{sitemap_obj.id}?keywords={meta_keywords}"
+        # sit   emap_obj.link = f"{FRONTEND_BASE_URL_FOR_SM}/{buisness.city}/{buisness.name}{(buisness.landmark) if buisness.landmark is not None else ''}/{sitemap_obj.id}?keywords={meta_keywords}"
         sitemap_obj.share_link = f"{BACKEND_BASE_URL_FOR_SM}/mapper/{sitemap_obj.id}/"
         sitemap_obj.save()
 
