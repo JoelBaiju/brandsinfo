@@ -32,6 +32,7 @@ class General_cats (models.Model):
 class Descriptive_cats (models.Model):
     cat_name        = models.CharField(max_length=100 , blank=True)
     general_cat     = models.ForeignKey(General_cats , on_delete=models.CASCADE)
+    maped           = models.BooleanField(default=False)
 
 
     def __str__(self):
@@ -49,6 +50,7 @@ class Popular_General_Cats(models.Model):
 
 class City (models.Model):
     city_name       = models.CharField(max_length=100 , blank=True)
+    maped           = models.BooleanField(default=False)
     
     def __str__(self):
         return self.city_name
@@ -90,7 +92,8 @@ class Buisnesses(models.Model):
     web_link                    = models.CharField(max_length=100 , blank=True) 
     whatsapp_number             = models.CharField(max_length=100 , blank=True)  
     email                       = models.EmailField(max_length=40 , blank=True)  
-    incharge_number             = models.CharField(max_length=15 , blank=True) 
+    incharge_number             = models.CharField(max_length=15 , blank=True)
+    maped                       = models.BooleanField(default=False) 
     score                       = models.CharField(max_length=12 , default='0' ,)
     image                       = models.ImageField(upload_to='Profile_pics/' ,default='')
     sa_rate                     = models.CharField(max_length=12 , default='15' ,)
@@ -342,12 +345,15 @@ class Liked_Buisnesses(models.Model):
 
 
 class Sitemap_Links(models.Model):
-    link                    = models.CharField(max_length=300 ,null=True)
+    link                    = models.CharField(max_length=600 ,null=True)
     share_link              = models.CharField(max_length=100 ,null=True)
     single_buisness         = models.BooleanField(default=False)
     cc_combination          = models.BooleanField(default=False)
     city                    = models.ForeignKey(City , on_delete=models.CASCADE , null=True)
     dcat                    = models.ForeignKey(Descriptive_cats , on_delete=models.CASCADE , null=True)
+    city_name               = models.CharField(max_length=100, null=True, db_index=True)  # Indexed
+    dcat_name               = models.CharField(max_length=100, null=True, db_index=True)  # Indexed
+
     buisness                = models.ForeignKey(Buisnesses , on_delete=models.CASCADE , null=True ,related_name="sitemap_link")
     meta_title              = models.CharField(max_length=400 , null=True)
     meta_description        = models.CharField(max_length=400 , null=True)
@@ -363,7 +369,15 @@ class Sitemap_Links(models.Model):
     change_freq             = models.CharField(max_length=50 , null=True)
     priority                = models.FloatField(default=0.5)    
     
-    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['city', 'dcat'], name='unique_city_dcat')
+        ]
+        indexes     = [
+            models.Index(fields=["city_name", "dcat_name"]),    
+        ]
+   
+        
     def __str__(self):
         return self.link
 

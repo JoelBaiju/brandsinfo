@@ -249,9 +249,19 @@ DEFAULT_FROM_EMAIL = 'brandsinfoguide@gmail.com'  # Default from email (can be y
 # OPENAI_API_KEY='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'
 # FAST2SMS_API_KEY='TNuYH9rIb5d7cM6UhWglVmB2vQEieXFKD314RJsStPCLGk08fAOnKw9RlTU30emkyMSD8uXqtfbJgcvW'
 
-GEMINI_API_KEYS=['AIzaSyBZX8VGvu3udJ80zyexe78s7qrAZgAPneM',
-                 'AIzaSyDwPLJew4URfzgMdQ43BEG-A7ldVs83_2w',
-                 'AIzaSyDbM8NSNv49EX63BqC1alukSm0eS_8rtJ0',
+GEMINI_API_KEYS=[
+                 'AIzaSyDwPLJew4URfzgMdQ43BEG-A7ldVs83_2w',    #gemini key in careindia
+                'AIzaSyA5FqJy6E9Oypk0rp4FRezaFwvs7cd9dPc',    #icare key in icareindia
+
+                 'AIzaSyAFMQMVZhQAsOBfTq36fdsBNnAJ0jl4nmo',    #gemini key in anjali
+                 'AIzaSyATUTGsCNyIH4VW4bTfMRdoyiG--5KHV8o',  #brandsinfo key in anjali
+                 
+                 
+                 'AIzaSyB2JQaUzhAB6fFlOgFB9DSmp8UAnBWOjvs',  # brandsinfo key in brandsinfo 
+                
+            
+                 'AIzaSyDbM8NSNv49EX63BqC1alukSm0eS_8rtJ0', #gemini key in fightclub                
+                'AIzaSyDmKDJSC2i7b_OST495c9HDnNIyJ4DPgGQ' #brandsinfo key in fightclub
                 ]
 
 

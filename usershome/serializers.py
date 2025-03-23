@@ -591,3 +591,18 @@ class HomeMetaDataSerializer(serializers.ModelSerializer):
                   'meta_og_site_name','meta_og_type','meta_og_image_width',
                   'meta_og_image_height','meta_og_image_alt'] 
         
+
+
+
+
+
+
+
+
+
+
+
+class Site_Map_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sitemap_Links
+        fields = '__all__'

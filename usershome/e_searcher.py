@@ -12,7 +12,8 @@ from .serializers import *
 from django.utils import timezone
 from django.db.models import Q as modelsQ
 from django.db.models import F
-
+import concurrent.futures
+from .sitemap_view import CC_Check_and_add_metadata
 
 # Define Edge NGram Tokenizer and Analyzer
 edge_ngram_tokenizer = tokenizer(
@@ -175,120 +176,93 @@ def elasticsearch2(request):
     assured     = request.GET.get('assured' , 'False')
     rated_high  = request.GET.get('rated_high' , 'False')
     open_now    = request.GET.get('open_now' , 'False')
-    print(assured)
 
-    # Combine all search queries into a single bool query
-    search_query = Q("bool", should=[
-        Q("multi_match", query=query, fields=["name", "category"], fuzziness="AUTO", max_expansions=50, prefix_length=2),
-        Q("multi_match", query=query, fields=["cat_name"], fuzziness="AUTO", max_expansions=50, prefix_length=2)
-    ])
-    
-  
-    # Perform the search on all document types
-    products = ProductDocument.search().query(search_query).to_queryset()
-    services = ServiceDocument.search().query(search_query).to_queryset()
-    buisnesses_direct = BuisnessDocument.search().query(search_query).to_queryset()
-    bdcats = BDesCatDocument.search().query(search_query).to_queryset()
-    
-    
-    print('keyword',query)
-    print('products',products)
-    print('services',services)
-    print('b_direct',buisnesses_direct)
-    
-    # Collect unique business IDs
-    product_buisness_ids = products.values_list('buisness', flat=True).distinct()
-    service_buisness_ids = services.values_list('buisness', flat=True).distinct()
-    bdcats_buisness_ids = bdcats.values_list('buisness', flat=True).distinct()
 
-    unique_buisness_ids = set(chain(product_buisness_ids, service_buisness_ids, bdcats_buisness_ids))
-
-    # Fetch the city object
-    try:
-        city_obj = City.objects.get(city_name=location)
-    except City.DoesNotExist:
-        return Response(f'Sorry, we dont have any results for {location} city')
-
-    # Fetch businesses based on unique IDs and city
-    buisnesses = Buisnesses.objects.filter(id__in=unique_buisness_ids, city=city_obj)
-    
-    now = timezone.now().time()
-    now = timezone.now()
-
-# Convert to a specific time zone (e.g., Asia/Kolkata)
-    local_tz = pytz.timezone('Asia/Kolkata')
-    local_time = now.astimezone(local_tz)
-    print("Local Time:", local_time.time())
-
-    # if assured=='True':
-    #     print('assured filter applied')
-    #     buisnesses_direct=buisnesses_direct.filter(assured=True)
-    #     buisnesses = Buisnesses.objects.filter(id__in=unique_buisness_ids, city=city_obj , assured=True)
-
-    # if verified=='True':
-    #     print('verified filter applied')
-    #     buisnesses_direct=buisnesses_direct.filter(verified=True)
-    #     buisnesses = Buisnesses.objects.filter(id__in=unique_buisness_ids, city=city_obj ,verified=True)
-
-    # if open_now=='True':
-    #     print('open_now filter applied')
-    #     buisnesses_direct=buisnesses_direct.filter(verified=True
-    #                                                ).filter(
-    #                                         modelsQ(opens_at__lte=now, closes_at__gte=now) |  # Normal case
-    #                                         modelsQ(opens_at__gt=F('closes_at'), opens_at__lte=now) |  # Opens after midnight
-    #                                         modelsQ(opens_at__gt=F('closes_at'), closes_at__gte=now)  # Closes after midnight
-    #                                     )
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future_cc_meta = executor.submit(CC_Check_and_add_metadata , location , query)
         
-    #     buisnesses = Buisnesses.objects.filter(id__in=unique_buisness_ids, city=city_obj ,
-    #                                            ).filter(
-    #                                         modelsQ(opens_at__lte=now, closes_at__gte=now) |  # Normal case
-    #                                         modelsQ(opens_at__gt=F('closes_at'), opens_at__lte=now) |  # Opens after midnight
-    #                                         modelsQ(opens_at__gt=F('closes_at'), closes_at__gte=now)  # Closes after midnight
-    #                                     )
+        search_query = Q("bool", should=[
+            Q("multi_match", query=query, fields=["name", "category"], fuzziness="AUTO", max_expansions=50, prefix_length=2),
+            Q("multi_match", query=query, fields=["cat_name"], fuzziness="AUTO", max_expansions=50, prefix_length=2)
+        ])
+        
+        try:
+            city_obj = City.objects.get(city_name=location)
+        except City.DoesNotExist:
+            return Response(f'Sorry, we dont have any results for {location} city')
 
-
-
-    filters = modelsQ()
-
-    if assured == 'True':
-        print('assured filter applied')
-        filters &= modelsQ(assured=True)
-
-    if verified == 'True':
-        print('verified filter applied')
-        filters &= modelsQ(verified=True)
-
-    if open_now == 'True':
-        print('open_now filter applied')
-        now = local_time
-        print(now)
-        filters &= (
-            modelsQ(opens_at__lte=now, closes_at__gte=now) |  # Normal case
-            modelsQ(opens_at__gt=F('closes_at'), opens_at__lte=now) |  # Opens after midnight
-            modelsQ(opens_at__gt=F('closes_at'), closes_at__gte=now)  # Closes after midnight
-    )
+    
+        products = ProductDocument.search().query(search_query).to_queryset()
+        services = ServiceDocument.search().query(search_query).to_queryset()
+        buisnesses_direct = BuisnessDocument.search().query(search_query).to_queryset()
+        bdcats = BDesCatDocument.search().query(search_query).to_queryset()
+        
+        
+        print('keyword',query)
+        print('products',products)
+        print('services',services)
+        print('b_direct',buisnesses_direct)
         
 
-    
+        product_buisness_ids = products.values_list('buisness', flat=True).distinct()
+        service_buisness_ids = services.values_list('buisness', flat=True).distinct()
+        bdcats_buisness_ids = bdcats.values_list('buisness', flat=True).distinct()
 
-    
+        unique_buisness_ids = set(chain(product_buisness_ids, service_buisness_ids, bdcats_buisness_ids))
 
 
-    buisnesses = buisnesses.filter(filters)
-    buisnesses_direct = buisnesses_direct.filter(filters)
-    
-    
-    combined_queryset = list(chain(buisnesses_direct, buisnesses))
-    unique_combined_queryset = list(set(combined_queryset)) 
-    
-    if rated_high == 'True':
-        unique_combined_queryset = sorted(unique_combined_queryset, key=lambda x: x.rating, reverse=True)
+        buisnesses = Buisnesses.objects.filter(id__in=unique_buisness_ids, city=city_obj)
+        
+        
+        now = timezone.now().time()
+        now = timezone.now()
+        local_tz = pytz.timezone('Asia/Kolkata')
+        local_time = now.astimezone(local_tz)
+        print("Local Time:", local_time.time())
 
-    
-    
-   
-    pageing_assistant=Pageing_assistant(unique_combined_queryset,BuisnessesSerializerMini)
-    return pageing_assistant.get_page(request)
+        
+
+        filters = modelsQ()
+
+        if assured == 'True':
+            print('assured filter applied')
+            filters &= modelsQ(assured=True)
+
+        if verified == 'True':
+            print('verified filter applied')
+            filters &= modelsQ(verified=True)
+
+        if open_now == 'True':
+            print('open_now filter applied')
+            now = local_time
+            print(now)
+            filters &= (
+                modelsQ(opens_at__lte=now, closes_at__gte=now) |  # Normal case
+                modelsQ(opens_at__gt=F('closes_at'), opens_at__lte=now) |  # Opens after midnight
+                modelsQ(opens_at__gt=F('closes_at'), closes_at__gte=now)  # Closes after midnight
+        )
+            
+
+        buisnesses = buisnesses.filter(filters)
+        buisnesses_direct = buisnesses_direct.filter(filters)
+
+        
+        combined_queryset = list(chain(buisnesses_direct, buisnesses))
+        
+        unique_combined_queryset = list(set(combined_queryset)) 
+        
+        if rated_high == 'True':
+            unique_combined_queryset = sorted(unique_combined_queryset, key=lambda x: x.rating, reverse=True)
+
+        pageing_assistant=Pageing_assistant(unique_combined_queryset,BuisnessesSerializerMini)
+        
+        metadata = future_cc_meta.result()
+        response = pageing_assistant.get_page(request)
+        response.data['metadata'] = metadata  
+        return response
+
+
+
 
 
 
@@ -334,8 +308,6 @@ def keyword_suggestions(request):
     for doc in chain(product_docs, service_docs, business_docs):
         keywords.add(doc.name.lower())
     
-    # Sort by relevance (basic sorting by length for now, can be improved)
-    # sorted_keywords = sorted(keywords, key=len)
-    
+  
     return Response({"suggestions": keywords})
 

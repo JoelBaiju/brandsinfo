@@ -88,65 +88,6 @@ def generate_metadata(prompt):
 
 
 
-# def generate_metadata(prompt):
-#     print('Generating metadata with Gemini 2.0 Flash...')
-
-#     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={settings.GEMINI_API_KEY}"
-    
-#     payload = {"contents": [{"parts": [{"text": prompt}]}]}
-    
-#     headers = {
-#         "Content-Type": "application/json",
-#         "Accept-Encoding": "gzip",  # Enables gzip compression for faster responses
-#         "Connection": "keep-alive"  # Keeps HTTP connection alive for efficiency
-#     }
-
-#     session = requests.Session()  # Persistent session for lower latency
-
-#     for attempt in range(3):  # Retry logic for robustness
-#         try:
-#             response = session.post(url, headers=headers, json=payload, timeout=10)
-
-#             if response.status_code != 200:
-#                 raise ValueError(f"Error from Gemini API: {response.status_code} - {response.text}")
-
-#             response_json = response.json()
-
-#             # Extract response text
-#             candidates = response_json.get("candidates", [])
-#             if not candidates:
-#                 raise ValueError("No candidates returned from API.")
-
-#             response_text = candidates[0]["content"]["parts"][0]["text"].strip()
-
-#             # Extract JSON safely (avoiding regex for efficiency)
-#             json_start = response_text.find("{")
-#             json_end = response_text.rfind("}")
-#             if json_start == -1 or json_end == -1:
-#                 raise ValueError("Invalid JSON response received.")
-
-#             metadata_json = response_text[json_start:json_end + 1]
-
-#             # Parse JSON
-#             metadata = json.loads(metadata_json)
-
-#             print(metadata.get("meta_title", ""), metadata.get("meta_description", ""), metadata.get("meta_keywords", ""))
-            
-#             return {"metadata": metadata, "usage": response_json}
-
-#         except (requests.RequestException, json.JSONDecodeError) as e:
-#             print(f"Attempt {attempt + 1} failed: {e}")
-    
-#     raise ValueError("Failed to fetch metadata after multiple attempts.")
-
-
-
-
-
-
-
-
-
 
 
 
@@ -176,7 +117,7 @@ def generate_metadata_for_CC(category , city):
     - Naturally include **primary keywords**.  
     - Use action-oriented language for engagement.  
 
-    #### **Meta Keywords**  
+    #### **Meta Keywords (≤ 360 characters)**  
     - Include **highly relevant, high-search-volume terms**.  
     - Use **geo-targeted keywords** for local SEO.  
     - Ensure a **comma-separated format** with no unnecessary words.  
@@ -228,7 +169,7 @@ def generate_metadata_for_SB(city,general_category,buisness_name,descriptive_cat
     - Naturally include **primary keywords**.  
     - Use action-oriented language for engagement.  
 
-    #### **Meta Keywords**  
+    #### **Meta Keywords  (≤ 360 characters)**  
     - Include **highly relevant, high-search-volume terms**.  
     - Use **geo-targeted keywords** for local SEO.  
     - Ensure a **comma-separated format** with no unnecessary words.  

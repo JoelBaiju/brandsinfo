@@ -76,6 +76,6 @@ urlpatterns = [
 
     path('alpha/sitemap_generator_allatonce_SB/', sitemap_view.Site_Map_Generator_ALLATONCE_SB),
     path('alpha/sitemap_generator_allatonce_CC/', sitemap_view.Site_Map_Generator_ALLATONCE_CC),
-    path('alpha/sgs_test/', sitemap_view.Site_Map_Generator_ALLATONCE_SB_single_api),
+    path('alpha/sgs_test/', sitemap_view.Site_Map_Generator_SB_single_Test_api),
     
 ]
