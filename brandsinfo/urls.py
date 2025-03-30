@@ -19,4 +19,12 @@ urlpatterns = [
 ]
 
 
+from django.urls import re_path
+from .websocket_consumers import NotificationConsumer
+
+websocket_urlpatterns = [
+    re_path(r'ws/notifications/$', NotificationConsumer.as_asgi()),
+]
+
+
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

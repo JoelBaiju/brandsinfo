@@ -13,9 +13,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.forms.models import model_to_dict
 from django.shortcuts import get_object_or_404
 
-from django.template.loader import render_to_string
-from django.core.mail import EmailMultiAlternatives
-from django.utils.html import strip_tags
 from django.db import IntegrityError
 
 # DRF imports
@@ -38,26 +35,14 @@ from .serializers import *
 from .searcher import find_closest 
 from brandsinfo.settings import BACKEND_BASE_URL_FOR_SM_SECURE
 from . import auth_views
+from .utils import *
 
 
 
 
 
-def count_filled_fields(instance):
-    data_dict = model_to_dict(instance, exclude=["id","score"," no_of_views" , "no_of_enquiries" ,"sa_rate","user","latittude"]) 
-    filled_fields = {key: value for key, value in data_dict.items() if value not in [None, "", [], {}]}
-    print(filled_fields)
-    return len(filled_fields)
 
 
-
-def BuisnessScore(buisness):
-    fieldcount=count_filled_fields(buisness)
-    score_in_percentage=(fieldcount/21)*100
-    print(score_in_percentage)
-    if score_in_percentage>100:
-        return 100
-    return (int(score_in_percentage))
 
 class BuisnessesView(generics.ListAPIView):
     queryset = Buisnesses.objects.all()
@@ -76,7 +61,7 @@ class BuisnessesView(generics.ListAPIView):
             print(buisness)
             return buisness
         return Buisnesses.objects.none()
-    
+      
 
     def get(self , request):
         if self.request.user.is_authenticated:
@@ -90,6 +75,11 @@ class BuisnessesView(generics.ListAPIView):
                     user = Extended_User.objects.get(username=self.request.user)
                     offers = Buisness_Offers.objects.filter(buisness=buisness)
                     offers = BuisnessOffersSerializer(offers , many=True)
+                    
+                    formatt = request.GET.get('formatt')
+                    print(formatt)
+                    visitanalysis=buisness_visits_analyzer(buisness =buisness , formatt=formatt)
+     
 
                     if buisness.buisness_type == 'service':
                         services = Services.objects.filter(buisness=buisness)
@@ -103,7 +93,11 @@ class BuisnessesView(generics.ListAPIView):
                                                                 'average_time_spend':'0',
                                                                 'keywords':['hospital','workshop','restaurant']      ,
                                                                 'leads':'56',
-                                                                'profile_views_progress':'43'                                                      
+                                                                'profile_views_progress':'43',                 
+                                                                'most_serched_services':Most_searched_services_in_buisness(buisness),
+                                                                'most_serched_products':[],
+                                                                'searched':buisness.searched,
+                                                                'visits':visitanalysis       
                                                             },
                                                 'products':[],
                                                 'user': UserSerializer(user).data
@@ -124,7 +118,12 @@ class BuisnessesView(generics.ListAPIView):
                                                                 'average_time_spend':'0',
                                                                 'keywords':['hotel','bank','store'],
                                                                 'leads':'56',
-                                                                'profile_views_progress':'43'
+                                                                'profile_views_progress':'43',
+                                                                'most_serched_products':Most_searched_products_in_buisness(buisness),
+                                                                'most_serched_services':[],
+                                                                'searched':buisness.searched,
+                                                                'visits':visitanalysis
+
                                                             }, 
                                                 'services':[],
                                                 'user': UserSerializer(user).data
@@ -148,7 +147,13 @@ class BuisnessesView(generics.ListAPIView):
                                                                 'average_time_spend':'0',
                                                                 'keywords':['hospital','workshop','restaurant'],
                                                                 'leads':'56',
-                                                                'profile_views_progress':'43'                                                            
+                                                                'profile_views_progress':'43',
+                                                                'most_serched_products':Most_searched_products_in_buisness(buisness),
+                                                                'most_serched_services':Most_searched_services_in_buisness(buisness),
+                                                                'searched':buisness.searched,
+                                                                'visits':visitanalysis       
+  
+                                                                                                                        
                                                             },
                                                 'products':ProductSerializer(products , many=True).data,
                                                 'user': UserSerializer(user).data
@@ -257,10 +262,14 @@ class BuisnessesView_for_customers(generics.ListAPIView):
         buisness = sitemap_obj.buisness
         print()
         reviewed=None
+        visit_tracker = BuisnessVisitTracker.objects.create(buisness=buisness)
         if request.user.is_anonymous == False:
-            reviewed = Reviews_Ratings.objects.filter(user=Extended_User.objects.get(username=request.user),buisness=buisness).exists()
-            print(reviewed)
-
+            user=Extended_User.objects.get(username=request.user)
+            reviewed = Reviews_Ratings.objects.filter(user=user,buisness=buisness).exists()
+            visit_tracker.user=user
+            print("checked reviewed : " , reviewed)
+        visit_tracker.save()
+        
         if buisness:
             BuisnessScore(buisness)
             try:
@@ -280,7 +289,17 @@ class BuisnessesView_for_customers(generics.ListAPIView):
                                             'services':ServiceSerializer(services , many=True).data,
                                             'products':[],
                                             'tracker_id':tracker.id,
-                                            'reviewed':reviewed
+                                            'reviewed':reviewed,
+                                            'dcats':BuisnessDcats(buisness),
+                                            'analytics':{
+                                                            'average_time_spend':'0',
+                                                            'keywords':['hospital','workshop','restaurant'] ,
+                                                            'most_serched_products':Most_searched_products_in_buisness(buisness),
+                                                            'most_serched_services':Most_searched_services_in_buisness(buisness),
+                                                            'searched':buisness.searched,
+                                                            'no_of_enquiries':number_of_enquiries(buisness),
+                                                            
+                                                        }
                                         },
                                         status=status.HTTP_200_OK
                                     )
@@ -295,7 +314,12 @@ class BuisnessesView_for_customers(generics.ListAPIView):
                                             'products':ProductSerializer(products , many=True).data,
                                             'services':[],
                                             'tracker_id':tracker.id,
-                                            'reviewed':reviewed
+                                            'reviewed':reviewed,
+                                            'dcats':BuisnessDcats(buisness),
+                                            'most_serched_products':Most_searched_products_in_buisness(buisness),
+                                            'most_serched_services':Most_searched_services_in_buisness(buisness),
+                                            'searched':buisness.searched,
+                                            'no_of_enquiries':number_of_enquiries(buisness),
 
                                         },
                                         status=status.HTTP_200_OK
@@ -312,9 +336,15 @@ class BuisnessesView_for_customers(generics.ListAPIView):
                                                 'buisness':self.serializer_class(buisness).data,
                                                 'offers':offers.data,
                                                 'services':ServiceSerializer(services , many=True).data,
+                                                'dcats':BuisnessDcats(buisness),
                                                 'analytics':{
                                                                 'average_time_spend':'0',
-                                                                'keywords':['hospital','workshop','restaurant']                                                            
+                                                                'keywords':['hospital','workshop','restaurant'] ,
+                                                                'most_serched_products':Most_searched_products_in_buisness(buisness),
+                                                                'most_serched_services':Most_searched_services_in_buisness(buisness),
+                                                                'searched':buisness.searched,
+                                                                'no_of_enquiries':number_of_enquiries(buisness),
+                                                                                                                          
                                                             },
                                                 'products':ProductSerializer(products , many=True).data,
                                                 'reviewed':reviewed
@@ -322,7 +352,8 @@ class BuisnessesView_for_customers(generics.ListAPIView):
                                             },
                                             status=status.HTTP_200_OK
                                         )
-            except:
+            except Exception as e:
+                print(e)
                 return Response('No Buisnesess Found',status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response('')
@@ -782,22 +813,6 @@ class Get_Reviews_Ratings_View(generics.ListAPIView):
 
 
 
-def send_otp_email(firstname,otp,toemail):
-    subject = 'Your OTP for Email Verification'
-    html_message = render_to_string('email_otp.html', {
-    'name': firstname,
-    'otp': otp
-    })
-    plain_message = strip_tags(html_message)
-
-    email = EmailMultiAlternatives(
-    subject,
-    plain_message,
-    'brandsinfoguide@gmail.com',  # Replace with your "from" email address
-    [toemail]    
-    )
-    email.attach_alternative(html_message, 'text/html')
-    email.send()
 
 
 @api_view(['POST'])    

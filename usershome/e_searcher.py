@@ -9,11 +9,12 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import *  
 from .serializers import *  
-from django.utils import timezone
 from django.db.models import Q as modelsQ
 from django.db.models import F
 import concurrent.futures
 from .sitemap_view import CC_Check_and_add_metadata
+from .utils import *
+
 
 # Define Edge NGram Tokenizer and Analyzer
 edge_ngram_tokenizer = tokenizer(
@@ -142,10 +143,6 @@ class PSubCatsDocument(Document):
 
 
 
-
-
-
-
 class paginator(PageNumberPagination):
     page_size = 16
     page_size_query_param = 'page_size'
@@ -165,7 +162,6 @@ class Pageing_assistant:
         return Response({'error':'No results found'},status=status.HTTP_404_NOT_FOUND)
 
 
-import pytz
 
 
 @api_view(['GET'])
@@ -197,7 +193,13 @@ def elasticsearch2(request):
         buisnesses_direct = BuisnessDocument.search().query(search_query).to_queryset()
         bdcats = BDesCatDocument.search().query(search_query).to_queryset()
         
-        
+        if products.count()!=0:
+            executor.submit(update_search_count_products , products)
+        if services.count()!=0:
+            executor.submit(update_search_count_services , services)
+
+
+
         print('keyword',query)
         print('products',products)
         print('services',services)
@@ -214,12 +216,6 @@ def elasticsearch2(request):
         buisnesses = Buisnesses.objects.filter(id__in=unique_buisness_ids, city=city_obj)
         
         
-        now = timezone.now().time()
-        now = timezone.now()
-        local_tz = pytz.timezone('Asia/Kolkata')
-        local_time = now.astimezone(local_tz)
-        print("Local Time:", local_time.time())
-
         
 
         filters = modelsQ()
@@ -234,7 +230,7 @@ def elasticsearch2(request):
 
         if open_now == 'True':
             print('open_now filter applied')
-            now = local_time
+            now = localtime()
             print(now)
             filters &= (
                 modelsQ(opens_at__lte=now, closes_at__gte=now) |  # Normal case
@@ -245,11 +241,14 @@ def elasticsearch2(request):
 
         buisnesses = buisnesses.filter(filters)
         buisnesses_direct = buisnesses_direct.filter(filters)
+        executor.submit(update_search_count_buisnesses , buisnesses)
+        executor.submit(update_search_count_buisnesses , buisnesses_direct)
 
         
         combined_queryset = list(chain(buisnesses_direct, buisnesses))
         
         unique_combined_queryset = list(set(combined_queryset)) 
+        
         
         if rated_high == 'True':
             unique_combined_queryset = sorted(unique_combined_queryset, key=lambda x: x.rating, reverse=True)

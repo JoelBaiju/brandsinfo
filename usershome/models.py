@@ -9,6 +9,46 @@ from django.contrib.auth.models import AbstractUser
 
 # Django Models:-
 
+
+
+
+class Plans(models.Model):
+    plan_name                                   = models.CharField(max_length=100)
+    # trier 1
+    profile_visit                               = models.BooleanField(default=False)
+    search_priority_1                           = models.BooleanField(default=False)
+    image_gallery                               = models.BooleanField(default=False)
+    contact_info                                = models.BooleanField(default=False)
+    google_map                                  = models.BooleanField(default=False)
+    whatsapp_chat                               = models.BooleanField(default=False)
+    call_action_button                          = models.BooleanField(default=False)
+    bi_analytics                                = models.BooleanField(default=False)
+    profile_sharing_URL                         = models.BooleanField(default=False)
+    profile_view_count                          = models.BooleanField(default=False)
+    profile_social_media_URL_links              = models.BooleanField(default=False)
+    social_media_welcome_promotion_in_BI        = models.BooleanField(default=False)
+    # tier 2
+    search_visibility_2                         = models.BooleanField(default=False)
+    video_gallery                               = models.BooleanField(default=False)
+    posters_6                                   = models.BooleanField(default=False)
+    email_id                                    = models.BooleanField(default=False)
+    reviews_ratings                             = models.BooleanField(default=False)
+    audio_video_ad                              = models.BooleanField(default=False)
+    bi_verification                             = models.BooleanField(default=False)
+    products_and_service_visibility             = models.BooleanField(default=False)
+    social_media_paid_promotion_in_bi_youtube   = models.BooleanField(default=False)
+    # tier 3
+    search_visibility_3                         = models.BooleanField(default=False)
+    posters_12                                  = models.BooleanField(default=False)
+    todays_offer                                = models.BooleanField(default=False)
+    job_portal                                  = models.BooleanField(default=False)
+    reels_video_ad                              = models.BooleanField(default=False)
+    bi_assured                                  = models.BooleanField(default=False)
+    bi_certification                            = models.BooleanField(default=False)
+    social_media_paid_promotion_in_bi_12_posters_monthly = models.BooleanField(default=False)
+
+
+
 class Extended_User(AbstractUser):
     mobile_number   = models.CharField(max_length=15, null=True, blank=True)
     is_customer     = models.BooleanField(default=False)
@@ -16,7 +56,6 @@ class Extended_User(AbstractUser):
     
     def __str__(self):
         return self.username
-
 
 # ==========================================================================================
 
@@ -69,6 +108,8 @@ class Locality (models.Model):
 # ==========================================================================================
     
 class Buisnesses(models.Model):
+    # Allowing null=True for cases where a business might not be linked to a user initially.
+    plan            = models.ForeignKey(Plans ,on_delete=models.CASCADE , null=True)
     user                        = models.ForeignKey(Extended_User , on_delete=models.CASCADE , null=True)
     name                        = models.CharField(max_length=100)
     description                 = models.CharField(max_length=1000 , blank=True , null=True)
@@ -96,7 +137,7 @@ class Buisnesses(models.Model):
     maped                       = models.BooleanField(default=False) 
     score                       = models.CharField(max_length=12 , default='0' ,)
     image                       = models.ImageField(upload_to='Profile_pics/' ,default='')
-    sa_rate                     = models.CharField(max_length=12 , default='15' ,)
+    searched                    = models.IntegerField(default=0)
     no_of_enquiries             = models.IntegerField(default=0 , blank=True)  
     no_of_views                 = models.IntegerField(default=0 , blank=True)
     verified                    = models.BooleanField(default=False)
@@ -110,7 +151,10 @@ class Buisnesses(models.Model):
     
     
     
-    
+class BuisnessVisitTracker(models.Model):
+    buisness                    = models.ForeignKey(Buisnesses , on_delete=models.CASCADE)
+    date                        = models.DateField(auto_now_add=True)
+    user                        = models.ForeignKey(Extended_User , on_delete=models.CASCADE , null=True)
 
 
 class Buisness_Offers(models.Model):
@@ -353,7 +397,6 @@ class Sitemap_Links(models.Model):
     dcat                    = models.ForeignKey(Descriptive_cats , on_delete=models.CASCADE , null=True)
     city_name               = models.CharField(max_length=100, null=True, db_index=True)  # Indexed
     dcat_name               = models.CharField(max_length=100, null=True, db_index=True)  # Indexed
-
     buisness                = models.ForeignKey(Buisnesses , on_delete=models.CASCADE , null=True ,related_name="sitemap_link")
     meta_title              = models.CharField(max_length=400 , null=True)
     meta_description        = models.CharField(max_length=400 , null=True)
@@ -377,9 +420,15 @@ class Sitemap_Links(models.Model):
             models.Index(fields=["city_name", "dcat_name"]),    
         ]
    
-        
-    def __str__(self):
-        return self.link
+   
+    # def __str__(self):
+    #     if self.buisness:
+    #         return self.buisness.name 
+    #     else:   
+    #         return self.city.city_name + ' - ' + self.dcat.cat_name
+
+    # def __str__(self):
+    #     return 'hello'+str(self.id)+self.link
 
 
 

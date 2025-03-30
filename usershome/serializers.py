@@ -176,7 +176,7 @@ class BuisnessesSerializerFull(serializers.ModelSerializer):
                 'latittude','longitude','opens_at','closes_at','since',
                 'no_of_views','instagram_link','facebook_link','web_link',
                 'x_link','youtube_link','whatsapp_number','incharge_number','user',
-                'score','image','sa_rate',  'no_of_enquiries','email','image_gallery',
+                'score','image',  'no_of_enquiries','email','image_gallery',
                 ]
     
     def to_representation(self, instance):
@@ -448,6 +448,18 @@ class ProductSerializer(serializers.ModelSerializer):
                   'buisness', 'images','searched','product_images']
 
 
+
+class ProductSerializerMini(serializers.ModelSerializer):
+    images = serializers.ListField(
+            child=serializers.ImageField(), write_only=True
+        )  
+  
+    product_images = ProductPicsSerializer(source='product_pics_set', many=True, read_only=True)
+
+
+    class Meta:
+        model = Products
+        fields = ['id','name', 'price','images','searched','product_images']
 
 
 
