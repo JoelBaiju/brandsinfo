@@ -85,30 +85,30 @@ WSGI_APPLICATION = "brandsinfo.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'brandsinfo',   
-        'USER': 'root',       
-        'PASSWORD': 'root123',  
-        'HOST': 'localhost',    
-        'PORT': '3306',         
-    }
-}
-
-
-
-
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.mysql',
 #         'NAME': 'brandsinfo',   
 #         'USER': 'root',       
-#         'PASSWORD': 'Root@1234',  
+#         'PASSWORD': 'root123',  
 #         'HOST': 'localhost',    
 #         'PORT': '3306',         
 #     }
 # }
+
+
+
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'brandsinfo',   
+        'USER': 'root',       
+        'PASSWORD': 'Root@1234',  
+        'HOST': 'localhost',    
+        'PORT': '3306',         
+    }
+}
 
 
 
@@ -198,20 +198,20 @@ SIMPLE_JWT = {
 
 
 # dev
-ELASTICSEARCH_DSL = {
-    'default': {
-        'hosts': ['http://elastic:Z0NLsQ1r6OEnfGdTh2qr@localhost:9200/'],
-    },
-}
+# ELASTICSEARCH_DSL = {
+#     'default': {
+#         'hosts': ['http://elastic:Z0NLsQ1r6OEnfGdTh2qr@localhost:9200/'],
+#     },
+# }
 
 
 
 # production
-# ELASTICSEARCH_DSL = {
-#     'default': {
-#         'hosts': ['http://elastic:tlTHrONRrteZRwDmhHoP@localhost:9200/'],
-#     },
-# }
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': ['http://elastic:tlTHrONRrteZRwDmhHoP@localhost:9200/'],
+    },
+}
     
 
 
@@ -260,11 +260,11 @@ CELERY_TASK_SERIALIZER = 'json'
 
 
 # dev
-FRONTEND_BASE_URL_FOR_SM = 'https://45jfqx2q-3000.inc1.devtunnels.ms'
-BACKEND_BASE_URL_FOR_SM = 'https://mq459llx-8000.inc1.devtunnels.ms'
-BACKEND_BASE_URL_FOR_SM_SECURE = 'https://mq459llx-8000.inc1.devtunnels.ms'
-OPENAI_API_KEY='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'
-FAST2SMS_API_KEY='TNuYH9rIb5d7cM6UhWglVmB2vQEieXFKD314RJsStPCLGk08fAOnKw9RlTU30emkyMSD8uXqtfbJgcvW'
+# FRONTEND_BASE_URL_FOR_SM = 'https://45jfqx2q-3000.inc1.devtunnels.ms'
+# BACKEND_BASE_URL_FOR_SM = 'https://mq459llx-8000.inc1.devtunnels.ms'
+# BACKEND_BASE_URL_FOR_SM_SECURE = 'https://mq459llx-8000.inc1.devtunnels.ms'
+# OPENAI_API_KEY='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'
+# FAST2SMS_API_KEY='TNuYH9rIb5d7cM6UhWglVmB2vQEieXFKD314RJsStPCLGk08fAOnKw9RlTU30emkyMSD8uXqtfbJgcvW'
 
 GEMINI_API_KEYS=[
                  'AIzaSyDwPLJew4URfzgMdQ43BEG-A7ldVs83_2w',    #gemini key in careindia
@@ -283,11 +283,11 @@ GEMINI_API_KEYS=[
 
 
 # production
-# FRONTEND_BASE_URL_FOR_SM = 'https://brandsinfo.in'
-# BACKEND_BASE_URL_FOR_SM = 'https://api.brandsinfo.in'
-# BACKEND_BASE_URL_FOR_SM_SECURE = 'https://api.brandsinfo.in'
-# OPENAI_API_KEY='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'
-# FAST2SMS_API_KEY='TNuYH9rIb5d7cM6UhWglVmB2vQEieXFKD314RJsStPCLGk08fAOnKw9RlTU30emkyMSD8uXqtfbJgcvW'
+FRONTEND_BASE_URL_FOR_SM = 'https://brandsinfo.in'
+BACKEND_BASE_URL_FOR_SM = 'https://api.brandsinfo.in'
+BACKEND_BASE_URL_FOR_SM_SECURE = 'https://api.brandsinfo.in'
+OPENAI_API_KEY='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'
+FAST2SMS_API_KEY='TNuYH9rIb5d7cM6UhWglVmB2vQEieXFKD314RJsStPCLGk08fAOnKw9RlTU30emkyMSD8uXqtfbJgcvW'
 
 
 
