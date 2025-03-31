@@ -167,23 +167,33 @@ def verifyotp(request, utype, from_enquiry=False):
         phone = data.get('phone')
         token = data.get('idToken')
 
-        if not phone or not token:
+        if not phone :
+            print('phone not in request')
+            return Response({'message': 'Phone and OTP are required'}, status=status.HTTP_400_BAD_REQUEST)
+        if not token :
+            print('phone not in token')
             return Response({'message': 'Phone and OTP are required'}, status=status.HTTP_400_BAD_REQUEST)
 
         auth = Auth_OTPs.objects.get(phone=phone)
         
         if auth is None:
+            print('auth object not found')
             return Response({'message': 'invalid error'}, status=status.HTTP_400_BAD_REQUEST)
 
        
         if verify_token(token)==False:
+            print('token verification failed')
             return Response({'message': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
 
         if auth.exists:
             user = get_object_or_404(Extended_User, username=auth.phone)
         else:
-            user = create_new_user(phone, auth, utype)
-
+            print('auth not found')
+            try:
+                user = create_new_user(phone, auth, utype)
+            except Exception as e :
+                print(e)
+                print('user creation exeption occured')
         if from_enquiry:
             link_user_to_enquiry(auth, user)
 
