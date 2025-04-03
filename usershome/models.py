@@ -28,7 +28,7 @@ class Plans(models.Model):
     profile_social_media_URL_links              = models.BooleanField(default=False)
     social_media_welcome_promotion_in_BI        = models.BooleanField(default=False)
     # tier 2
-    search_visibility_2                         = models.BooleanField(default=False)
+    search_priority_2                         = models.BooleanField(default=False)
     video_gallery                               = models.BooleanField(default=False)
     posters_6                                   = models.BooleanField(default=False)
     email_id                                    = models.BooleanField(default=False)
@@ -38,12 +38,12 @@ class Plans(models.Model):
     products_and_service_visibility             = models.BooleanField(default=False)
     social_media_paid_promotion_in_bi_youtube   = models.BooleanField(default=False)
     # tier 3
-    search_visibility_3                         = models.BooleanField(default=False)
+    search_priority_3                         = models.BooleanField(default=False)
     posters_12                                  = models.BooleanField(default=False)
     todays_offer                                = models.BooleanField(default=False)
     job_portal                                  = models.BooleanField(default=False)
     reels_video_ad                              = models.BooleanField(default=False)
-    bi_assured                                  = models.BooleanField(default=False)
+    bi_assured                                    = models.BooleanField(default=False)
     bi_certification                            = models.BooleanField(default=False)
     social_media_paid_promotion_in_bi_12_posters_monthly = models.BooleanField(default=False)
 
@@ -53,6 +53,7 @@ class Extended_User(AbstractUser):
     mobile_number   = models.CharField(max_length=15, null=True, blank=True)
     is_customer     = models.BooleanField(default=False)
     is_vendor       = models.BooleanField(default=False)
+    is_admin        = models.BooleanField(default=False)
     
     def __str__(self):
         return self.username
@@ -109,7 +110,8 @@ class Locality (models.Model):
     
 class Buisnesses(models.Model):
     # Allowing null=True for cases where a business might not be linked to a user initially.
-    plan            = models.ForeignKey(Plans ,on_delete=models.CASCADE , null=True)
+    plan                        = models.ForeignKey(Plans ,on_delete=models.CASCADE , null=True ,blank=True)
+    search_priority             = models.IntegerField(default=0)
     user                        = models.ForeignKey(Extended_User , on_delete=models.CASCADE , null=True)
     name                        = models.CharField(max_length=100)
     description                 = models.CharField(max_length=1000 , blank=True , null=True)
@@ -150,6 +152,8 @@ class Buisnesses(models.Model):
         return self.name
     
     
+    
+
     
 class BuisnessVisitTracker(models.Model):
     buisness                    = models.ForeignKey(Buisnesses , on_delete=models.CASCADE)

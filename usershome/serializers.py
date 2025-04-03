@@ -119,7 +119,18 @@ class BuisnessOffersSerializer(serializers.ModelSerializer):
 
 
 
-
+class PlansSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Plans
+        fields = [
+            'plan_name','profile_visit','image_gallery',
+            'contact_info','google_map','whatsapp_chat','call_action_button',
+            'bi_analytics','profile_sharing_URL','profile_view_count',
+            'profile_social_media_URL_links',
+            'video_gallery','email_id',
+            'reviews_ratings','bi_verification','products_and_service_visibility',
+            'bi_assured','bi_certification'
+        ]
 
 class BuisnessesSerializer(serializers.ModelSerializer):
     image       = serializers.ImageField(required=False)
@@ -129,7 +140,8 @@ class BuisnessesSerializer(serializers.ModelSerializer):
                     queryset=Extended_User.objects.all()
                     )
     image_gallery   = BuisnessPicsSerializer(many=True, read_only=True)
-    
+    plan = serializers.PrimaryKeyRelatedField(queryset=Plans.objects.all())  # ✅ This expects an ID
+
     class Meta:
         model = Buisnesses
         fields=['id','name','description','buisness_type','manager_name',
@@ -138,7 +150,7 @@ class BuisnessesSerializer(serializers.ModelSerializer):
                 'since','no_of_views','instagram_link','facebook_link',
                 'web_link','x_link','youtube_link','whatsapp_number',
                 'incharge_number','user','score','image',
-                'sa_rate',  'no_of_enquiries','email','image_gallery',
+                'searched',  'no_of_enquiries','email','image_gallery','plan'
                 ]
         
         
@@ -167,6 +179,7 @@ class BuisnessesSerializerFull(serializers.ModelSerializer):
                     queryset=Extended_User.objects.all()
                     )
     image_gallery = BuisnessPicsSerializer(many=True, read_only=True)
+    plan       = PlansSerializer()
 
     
     class Meta:
@@ -176,7 +189,7 @@ class BuisnessesSerializerFull(serializers.ModelSerializer):
                 'latittude','longitude','opens_at','closes_at','since',
                 'no_of_views','instagram_link','facebook_link','web_link',
                 'x_link','youtube_link','whatsapp_number','incharge_number','user',
-                'score','image',  'no_of_enquiries','email','image_gallery',
+                'score','image',  'no_of_enquiries','email','image_gallery','plan'
                 ]
     
     def to_representation(self, instance):
@@ -195,9 +208,11 @@ class BuisnessesSerializerCustomers(serializers.ModelSerializer):
     user        = serializers.PrimaryKeyRelatedField(
                     queryset=Extended_User.objects.all()
                     )
-    image_gallery = BuisnessPicsSerializer(many=True, read_only=True)
-    site_data = SiteSaplinksSerializerFull(source='sitemap_link', read_only=True)
-    review_rating = ReviewRatingSerializerMini(source='reviews_ratings_set', many=True, read_only=True)
+    image_gallery   = BuisnessPicsSerializer(many=True, read_only=True)
+    site_data       = SiteSaplinksSerializerFull(source='sitemap_link', read_only=True)
+    review_rating   = ReviewRatingSerializerMini(source='reviews_ratings_set', many=True, read_only=True)
+    plan            = PlansSerializer()
+
     class Meta:
         model   = Buisnesses
         fields  = [ 'id','name','description','buisness_type',
@@ -207,15 +222,20 @@ class BuisnessesSerializerCustomers(serializers.ModelSerializer):
                     'instagram_link','facebook_link','web_link','x_link',
                     'youtube_link','whatsapp_number','incharge_number','user',
                     'image','image_gallery','site_data','email','verified',
-                    'assured','review_rating','rating'
+                    'assured','review_rating','rating','plan'
                  ]
     
    
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation['image_gallery'] = BuisnessPicsSerializer(
-            instance.buisness_pics_set.all(), many=True
-        ).data
+        plan = instance.plan
+        if plan and plan.image_gallery:
+            representation['image_gallery'] = BuisnessPicsSerializer(
+                instance.buisness_pics_set.all(), many=True
+            ).data
+        else:
+            representation['image_gallery'] = []  # Set to empty if not allowed
+
         
         sitemap_link = instance.sitemap_link.first() 
         if sitemap_link:
@@ -247,7 +267,7 @@ class BuisnessesSerializerMini(serializers.ModelSerializer):
     class Meta:
         model   = Buisnesses
         fields  = [  
-                    'id','name','buisness_type','locality',
+                    'id','search_priority','name','buisness_type','locality',
                     'city','state','no_of_views','user',
                     'score','image','offers','redirect_link','rating',
                     'verified','assured'

@@ -51,14 +51,11 @@ class BuisnessesView(generics.ListAPIView):
     def get_queryset(self):
         # Optionally, filter the queryset if you want to return buisnesses associated with the user
         if self.request.user.is_authenticated:
-            print(self.request.user)
             try:
                 user = Extended_User.objects.get(username=self.request.user)
-                print('userrrrrrrrrrrrrrrr',user)
             except: 
                 return Response('User not found')
             buisness=[Buisnesses.objects.filter(user=user) , user]
-            print(buisness)
             return buisness
         return Buisnesses.objects.none()
       
@@ -77,93 +74,65 @@ class BuisnessesView(generics.ListAPIView):
                     offers = BuisnessOffersSerializer(offers , many=True)
                     
                     formatt = request.GET.get('formatt')
-                    print(formatt)
-                    visitanalysis=buisness_visits_analyzer(buisness =buisness , formatt=formatt)
-     
-
+                    analytics = request.GET.get('analytics')
+                    visitanalysis=False
+                    if buisness.plan.profile_visit:
+                        visitanalysis=buisness_visits_analyzer(buisness =buisness , formatt=formatt)
+            
+                    response =  {   
+                                    'buisness':BuisnessesSerializerFull(buisness).data,
+                                    'offers':offers.data,
+                                    'services':[],
+                                    'analytics':False,
+                                    'products':[],
+                                    'user': UserSerializer(user).data
+                                }
+                    if buisness.plan.bi_analytics:
+                        response['analytics']={
+                                    'average_time_spend':'0',
+                                    'keywords':['hospital','workshop','restaurant']      ,
+                                    'leads':'56',
+                                    'profile_views_progress':'43',                 
+                                    'most_serched_services':[],
+                                    'most_serched_products':[],
+                                    'searched':buisness.searched,
+                                    'visits':visitanalysis       
+                                }
+                        
+                        
+                        
                     if buisness.buisness_type == 'service':
                         services = Services.objects.filter(buisness=buisness)
+                        response['services']=ServiceSerializer(services , many=True).data
+                        if response['analytics']:
+                            response['analytics']['most_serched_services']=Most_searched_services_in_buisness(buisness)
                         
-                        return Response(    
-                                            {   
-                                                'buisness':BuisnessesSerializerFull(buisness).data,
-                                                'offers':offers.data,
-                                                'services':ServiceSerializer(services , many=True).data,
-                                                'analytics':{
-                                                                'average_time_spend':'0',
-                                                                'keywords':['hospital','workshop','restaurant']      ,
-                                                                'leads':'56',
-                                                                'profile_views_progress':'43',                 
-                                                                'most_serched_services':Most_searched_services_in_buisness(buisness),
-                                                                'most_serched_products':[],
-                                                                'searched':buisness.searched,
-                                                                'visits':visitanalysis       
-                                                            },
-                                                'products':[],
-                                                'user': UserSerializer(user).data
-                                            },
-                                            status=status.HTTP_200_OK
-                                        )
+                      
                     elif buisness.buisness_type == 'product':
-                        print('jeei')
                         products = Products.objects.filter(buisness=buisness)
+                        response['products']=ProductSerializer(products , many=True).data
+                        if response['analytics']:
+                            response['analytics']['most_serched_products']=Most_searched_products_in_buisness(buisness)
                         
                         
-                        return Response(    
-                                            {   
-                                                'buisness':BuisnessesSerializerFull(buisness).data,
-                                                'offers':offers.data,
-                                                'products':ProductSerializer(products , many=True).data,
-                                                'analytics':{
-                                                                'average_time_spend':'0',
-                                                                'keywords':['hotel','bank','store'],
-                                                                'leads':'56',
-                                                                'profile_views_progress':'43',
-                                                                'most_serched_products':Most_searched_products_in_buisness(buisness),
-                                                                'most_serched_services':[],
-                                                                'searched':buisness.searched,
-                                                                'visits':visitanalysis
-
-                                                            }, 
-                                                'services':[],
-                                                'user': UserSerializer(user).data
-
-                                            },
-                                            status=status.HTTP_200_OK
-                                        )
+                     
                     else :
                         
-                        print(buisness)
                         products = Products.objects.filter(buisness=buisness)
                         services = Services.objects.filter(buisness=buisness)
-                        print (products,services)
-                        print('sfsoasaoosjfsofjsfjsf samosa')
-                        return Response(    
-                                            {   
-                                                'buisness':BuisnessesSerializerFull(buisness).data,
-                                                'offers':offers.data,
-                                                'services':ServiceSerializer(services , many=True).data,
-                                                'analytics':{
-                                                                'average_time_spend':'0',
-                                                                'keywords':['hospital','workshop','restaurant'],
-                                                                'leads':'56',
-                                                                'profile_views_progress':'43',
-                                                                'most_serched_products':Most_searched_products_in_buisness(buisness),
-                                                                'most_serched_services':Most_searched_services_in_buisness(buisness),
-                                                                'searched':buisness.searched,
-                                                                'visits':visitanalysis       
-  
-                                                                                                                        
-                                                            },
-                                                'products':ProductSerializer(products , many=True).data,
-                                                'user': UserSerializer(user).data
-                                            },
-                                            status=status.HTTP_200_OK
-                                        )
+                        response['services']=ServiceSerializer(services , many=True).data
+                        response['products']=ProductSerializer(products , many=True).data
+                        if response['analytics']:
+                            response['analytics']['most_serched_services']=Most_searched_services_in_buisness(buisness)
+                            response['analytics']['most_serched_products']=Most_searched_products_in_buisness(buisness)
+                        
+                    if analytics:
+                        return Response(response['analytics'] ,  status=status.HTTP_200_OK)
+                    return Response( response,status=status.HTTP_200_OK )
 
                         
                 except Exception as e:
-                    print(f"Error: {str(e)}") 
+                    print(f"Error message: {str(e)}") 
                     return Response(f'No Buisnesess Found{e}',status=status.HTTP_400_BAD_REQUEST)
 
             else:
@@ -182,6 +151,7 @@ class BuisnessesView(generics.ListAPIView):
         return Response('Authentication required' , status=status.HTTP_401_UNAUTHORIZED)
     
     
+
     
     
     
@@ -193,8 +163,12 @@ class BuisnessesView(generics.ListAPIView):
                 status=status.HTTP_401_UNAUTHORIZED
             )
         print(request.user)
-        request.data['user'] = Extended_User.objects.get(username = request.user).id
-
+        user = Extended_User.objects.get(username=request.user)
+        plan = Plans.objects.get(plan_name='Default Plan')  # Get the plan instance
+        
+        request.data['user'] = user.id
+        request.data['plan'] = plan.id
+          
         serializer = self.get_serializer(data = request.data)
         print('incoming dataa hereeeee',request.data)
         if serializer.is_valid():
@@ -206,11 +180,10 @@ class BuisnessesView(generics.ListAPIView):
                 self.serializer_class(business).data,
                 status=status.HTTP_201_CREATED
             )
+        print(serializer.errors)
         return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
    
-    
-    
-    
+
     
 def tracker_addtime(self , request):
     
@@ -220,6 +193,7 @@ def tracker_addtime(self , request):
 
   # For detailed error logs
 
+from usershome.utils import check_plan
 
 class BuisnessesEdit(generics.UpdateAPIView):
     queryset = Buisnesses.objects.all()
@@ -271,7 +245,6 @@ class BuisnessesView_for_customers(generics.ListAPIView):
         visit_tracker.save()
         
         if buisness:
-            BuisnessScore(buisness)
             try:
                 buisness.no_of_views += 1
                 buisness.save()
@@ -291,15 +264,6 @@ class BuisnessesView_for_customers(generics.ListAPIView):
                                             'tracker_id':tracker.id,
                                             'reviewed':reviewed,
                                             'dcats':BuisnessDcats(buisness),
-                                            'analytics':{
-                                                            'average_time_spend':'0',
-                                                            'keywords':['hospital','workshop','restaurant'] ,
-                                                            'most_serched_products':Most_searched_products_in_buisness(buisness),
-                                                            'most_serched_services':Most_searched_services_in_buisness(buisness),
-                                                            'searched':buisness.searched,
-                                                            'no_of_enquiries':number_of_enquiries(buisness),
-                                                            
-                                                        }
                                         },
                                         status=status.HTTP_200_OK
                                     )
@@ -316,10 +280,7 @@ class BuisnessesView_for_customers(generics.ListAPIView):
                                             'tracker_id':tracker.id,
                                             'reviewed':reviewed,
                                             'dcats':BuisnessDcats(buisness),
-                                            'most_serched_products':Most_searched_products_in_buisness(buisness),
-                                            'most_serched_services':Most_searched_services_in_buisness(buisness),
-                                            'searched':buisness.searched,
-                                            'no_of_enquiries':number_of_enquiries(buisness),
+                                            
 
                                         },
                                         status=status.HTTP_200_OK
@@ -337,15 +298,6 @@ class BuisnessesView_for_customers(generics.ListAPIView):
                                                 'offers':offers.data,
                                                 'services':ServiceSerializer(services , many=True).data,
                                                 'dcats':BuisnessDcats(buisness),
-                                                'analytics':{
-                                                                'average_time_spend':'0',
-                                                                'keywords':['hospital','workshop','restaurant'] ,
-                                                                'most_serched_products':Most_searched_products_in_buisness(buisness),
-                                                                'most_serched_services':Most_searched_services_in_buisness(buisness),
-                                                                'searched':buisness.searched,
-                                                                'no_of_enquiries':number_of_enquiries(buisness),
-                                                                                                                          
-                                                            },
                                                 'products':ProductSerializer(products , many=True).data,
                                                 'reviewed':reviewed
 

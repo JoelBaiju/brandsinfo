@@ -249,9 +249,22 @@ def elasticsearch2(request):
         
         unique_combined_queryset = list(set(combined_queryset)) 
         
+        # future_tier1_buisnesses = executor.submit(CC_Check_and_add_metadata , location , query)
+        # future_tier1_buisnesses = executor.submit(CC_Check_and_add_metadata , location , query)
+        # future_tier1_buisnesses = executor.submit(CC_Check_and_add_metadata , location , query)
         
+        unique_combined_queryset = sorted(
+            unique_combined_queryset, 
+            key=lambda x: (x.search_priority), 
+            reverse=True
+        )
+
         if rated_high == 'True':
-            unique_combined_queryset = sorted(unique_combined_queryset, key=lambda x: x.rating, reverse=True)
+             unique_combined_queryset = sorted(
+            unique_combined_queryset, 
+            key=lambda x: (x.search_priority, x.rating), 
+            reverse=True
+            )         
 
         pageing_assistant=Pageing_assistant(unique_combined_queryset,BuisnessesSerializerMini)
         

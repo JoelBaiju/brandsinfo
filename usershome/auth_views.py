@@ -122,7 +122,8 @@ def verify_token(id_token):
 #         data = json.loads(request.body)
 #         phone = data.get('phone')
 #         otp = data.get('otp')
-#         print(otp)
+#         print(otp , phone)
+        
 
 #         if not phone or not otp:
 #             return Response({'message': 'Phone and OTP are required'}, status=status.HTTP_400_BAD_REQUEST)
@@ -321,3 +322,35 @@ def signup_request_from_enquiry(name,phone,enquiry_id):
         return Response({'success': False, 'message': 'An error occurred while processing your request.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+# ==========================================================================
+
+from django.contrib.auth import authenticate,login,logout
+
+
+def Admin_auth_view(request):
+    data = json.loads(request.body)
+    username = data.get('username')
+    password = data.get('password')
+    
+    user =authenticate(username=username , password = password)
+    if user:
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'message': 'OTP Verified',
+            'sessionid': str(refresh.access_token),
+            'refresh_token': str(refresh)
+        }, status=status.HTTP_201_CREATED)
+    else:
+        return Response('Gotchaa :)  Now Get lost')

@@ -187,3 +187,39 @@ def send_otp_email(firstname,otp,toemail):
     )
     email.attach_alternative(html_message, 'text/html')
     email.send()
+    
+    
+    
+    
+    
+    
+    
+    
+    
+from functools import wraps
+from django.http import JsonResponse
+from usershome.models import Buisnesses
+
+
+
+def check_plan(required_plan):
+    def decorator(view_func):
+        @wraps(view_func)
+        def wrapper(request, *args, **kwargs):
+            if not request.user.is_authenticated:
+                return JsonResponse({"error": "Unauthorized"}, status=401)
+
+            try:
+                business = Buisnesses.objects.get(user=request.user)
+                
+                # Deny access if the user's plan does not match the required plan
+                if not business.plan or business.plan.plan_name != required_plan:
+                    return JsonResponse({"error": "Upgrade your plan to access this feature"}, status=403)
+            
+            except Buisnesses.DoesNotExist:
+                return JsonResponse({"error": "No business associated with this account"}, status=404)
+
+            return view_func(request, *args, **kwargs)
+
+        return wrapper
+    return decorator
