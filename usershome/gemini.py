@@ -1,5 +1,5 @@
 from openai import OpenAI
-from brandsinfo.settings import OPENAI_API_KEY,GEMINI_API_KEYS
+from brandsinfo.settings import GEMINI_API_KEYS
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
