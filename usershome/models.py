@@ -11,43 +11,36 @@ from django.contrib.auth.models import AbstractUser
 
 
 
-
 class Plans(models.Model):
     plan_name                                   = models.CharField(max_length=100)
     # trier 1
     profile_visit                               = models.BooleanField(default=False)
+    average_time_spend                          = models.BooleanField(default=False)
+    chat                                        = models.BooleanField(default=False)
     search_priority_1                           = models.BooleanField(default=False)
     image_gallery                               = models.BooleanField(default=False)
-    contact_info                                = models.BooleanField(default=False)
     google_map                                  = models.BooleanField(default=False)
     whatsapp_chat                               = models.BooleanField(default=False)
-    call_action_button                          = models.BooleanField(default=False)
-    bi_analytics                                = models.BooleanField(default=False)
-    profile_sharing_URL                         = models.BooleanField(default=False)
     profile_view_count                          = models.BooleanField(default=False)
-    profile_social_media_URL_links              = models.BooleanField(default=False)
-    social_media_welcome_promotion_in_BI        = models.BooleanField(default=False)
     # tier 2
-    search_priority_2                         = models.BooleanField(default=False)
+    sa_rate                                     = models.BooleanField(default=False)
+    keywords                                    = models.BooleanField(default=False)
+    search_priority_2                           = models.BooleanField(default=False)
     video_gallery                               = models.BooleanField(default=False)
-    posters_6                                   = models.BooleanField(default=False)
-    email_id                                    = models.BooleanField(default=False)
-    reviews_ratings                             = models.BooleanField(default=False)
-    audio_video_ad                              = models.BooleanField(default=False)
     bi_verification                             = models.BooleanField(default=False)
     products_and_service_visibility             = models.BooleanField(default=False)
     social_media_paid_promotion_in_bi_youtube   = models.BooleanField(default=False)
     # tier 3
-    search_priority_3                         = models.BooleanField(default=False)
-    posters_12                                  = models.BooleanField(default=False)
+    most_searhed_p_s                            = models.BooleanField(default=False)
+    search_priority_3                           = models.BooleanField(default=False)
     todays_offer                                = models.BooleanField(default=False)
-    job_portal                                  = models.BooleanField(default=False)
-    reels_video_ad                              = models.BooleanField(default=False)
-    bi_assured                                    = models.BooleanField(default=False)
+    bi_assured                                  = models.BooleanField(default=False)
     bi_certification                            = models.BooleanField(default=False)
-    social_media_paid_promotion_in_bi_12_posters_monthly = models.BooleanField(default=False)
 
-
+class Plan_Varients(models.Model):
+    plan            = models.ForeignKey(Plans , on_delete=models.CASCADE)
+    duration        = models.CharField(max_length=50)
+    price           = models.CharField(max_length=50)
 
 class Extended_User(AbstractUser):
     mobile_number   = models.CharField(max_length=15, null=True, blank=True)
@@ -111,6 +104,8 @@ class Locality (models.Model):
 class Buisnesses(models.Model):
     # Allowing null=True for cases where a business might not be linked to a user initially.
     plan                        = models.ForeignKey(Plans ,on_delete=models.CASCADE , null=True ,blank=True)
+    plan_variant                = models.ForeignKey(Plan_Varients , on_delete=models.CASCADE , null=True , blank=True)
+    plan_start_date             = models.DateField(auto_now_add=True , null=True , blank=True)
     search_priority             = models.IntegerField(default=0)
     user                        = models.ForeignKey(Extended_User , on_delete=models.CASCADE , null=True)
     name                        = models.CharField(max_length=100)
@@ -152,8 +147,19 @@ class Buisnesses(models.Model):
         return self.name
     
     
+class Keywords(models.Model):
+    keyword         = models.CharField(max_length=200)
     
-
+    def __str__(self):
+        return self.keyword
+    
+    
+class Buisness_keywords(models.Model):
+    keyword         = models.ForeignKey(Keywords , on_delete=models.CASCADE)
+    buisness        = models.ForeignKey(Buisnesses , on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return str(self.id) + ' - ' + self.keyword.keyword + ' - ' + self.buisness.name
     
 class BuisnessVisitTracker(models.Model):
     buisness                    = models.ForeignKey(Buisnesses , on_delete=models.CASCADE)
@@ -225,7 +231,7 @@ class Products(models.Model):
     price           = models.CharField(max_length=20 , blank=True)
     sub_cat         = models.ForeignKey(Product_Sub_category , on_delete=models.CASCADE)
     description     = models.CharField(max_length=200 , blank=True)
-    buisness        = models.ForeignKey(Buisnesses , on_delete=models.CASCADE)
+    buisness        = models.ForeignKey(Buisnesses ,related_name='products', on_delete=models.CASCADE)
     searched        =  models.IntegerField(default=0 , blank=True)
 
     
@@ -258,13 +264,20 @@ class Service_Cats(models.Model):
 class Services (models.Model):
     name            = models.CharField(max_length=70)
     price           = models.CharField(max_length=30)
-    image           = models.ImageField(upload_to='Sevices_pics/' , default='' , null=True , blank=True )
+    description     = models.CharField(max_length=200 , blank=True , null=True)
     cat             = models.ForeignKey(Service_Cats , on_delete=models.CASCADE)
-    buisness        = models.ForeignKey(Buisnesses , on_delete=models.CASCADE)
+    buisness        = models.ForeignKey(Buisnesses ,related_name='services', on_delete=models.CASCADE)
     searched        =  models.IntegerField(default=0 , blank=True)
 
     def __str__(self):
         return self.name
+
+
+
+class Service_pics(models.Model):
+    image             = models.ImageField(upload_to='Sevices_pics/' , default='')
+    service         = models.ForeignKey(Services , on_delete=models.CASCADE)
+ 
 
     
     

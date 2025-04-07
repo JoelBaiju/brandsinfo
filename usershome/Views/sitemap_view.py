@@ -7,13 +7,13 @@ from rest_framework.response import Response
 
 
 # Local app imports
-from .models import *
-from .serializers import * 
+from ..models import *
+from ..serializers import * 
 from brandsinfo.settings import FRONTEND_BASE_URL_FOR_SM , BACKEND_BASE_URL_FOR_SM
-from .gemini import generate_metadata_for_SB as gemini_generate_metadata_for_SB
-from .gemini import generate_metadata_for_CC as gemini_generate_metadata_for_CC
+from ..Ai.gemini import generate_metadata_for_SB as gemini_generate_metadata_for_SB
+from ..Ai.gemini import generate_metadata_for_CC as gemini_generate_metadata_for_CC
 from django.db import IntegrityError
-from .serializers import SiteSaplinksSerializerFull
+from ..serializers import SiteSaplinksSerializerFull
 
 
 
@@ -127,12 +127,22 @@ def CC_Check_and_add_metadata(city , dcat):
                 category = dcat,
             )
             metadata = response['metadata']
-
-            sitemap_obj.meta_title         = metadata.get("meta_title", "")
-            sitemap_obj.meta_description   = metadata.get("meta_description", "")
-            sitemap_obj.meta_keywords      = metadata.get("meta_keywords", "")
+            meta_title         = metadata.get("meta_title", "")
+            meta_description   = metadata.get("meta_description", "")
+            meta_keywords      = metadata.get("meta_keywords", "")
+            
+            sitemap_obj.meta_title         = meta_title
+            sitemap_obj.meta_description   = meta_description
+            sitemap_obj.meta_keywords      = meta_keywords
+            sitemap_obj.meta_author = 'Brandsinfo',
+            sitemap_obj.meta_og_table = meta_title + '- Brandsinfo',
+            sitemap_obj.meta_og_description = meta_description,
+            sitemap_obj.meta_og_url = f"{BACKEND_BASE_URL_FOR_SM}/mapper/{sitemap_obj.id}/",
+            sitemap_obj.meta_og_site_name = 'Brandsinfo',
+            sitemap_obj.page_title =  meta_title + '- Brandsinfo'
             sitemap_obj.cc_combination     = True
             sitemap_obj.link               = f"{FRONTEND_BASE_URL_FOR_SM}/{city}/{dcat}/{sitemap_obj.id}?keywords={sitemap_obj.meta_keywords}"
+            
             sitemap_obj.save()
             
             return SiteSaplinksSerializerFull(sitemap_obj).data
@@ -177,7 +187,13 @@ def Site_Map_Generator_ALLATONCE_SB(request):
             buisness=buisness,
             meta_title=meta_title,
             meta_description=meta_description,
-            meta_keywords=meta_keywords
+            meta_keywords=meta_keywords,
+            meta_author = 'Brandsinfo',
+            meta_og_table = meta_title + '- Brandsinfo',
+            meta_og_description = meta_description,
+            meta_og_url = f"{BACKEND_BASE_URL_FOR_SM}/mapper/{sitemap_obj.id}/",
+            meta_og_site_name = 'Brandsinfo',
+            page_title =  meta_title + '- Brandsinfo'
         )
         sitemap_obj.single_buisness = True
         sitemap_obj.City = Buisnesses.city 
@@ -214,18 +230,31 @@ def Site_Map_Generator_SB(buisness):
     meta_title = metadata.get("meta_title", "")
     meta_description = metadata.get("meta_description", "")
     meta_keywords = metadata.get("meta_keywords", "")
+    keyword = meta_keywords.split(',')
+    keyword = [k.strip() for k in keyword]
+    
+    for i in keyword:
+        Keyword = Keywords.objects.get_or_create( keyword=i)
+        Bkeyword = Buisness_keywords.objects.get_or_create(buisness=buisness, keyword=Keyword[0])
 
     sitemap_obj = Sitemap_Links.objects.create(
         buisness=buisness,
         meta_title=meta_title,
         meta_description=meta_description,
-        meta_keywords=meta_keywords
+        meta_keywords=meta_keywords,
+        meta_author = 'Brandsinfo',
+        meta_og_title = meta_title + '- Brandsinfo',
+        meta_og_description = meta_description,
+        meta_og_site_name = 'Brandsinfo',
+        page_title =  meta_title + '- Brandsinfo'
     )
     sitemap_obj.single_buisness = True
-    sitemap_obj.City = Buisnesses.city 
+    sitemap_obj.City = buisness.city 
     sitemap_obj.link = f"{FRONTEND_BASE_URL_FOR_SM}/{buisness.city}/{buisness.name}{(buisness.landmark) if buisness.landmark is not None else ''}/{sitemap_obj.id}?keywords={meta_keywords}"
     # sitemap_obj.link = f"{FRONTEND_BASE_URL_FOR_SM}/{buisness.city}/{buisness.name}{(buisness.landmark) if buisness.landmark is not None else ''}/{sitemap_obj.id}"
     sitemap_obj.share_link = f"{BACKEND_BASE_URL_FOR_SM}/mapper/{sitemap_obj.id}/"
+    sitemap_obj.meta_og_url = f"{BACKEND_BASE_URL_FOR_SM}/mapper/{sitemap_obj.id}/",
+
     sitemap_obj.save()
     buisness.maped=True
     buisness.save()
@@ -259,15 +288,21 @@ def Site_Map_Generator_SB_single_Test_api(request):
     meta_title = metadata.get("meta_title", "")
     meta_description = metadata.get("meta_description", "")
     meta_keywords = metadata.get("meta_keywords", "")
-
-
+    keyword = meta_keywords.split(',')
+    keyword = [k.strip() for k in keyword]
+    
+    for i in keyword:
+        Keyword = Keywords.objects.get_or_create( keyword=i)
+        Bkeyword = Buisness_keywords.objects.get_or_create(buisness=buisness, keyword=Keyword[0])
+    print(keyword)
     response_json = response.get('usage')
 
     return Response( {'m':'Generated and saved successfully',
                       'meta_title':meta_title,
                       'meta_keywords':meta_keywords,
                       'meta_description':meta_description,
-                      'response':response_json})
+                      'response':response_json,
+                      'keyword':keyword,})
 
     
     

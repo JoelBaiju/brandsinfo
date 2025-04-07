@@ -17,7 +17,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from usershome.fast2_sms_service import send_otp
+from usershome.Tools_Utils.fast2_sms_service import send_otp
 
 
 # Local app imports

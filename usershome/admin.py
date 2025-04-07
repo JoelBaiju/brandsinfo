@@ -33,7 +33,6 @@ admin.site.register( Descriptive_cats,dcatsAdmin)
 admin.site.register( City,cityAdmin)
 
 
-admin.site.register(Buisnesses)
 admin.site.register(Buisness_Descriptive_cats)
 admin.site.register(Buisness_General_cats)
 admin.site.register(General_cats)
@@ -64,10 +63,17 @@ admin.site.register(Home_Ads)
 admin.site.register(Auth_OTPs)
 admin.site.register(BuisnessVisitTracker)
 admin.site.register(Plans)
-
+admin.site.register(Buisness_keywords)
+admin.site.register(Keywords)
 admin.site.register(Sitemap_Links)
 
 class ProductsAdmin(admin.ModelAdmin):
     list_display = ['name', 'price', 'cat']
     search_fields = ['name', 'cat__cat_name']
     
+    
+
+class BuisnessesAdmin(admin.ModelAdmin):
+    list_display = ['id','name']
+    
+admin.site.register(Buisnesses ,BuisnessesAdmin)

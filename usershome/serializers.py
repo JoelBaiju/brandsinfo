@@ -92,6 +92,22 @@ class ReviewRatingSerializerMini(serializers.ModelSerializer):
     
 
 
+class BDescriptiveCatsSerializer(serializers.ModelSerializer):
+    cat_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Buisness_Descriptive_cats
+        fields = ['id', 'cat_name']
+
+    def get_cat_name(self, obj):
+        return obj.dcat.cat_name
+
+
+class BGeneralCatsSerializer(serializers.ModelSerializer):
+    cat_name = serializers.StringRelatedField(source='gcat.cat_name', read_only=True)
+    class Meta:
+        model = Buisness_General_cats
+        fields = ['id', 'cat_name']
 
 
 
@@ -124,12 +140,12 @@ class PlansSerializer(serializers.ModelSerializer):
         model = Plans
         fields = [
             'plan_name','profile_visit','image_gallery',
-            'contact_info','google_map','whatsapp_chat','call_action_button',
-            'bi_analytics','profile_sharing_URL','profile_view_count',
-            'profile_social_media_URL_links',
-            'video_gallery','email_id',
-            'reviews_ratings','bi_verification','products_and_service_visibility',
-            'bi_assured','bi_certification'
+            'google_map','whatsapp_chat',
+            'profile_view_count',
+            'video_gallery',
+            'bi_verification','products_and_service_visibility',
+            'bi_assured','bi_certification','keywords','average_time_spend',
+            'sa_rate'
         ]
 
 class BuisnessesSerializer(serializers.ModelSerializer):
@@ -140,7 +156,7 @@ class BuisnessesSerializer(serializers.ModelSerializer):
                     queryset=Extended_User.objects.all()
                     )
     image_gallery   = BuisnessPicsSerializer(many=True, read_only=True)
-    plan = serializers.PrimaryKeyRelatedField(queryset=Plans.objects.all())  # ✅ This expects an ID
+    plan = PlansSerializer( read_only=True)
 
     class Meta:
         model = Buisnesses
@@ -179,7 +195,7 @@ class BuisnessesSerializerFull(serializers.ModelSerializer):
                     queryset=Extended_User.objects.all()
                     )
     image_gallery = BuisnessPicsSerializer(many=True, read_only=True)
-    plan       = PlansSerializer()
+    plan = PlansSerializer( read_only=True)
 
     
     class Meta:
@@ -211,7 +227,7 @@ class BuisnessesSerializerCustomers(serializers.ModelSerializer):
     image_gallery   = BuisnessPicsSerializer(many=True, read_only=True)
     site_data       = SiteSaplinksSerializerFull(source='sitemap_link', read_only=True)
     review_rating   = ReviewRatingSerializerMini(source='reviews_ratings_set', many=True, read_only=True)
-    plan            = PlansSerializer()
+    plan = PlansSerializer( read_only=True)
 
     class Meta:
         model   = Buisnesses
@@ -253,6 +269,17 @@ class BuisnessesSerializerCustomers(serializers.ModelSerializer):
 
 from django.db.models import Avg
 
+class ProductMiniSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Products
+        fields = ['id', 'name', 'price' ]
+
+class ServiceMiniSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Services
+        fields = ['id', 'name', 'price' ,'description']
+
+
 
 class BuisnessesSerializerMini(serializers.ModelSerializer):
     image       = serializers.ImageField()        
@@ -263,14 +290,16 @@ class BuisnessesSerializerMini(serializers.ModelSerializer):
                 )
     offers      = BuisnessOffersSerializer(many=True, read_only=True)
     redirect_link = SiteSaplinksSerializerMini(source='sitemap_link', read_only=True)
-
+    products = ProductMiniSerializer(many=True, read_only=True)
+    services = ServiceMiniSerializer(many=True, read_only=True)
+    plan = PlansSerializer( read_only=True)
     class Meta:
         model   = Buisnesses
         fields  = [  
                     'id','search_priority','name','buisness_type','locality',
                     'city','state','no_of_views','user',
                     'score','image','offers','redirect_link','rating',
-                    'verified','assured'
+                    'verified','assured','plan','products','services','building_name','state'
                  ]
     
     
@@ -307,7 +336,8 @@ class BuisnessesSerializerShort(serializers.ModelSerializer):
     image       = serializers.ImageField()        
     city        = serializers.StringRelatedField()
     locality    = serializers.StringRelatedField()
-   
+    plan = PlansSerializer( read_only=True)
+
 
     class Meta:
         model   = Buisnesses
@@ -317,8 +347,8 @@ class BuisnessesSerializerShort(serializers.ModelSerializer):
                     'state','pincode','opens_at','closes_at','since',
                     'instagram_link','facebook_link','web_link','x_link',
                     'youtube_link','whatsapp_number','incharge_number',
-                    'image','email','manager_name'
-                 ]
+                    'image','email','manager_name','plan','no_of_views','score'
+                ]
     
     
 
@@ -422,24 +452,26 @@ class EnquiriesSerializer(serializers.ModelSerializer):
 class ProductPicsSerializer(serializers.ModelSerializer):
     class Meta:
         model   = Product_pics
-        fields  = ['image']
+        fields  = ['id','image']
 
-class ProductCreateSerializer(serializers.ModelSerializer):
+class ProductSerializer(serializers.ModelSerializer):
     images = serializers.ListField(
             child=serializers.ImageField(), write_only=True
         )  
   
     sub_cat = serializers.PrimaryKeyRelatedField(
-    queryset=Product_Sub_category.objects.all(),
-)
+        queryset=Product_Sub_category.objects.all(),
+        write_only=True
+        )
 
-    
+    cat_name = serializers.CharField(source='sub_cat.cat_name', read_only=True)  # 👈 Add this
+
     product_images = ProductPicsSerializer(source='product_pics_set', many=True, read_only=True)
 
 
     class Meta:
         model = Products
-        fields = ['id','name', 'price', 'sub_cat', 'description',
+        fields = ['id','name', 'price', 'sub_cat','cat_name', 'description',
                   'buisness', 'images','searched','product_images']
 
     def create(self, validated_data):
@@ -450,24 +482,11 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             Product_pics.objects.create(product=product, image=image)
         
         return product
-
-
-
-class ProductSerializer(serializers.ModelSerializer):
-    images = serializers.ListField(
-            child=serializers.ImageField(), write_only=True
-        )  
-  
-    sub_cat = serializers.StringRelatedField()
-    product_images = ProductPicsSerializer(source='product_pics_set', many=True, read_only=True)
-
-
-    class Meta:
-        model = Products
-        fields = ['id','name', 'price', 'sub_cat', 'description',
-                  'buisness', 'images','searched','product_images']
-
-
+    
+    
+    
+    
+    
 
 class ProductSerializerMini(serializers.ModelSerializer):
     images = serializers.ListField(
@@ -485,35 +504,38 @@ class ProductSerializerMini(serializers.ModelSerializer):
 
 
 
-class CreateServiceSerializer(serializers.ModelSerializer):
-    cat = serializers.PrimaryKeyRelatedField(queryset=Service_Cats.objects.all())
-    images = serializers.ListField(
-        child=serializers.ImageField(),
-        write_only=True,
-        required=False
-    )
 
+class ServicePicsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Services
-        fields = '__all__'  # Includes all fields in the model
-
-    def create(self, validated_data):
-        print(validated_data)
-        images = validated_data.pop('images', None)
-        
-        image = images[0] if images else None
-        return Services.objects.create(**validated_data, image=image)
-
+        model   = Product_pics
+        fields  = ['id','image']
 
 class ServiceSerializer(serializers.ModelSerializer):
+    images = serializers.ListField(
+            child=serializers.ImageField(), write_only=True
+        )  
+    cat = serializers.PrimaryKeyRelatedField(queryset=Service_Cats.objects.all(),write_only=True)
+    
+    cat_name = serializers.CharField(source='cat.cat_name', read_only=True)  
+    
+    service_images = ServicePicsSerializer(source='service_pics_set', many=True, read_only=True)
 
-    cat = serializers.StringRelatedField()
-    image = serializers.ImageField()
-    
+
     class Meta:
-        model = Services
-        fields = '__all__'  # Includes all fields in the model
-    
+        model = Products
+        fields = ['id','name', 'price', 'cat_name','cat', 'description',
+                  'buisness', 'images','searched','service_images']
+
+    def create(self, validated_data):
+        images_data = validated_data.pop('images', [])
+        service = Services.objects.create(**validated_data)
+        
+        for image in images_data:
+            Service_pics.objects.create(service=service, image=image)
+        
+        return service
+
+
 
 
 class ServiceCatsSerializer(serializers.ModelSerializer):

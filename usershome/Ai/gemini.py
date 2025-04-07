@@ -3,7 +3,7 @@ from brandsinfo.settings import GEMINI_API_KEYS
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Sitemap_Links, City, Descriptive_cats, Buisnesses
+from ..models import Sitemap_Links, City, Descriptive_cats, Buisnesses
 import json
 import re
 import requests
@@ -26,11 +26,10 @@ api_key_cycle = itertools.cycle(GEMINI_API_KEYS)
 def generate_metadata(prompt):
     print("Generating metadata with Gemini 2.0 Flash...")
 
-    session = requests.Session()  # Persistent session for lower latency
+    session = requests.Session()  
 
-    for attempt in range(5):  # Max 5 retries
+    for attempt in range(5): 
         try:
-            # **Instead of waiting for failure, switch API keys every request**
             api_key = next(api_key_cycle)
             print( 'api key ' ,api_key)
             
@@ -40,16 +39,16 @@ def generate_metadata(prompt):
             payload = {"contents": [{"parts": [{"text": prompt}]}]}
             headers = {
                 "Content-Type": "application/json",
-                "Accept-Encoding": "gzip",  # Enables gzip compression for faster responses
-                "Connection": "keep-alive"  # Keeps HTTP connection alive for efficiency
+                "Accept-Encoding": "gzip",  
+                "Connection": "keep-alive"  
             }
 
             response = session.post(url, headers=headers, json=payload, timeout=10)
 
-            if response.status_code == 429:  # Rate limit hit
+            if response.status_code == 429:  
                 print(f"Rate limit reached for {api_key}. Skipping to next key...")
-                time.sleep(0.5)  # Small delay before next attempt
-                continue  # Try again with the next key
+                time.sleep(0.5) 
+                continue  
             
             if response.status_code != 200:
                 raise ValueError(f"Error from Gemini API: {response.status_code} - {response.text}")
@@ -61,7 +60,6 @@ def generate_metadata(prompt):
 
             response_text = candidates[0]["content"]["parts"][0]["text"].strip()
 
-            # Extract JSON safely
             json_start = response_text.find("{")
             json_end = response_text.rfind("}")
             if json_start == -1 or json_end == -1:

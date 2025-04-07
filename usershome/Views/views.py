@@ -4,6 +4,7 @@ import string
 from urllib.parse import urljoin, urlparse
 from itertools import chain
 import traceback
+import concurrent.futures
 
 # Django imports
 from django.shortcuts import redirect, render
@@ -30,12 +31,12 @@ from rest_framework.views import APIView
 
 # Local app imports
 from .sitemap_view import Site_Map_Generator_SB
-from .models import *
-from .serializers import * 
-from .searcher import find_closest 
+from ..models import *
+from ..serializers import * 
+from ..SearchEngines.searcher import find_closest 
 from brandsinfo.settings import BACKEND_BASE_URL_FOR_SM_SECURE
 from . import auth_views
-from .utils import *
+from usershome.Tools_Utils.utils import *
 
 
 
@@ -62,6 +63,7 @@ class BuisnessesView(generics.ListAPIView):
 
     def get(self , request):
         if self.request.user.is_authenticated:
+            user = Extended_User.objects.get(username=self.request.user)
             bid=request.GET.get('bid')
             if bid:
                 try:
@@ -69,51 +71,33 @@ class BuisnessesView(generics.ListAPIView):
                     buisness = Buisnesses.objects.get(id=bid)
                     buisness.score=BuisnessScore(buisness)
                     buisness.save()
-                    user = Extended_User.objects.get(username=self.request.user)
                     offers = Buisness_Offers.objects.filter(buisness=buisness)
                     offers = BuisnessOffersSerializer(offers , many=True)
                     
                     formatt = request.GET.get('formatt')
                     analytics = request.GET.get('analytics')
-                    visitanalysis=False
-                    if buisness.plan.profile_visit:
-                        visitanalysis=buisness_visits_analyzer(buisness =buisness , formatt=formatt)
-            
-                    response =  {   
+                    
+                  
+                    response =  {                                       
+                                    'user': UserSerializer(user).data,
                                     'buisness':BuisnessesSerializerFull(buisness).data,
+                                    'd_cats':BDescriptiveCatsSerializer(Buisness_Descriptive_cats.objects.filter(buisness=buisness) , many=True).data,
+                                    'g_cats':BGeneralCatsSerializer(Buisness_General_cats.objects.filter(buisness=buisness) , many=True).data,
                                     'offers':offers.data,
                                     'services':[],
-                                    'analytics':False,
                                     'products':[],
-                                    'user': UserSerializer(user).data
+                                    'analytics':add_analytics(buisness,formatt)
                                 }
-                    if buisness.plan.bi_analytics:
-                        response['analytics']={
-                                    'average_time_spend':'0',
-                                    'keywords':['hospital','workshop','restaurant']      ,
-                                    'leads':'56',
-                                    'profile_views_progress':'43',                 
-                                    'most_serched_services':[],
-                                    'most_serched_products':[],
-                                    'searched':buisness.searched,
-                                    'visits':visitanalysis       
-                                }
-                        
-                        
                         
                     if buisness.buisness_type == 'service':
                         services = Services.objects.filter(buisness=buisness)
                         response['services']=ServiceSerializer(services , many=True).data
-                        if response['analytics']:
-                            response['analytics']['most_serched_services']=Most_searched_services_in_buisness(buisness)
                         
                       
                     elif buisness.buisness_type == 'product':
                         products = Products.objects.filter(buisness=buisness)
                         response['products']=ProductSerializer(products , many=True).data
-                        if response['analytics']:
-                            response['analytics']['most_serched_products']=Most_searched_products_in_buisness(buisness)
-                        
+                      
                         
                      
                     else :
@@ -122,10 +106,6 @@ class BuisnessesView(generics.ListAPIView):
                         services = Services.objects.filter(buisness=buisness)
                         response['services']=ServiceSerializer(services , many=True).data
                         response['products']=ProductSerializer(products , many=True).data
-                        if response['analytics']:
-                            response['analytics']['most_serched_services']=Most_searched_services_in_buisness(buisness)
-                            response['analytics']['most_serched_products']=Most_searched_products_in_buisness(buisness)
-                        
                     if analytics:
                         return Response(response['analytics'] ,  status=status.HTTP_200_OK)
                     return Response( response,status=status.HTTP_200_OK )
@@ -134,20 +114,14 @@ class BuisnessesView(generics.ListAPIView):
                 except Exception as e:
                     print(f"Error message: {str(e)}") 
                     return Response(f'No Buisnesess Found{e}',status=status.HTTP_400_BAD_REQUEST)
-
-            else:
-                qset = self.get_queryset()
-                try:
-                    buisnesses = BuisnessesSerializerMini(qset[0] , many=True).data
-                except Exception as e:
-                    print(e)
-                    return Response('No Buisnesess Found',status=status.HTTP_400_BAD_REQUEST)
-                
-                
-                
-                user = UserSerializer(qset[1]).data
-                return Response({"userprofile":user,'buisnesses':buisnesses},status=status.HTTP_200_OK)
             
+            else:
+                buisness = Buisnesses.objects.filter(user=user)
+                serialized_buisness = BuisnessesSerializerShort(buisness , many=True)
+                response = {'buisnesses': serialized_buisness.data,
+                            'user': UserSerializer(user).data}
+                return Response(response,status=status.HTTP_200_OK)
+                                     
         return Response('Authentication required' , status=status.HTTP_401_UNAUTHORIZED)
     
     
@@ -164,7 +138,7 @@ class BuisnessesView(generics.ListAPIView):
             )
         print(request.user)
         user = Extended_User.objects.get(username=request.user)
-        plan = Plans.objects.get(plan_name='Default Plan')  # Get the plan instance
+        plan = Plans.objects.get(plan_name='Default Plan')  
         
         request.data['user'] = user.id
         request.data['plan'] = plan.id
@@ -193,7 +167,6 @@ def tracker_addtime(self , request):
 
   # For detailed error logs
 
-from usershome.utils import check_plan
 
 class BuisnessesEdit(generics.UpdateAPIView):
     queryset = Buisnesses.objects.all()
@@ -248,8 +221,8 @@ class BuisnessesView_for_customers(generics.ListAPIView):
             try:
                 buisness.no_of_views += 1
                 buisness.save()
-                tracker=BuisnessTracker.objects.create(buisness=buisness)
-                tracker.save()
+                # tracker=BuisnessTracker.objects.create(buisness=buisness)
+                # tracker.save()
                 offers = Buisness_Offers.objects.filter(buisness=buisness)
                 offers = BuisnessOffersSerializer(offers , many=True)
                 if buisness.buisness_type == 'service':
@@ -261,7 +234,7 @@ class BuisnessesView_for_customers(generics.ListAPIView):
                                             'offers':offers.data,
                                             'services':ServiceSerializer(services , many=True).data,
                                             'products':[],
-                                            'tracker_id':tracker.id,
+                                            # 'tracker_id':tracker.id,
                                             'reviewed':reviewed,
                                             'dcats':BuisnessDcats(buisness),
                                         },
@@ -277,7 +250,7 @@ class BuisnessesView_for_customers(generics.ListAPIView):
                                             'offers':offers.data,
                                             'products':ProductSerializer(products , many=True).data,
                                             'services':[],
-                                            'tracker_id':tracker.id,
+                                            # 'tracker_id':tracker,
                                             'reviewed':reviewed,
                                             'dcats':BuisnessDcats(buisness),
                                             
@@ -393,6 +366,7 @@ class BuisnessPics_Delete(generics.DestroyAPIView):
 
 
 
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def check_bookmarked(request):
@@ -460,6 +434,19 @@ class DeleteOfferView(generics.DestroyAPIView):
         self.perform_destroy(offer)
         return Response({'message': 'Offer deleted successfully'}, status=status.HTTP_200_OK)
 
+
+class EditOfferView(generics.UpdateAPIView):
+    serializer_class = BuisnessOffersSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = Buisness_Offers.objects.all()
+    lookup_field = 'id'
+
+    def update(self, request, *args, **kwargs):
+        offer = self.get_object()
+        if offer.buisness.user != request.user:
+            return Response({'error': 'Unauthorized to edit this offer'}, status=status.HTTP_403_FORBIDDEN)
+
+        return super().update(request, *args, **kwargs)
 
 
 
@@ -873,103 +860,6 @@ def get_locality_with_city(request):
 
 
 
-
-
-
-@api_view(['GET'])
-def search_products_category(request):
-    query = request.GET.get('q', '')
-    if not query:
-        return Response({'error': 'Query parameter "q" is required'}, status=400)
-
-    cats = find_closest('usershome_product_sub_category',query)
-    return Response(cats)
-
-
-
-
-class AddProductWithImagesView(generics.CreateAPIView):
-    serializer_class = ProductSerializer
-    queryset = Products.objects.all()
-    parser_classes = [MultiPartParser, FormParser]
-    def get(self, request):
-        bid=request.GET.get('bid')
-        if not bid :
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        queryset = Products.objects.filter(buisness=Buisnesses.objects.get(id=bid))
-        print(queryset[0])
-        return Response(ProductSerializer(queryset , many=True).data , status=status.HTTP_200_OK)
-        
-    def create(self, request, *args, **kwargs): 
-        print('fffffffff')       
-        data = request.data
-        print(data)
-        images = request.FILES.getlist('images[]')  
-        data.setlist('images', images)  
-        serializer = ProductCreateSerializer(data=data)
-        print(data)
-        
-        if serializer.is_valid():
-            print(" ")
-            product = serializer.save()
-            return Response({'buisness_type':Buisnesses.objects.get(id=data.get('buisness')).buisness_type}, status=status.HTTP_201_CREATED)
-        
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-
-    
-
-class ProductDelete(generics.DestroyAPIView):
-    queryset = Products.objects.all()
-    serializer_class = ProductSerializer
-    permission_classes = [IsAuthenticated]  # Only authenticated users can access
-
-
-
-
-class ServiceListCreateView(generics.ListCreateAPIView):
-    queryset = Services.objects.all()
-    serializer_class = CreateServiceSerializer
-    parser_classes = [MultiPartParser, FormParser]  # Allows image uploads
-    filter_backends = [filters.SearchFilter]  
-    search_fields = ['buisness']  # Enables filtering by business ID
-
-    def get(self, request):
-        bid=request.GET.get('bid')
-        if not bid :
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        queryset = Services.objects.filter(buisness=Buisnesses.objects.get(id=bid))
-        print(queryset[0])
-        return Response(ServiceSerializer(queryset , many=True).data)
-        
-    def post(self, request, *args, **kwargs):
-        print(request.data)
-        images = request.FILES.getlist('images[]')
-        data = request.data
-        data.setlist('images', images)
-        serializer = self.get_serializer(data=data) 
-        return super().post(request, *args, **kwargs)
-
-    
-    
-    
-    
-class ServiceCats(generics.ListCreateAPIView):
-    queryset = Service_Cats.objects.all()
-    serializer_class = ServiceCatsSerializer
-        
-    
-    
-
-
-
-class ServiceDelete(generics.DestroyAPIView):
-    queryset = Services.objects.all()
-    serializer_class = ServiceSerializer
-    permission_classes = [IsAuthenticated]  # Only authenticated users can access
-
-    
-    
  
 
 class Popular_general_cats_view(generics.ListAPIView):
@@ -1032,6 +922,7 @@ def add_des_category(request):
     data=json.loads(request.body)
     dcid=data.get('dcid')
     bid=data.get('bid')
+    print(dcid,'please be truee')
     print('hereerererersso only ')
     
     if not dcid or not bid:
@@ -1041,14 +932,22 @@ def add_des_category(request):
         print(Descriptive_cats.objects.get(id=i))
         
         Buisness_Descriptive_cats.objects.create(dcat=Descriptive_cats.objects.get(id=i) , buisness=buisness).save()
-    
-    Site_Map_Generator_SB(buisness=buisness)
+    if not Sitemap_Links.objects.filter(buisness=buisness).exists(): 
+        
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            executor.submit(Site_Map_Generator_SB , buisness)
+        
 
     
     return Response('',status=status.HTTP_200_OK)
 
     
-    
+class Delete_des_category(generics.DestroyAPIView):
+    queryset = Buisness_Descriptive_cats.objects.all()
+    serializer_class = BDescriptiveCatsSerializer
+    permission_classes = [IsAuthenticated]  
+
+   
 
 
 

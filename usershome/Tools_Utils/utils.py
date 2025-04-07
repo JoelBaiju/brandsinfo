@@ -2,8 +2,8 @@ from django.utils import timezone
 import pytz
 from django.forms.models import model_to_dict
 import datetime
-from .models import *
-from .serializers import *
+from ..models import *
+from ..serializers import *
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.core.mail import EmailMultiAlternatives
@@ -194,32 +194,45 @@ def send_otp_email(firstname,otp,toemail):
     
     
     
+def average_time_spent(buisness):
+    return 34
+
+def buisness_keywords(buisness):
+    Keywords = Buisness_keywords.objects.filter(buisness=buisness).values_list('keyword__keyword', flat=True)
+    return Keywords
     
-    
-from functools import wraps
-from django.http import JsonResponse
-from usershome.models import Buisnesses
+def add_analytics(buisness , visit_format):
+    buisness = Buisnesses.objects.get(id=buisness.id)
 
+    analytics = {
+        'average_time_spend': False,
+        'keywords': False,
+        'leads': '56',
+        'most_serched_services': [],
+        'most_serched_products': [],
+        'searched': buisness.searched,
+        'visits': False
+    }
 
+    if buisness.plan.plan_name != 'Default Plan':
+        if buisness.plan.profile_visit:
+            analytics['visits'] = buisness_visits_analyzer(buisness=buisness, formatt=visit_format)
 
-def check_plan(required_plan):
-    def decorator(view_func):
-        @wraps(view_func)
-        def wrapper(request, *args, **kwargs):
-            if not request.user.is_authenticated:
-                return JsonResponse({"error": "Unauthorized"}, status=401)
+        if buisness.plan.average_time_spend:
+            analytics['average_time_spend'] = average_time_spent(buisness)
 
-            try:
-                business = Buisnesses.objects.get(user=request.user)
-                
-                # Deny access if the user's plan does not match the required plan
-                if not business.plan or business.plan.plan_name != required_plan:
-                    return JsonResponse({"error": "Upgrade your plan to access this feature"}, status=403)
-            
-            except Buisnesses.DoesNotExist:
-                return JsonResponse({"error": "No business associated with this account"}, status=404)
+        if buisness.plan.keywords:
+            analytics['keywords'] = buisness_keywords(buisness)
 
-            return view_func(request, *args, **kwargs)
+        if buisness.plan.most_searhed_p_s:
+            if buisness.buisness_type == 'service':
+                analytics['most_serched_services'] = Most_searched_services_in_buisness(buisness)
 
-        return wrapper
-    return decorator
+            elif buisness.buisness_type == 'product':
+                analytics['most_serched_products'] = Most_searched_products_in_buisness(buisness)
+
+            else:
+                analytics['most_serched_services'] = Most_searched_services_in_buisness(buisness)
+                analytics['most_serched_products'] = Most_searched_products_in_buisness(buisness)
+
+    return analytics  # ✅ Always defined

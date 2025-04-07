@@ -15,12 +15,12 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from usershome.fast2_sms_service import send_otp
+from usershome.Tools_Utils.fast2_sms_service import send_otp
 
 
 # Local app imports
-from .models import *
-from .serializers import * 
+from ..models import *
+from ..serializers import * 
 from brandsinfo.settings import FIREBASE_API_KEY
 
 
@@ -327,6 +327,16 @@ def signup_request_from_enquiry(name,phone,enquiry_id):
 
 
 
+
+class User_Data(generics.ListAPIView):
+    queryset = Extended_User.objects.all()
+    serializer_class = UserSerializer
+
+    def get(self , request):
+        if request.user.is_authenticated:
+            user = Extended_User.objects.get(username=request.user)
+            return Response(self.serializer_class(user).data, status=status.HTTP_200_OK)
+        return Response('Authentication required' , status=status.HTTP_401_UNAUTHORIZED)
 
 
 

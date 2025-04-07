@@ -1,139 +1,18 @@
 # Import necessary modules and classes
-from django_elasticsearch_dsl import Document, fields
-from django_elasticsearch_dsl.registries import registry
-from elasticsearch_dsl import analyzer, tokenizer, Q
+from elasticsearch_dsl import Q
 from itertools import chain
 from rest_framework.decorators import api_view
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
-from .models import *  
-from .serializers import *  
+from ..models import *  
+from ..serializers import *  
 from django.db.models import Q as modelsQ
 from django.db.models import F
 import concurrent.futures
-from .sitemap_view import CC_Check_and_add_metadata
-from .utils import *
-
-
-# Define Edge NGram Tokenizer and Analyzer
-edge_ngram_tokenizer = tokenizer(
-    "edge_ngram_tokenizer", type="ngram", min_gram=1, max_gram=20, token_chars=["letter", "digit"]
-)
-
-edge_ngram_analyzer = analyzer(
-    "edge_ngram_analyzer",
-    tokenizer="edge_ngram_tokenizer",
-    filter=["lowercase"]
-)
-
-# Define a reusable index settings dictionary
-index_settings = {
-    "number_of_shards": 1,
-    "number_of_replicas": 0,
-    "analysis": {
-        "tokenizer": {
-            "edge_ngram_tokenizer": {
-                "type": "edge_ngram",
-                "min_gram": 1,
-                "max_gram": 20,
-                "token_chars": ["letter", "digit"]
-            }
-        },
-        "analyzer": {
-            "edge_ngram_analyzer": {
-                "type": "custom",
-                "tokenizer": "edge_ngram_tokenizer",
-                "filter": ["lowercase"]
-            }
-        }
-    }
-}
-
-# Product Document
-@registry.register_document
-class ProductDocument(Document):
-    name = fields.TextField(analyzer="edge_ngram_analyzer", search_analyzer="standard"  )
-    category = fields.TextField(analyzer="edge_ngram_analyzer", search_analyzer="standard"  )
-    description = fields.TextField()
-
-    class Index:
-        name = 'search_index'
-        settings = index_settings  # Use custom index settings
-
-    class Django:
-        model = Products
-        
-    def prepare_category(self, instance):
-        # Fetch the `cat_name` from the related `Descriptive_cats` model
-        return instance.sub_cat.cat_name
-        
-        
-
-
-# Service Document
-@registry.register_document
-class ServiceDocument(Document):
-    name = fields.TextField(analyzer="edge_ngram_analyzer", search_analyzer="standard")
-
-    class Index:
-        name = 'search_index'
-        settings = index_settings  # Use custom index settings
-
-    class Django:
-        model = Services
-
-# Business Document
-@registry.register_document
-class BuisnessDocument(Document):
-    name = fields.TextField(analyzer="edge_ngram_analyzer", search_analyzer="standard")
-
-
-    class Index:
-        name = 'search_index'
-        settings = index_settings  # Use custom index settings
-
-    class Django:
-        model = Buisnesses
-
-# Business Descriptive Categories Document
-@registry.register_document
-class BDesCatDocument(Document):
-    name = fields.TextField(analyzer="edge_ngram_analyzer", search_analyzer="standard")
-
-    class Index:
-        name = 'search_index'
-        settings = index_settings  # Use custom index settings
-
-    class Django:
-        model = Buisness_Descriptive_cats
-        
-    
-    def prepare_name(self, instance):
-        # Fetch the `cat_name` from the related `Descriptive_cats` model
-        return instance.dcat.cat_name
-        
-        
-
-# Product Subcategories Document
-@registry.register_document
-class PSubCatsDocument(Document):
-    cat_name = fields.TextField(analyzer="edge_ngram_analyzer", search_analyzer="standard")
-
-    class Index:
-        name = 'search_index'
-        settings = index_settings  # Use custom index settings
-
-    class Django:
-        model = Product_Sub_category
-
-
-
-
-
-
-
-
+from ..Views.sitemap_view import CC_Check_and_add_metadata
+from ..Tools_Utils.utils import *
+from .e_search_documents import *
 
 
 
@@ -178,7 +57,7 @@ def elasticsearch2(request):
         future_cc_meta = executor.submit(CC_Check_and_add_metadata , location , query)
         
         search_query = Q("bool", should=[
-            Q("multi_match", query=query, fields=["name", "category"], fuzziness="AUTO", max_expansions=50, prefix_length=2),
+            Q("multi_match", query=query, fields=["name", "category" ,"keywords"], fuzziness="AUTO", max_expansions=50, prefix_length=2),
             Q("multi_match", query=query, fields=["cat_name"], fuzziness="AUTO", max_expansions=50, prefix_length=2)
         ])
         
@@ -288,7 +167,7 @@ from elasticsearch_dsl import Q
 from itertools import chain
 
 @api_view(['GET'])
-def keyword_suggestions(request):
+def keyword_suggestions_for_major_suggestions(request):
     query = request.GET.get('q', '').strip()
     if not query:
         return Response({"suggestions": []})
@@ -323,3 +202,69 @@ def keyword_suggestions(request):
   
     return Response({"suggestions": keywords})
 
+
+
+
+
+
+
+
+
+
+@api_view(['GET'])
+def keyword_suggestions_for_bdcats(request):
+    query = request.GET.get('q', '').strip()
+    print('query', query)
+    
+    if not query:
+        return Response({"suggestions": []})
+
+    # Build the Elasticsearch query
+    search_query = Q("bool", should=[
+    Q("multi_match", query=query, fields=["cat_name"], fuzziness="AUTO"),
+    Q("match_phrase_prefix", cat_name={"query": query})
+    ])
+
+    # Search using the Elasticsearch DSL document
+    dcats_docs = DesCatDocument.search().query(search_query).source(['cat_name'])
+    print('dcats_docs', dcats_docs)
+    # Collect suggestions
+    keywords = []
+    for doc in dcats_docs:
+        if hasattr(doc, 'cat_name'):
+            keywords.append(
+                    {'cat_name' : doc.cat_name ,'id' : doc.meta.id}
+                            )
+
+    return Response({"suggestions": list(keywords)})
+
+
+
+
+
+
+
+
+@api_view(['GET'])
+def keyword_suggestions_for_gcats(request):
+    query = request.GET.get('q', '').strip()
+    print('query', query)
+    
+    if not query:
+        return Response({"suggestions": []})
+
+    search_query = Q("bool", should=[
+    Q("multi_match", query=query, fields=["cat_name"], fuzziness="AUTO"),
+    Q("match_phrase_prefix", cat_name={"query": query})
+    ])
+
+    gcats_docs = GenCatDocument.search().query(search_query).source(['cat_name'])
+    
+    keywords = []
+    for doc in gcats_docs:
+        if hasattr(doc, 'cat_name'):
+            keywords.append(
+                    {'name' : doc.cat_name ,'id' : doc.meta.id}
+                            )
+
+    return Response(list(keywords))
