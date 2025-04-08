@@ -299,7 +299,8 @@ class BuisnessesSerializerMini(serializers.ModelSerializer):
                     'id','search_priority','name','buisness_type','locality',
                     'city','state','no_of_views','user',
                     'score','image','offers','redirect_link','rating',
-                    'verified','assured','plan','products','services','building_name','state'
+                    'verified','assured','plan','products','services','building_name','state',
+                    'whatsapp_number'
                  ]
     
     
