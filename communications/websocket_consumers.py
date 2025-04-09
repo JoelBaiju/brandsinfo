@@ -28,3 +28,4 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             'message': event['message'],
             'timestamp': event['timestamp'],
         }))
+

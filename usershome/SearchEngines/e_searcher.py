@@ -71,6 +71,9 @@ def elasticsearch2(request):
         services = ServiceDocument.search().query(search_query).to_queryset()
         buisnesses_direct = BuisnessDocument.search().query(search_query).to_queryset()
         bdcats = BDesCatDocument.search().query(search_query).to_queryset()
+        bgcats = BGenCatDocument.search().query(search_query).to_queryset()
+        
+        
         
         if products.count()!=0:
             executor.submit(update_search_count_products , products)
@@ -83,13 +86,15 @@ def elasticsearch2(request):
         print('products',products)
         print('services',services)
         print('b_direct',buisnesses_direct)
-        
+        print('bdcats',bdcats)
+        print('bgcats',bgcats)
 
         product_buisness_ids = products.values_list('buisness', flat=True).distinct()
         service_buisness_ids = services.values_list('buisness', flat=True).distinct()
         bdcats_buisness_ids = bdcats.values_list('buisness', flat=True).distinct()
-
-        unique_buisness_ids = set(chain(product_buisness_ids, service_buisness_ids, bdcats_buisness_ids))
+        bgcats_buisness_ids = bgcats.values_list('buisness', flat=True).distinct()
+        
+        unique_buisness_ids = set(chain(product_buisness_ids, service_buisness_ids, bdcats_buisness_ids,bgcats_buisness_ids))
 
 
         buisnesses = Buisnesses.objects.filter(id__in=unique_buisness_ids, city=city_obj)

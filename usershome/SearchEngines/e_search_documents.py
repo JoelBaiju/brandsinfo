@@ -120,6 +120,21 @@ class BDesCatDocument(Document):
         return instance.dcat.cat_name
     
     
+@registry.register_document
+class BGenCatDocument(Document):
+    cat_name = fields.TextField(analyzer="edge_ngram_analyzer", search_analyzer="standard")
+
+    class Index:
+        name = 'bgcats_index'
+        settings = index_settings  # Use custom index settings
+
+    class Django:
+        model = Buisness_General_cats   
+    
+    def prepare_cat_name(self, instance):
+        return instance.gcat.cat_name
+     
+    
         
 
 # Product Subcategories Document
