@@ -149,6 +149,8 @@ class BuisnessesView(generics.ListAPIView):
             # print(serializer.data)
 
             business = serializer.save(owner = request.user)
+            business.plan = plan
+            business.save()
             print(business.city)
             return Response(
                 self.serializer_class(business).data,

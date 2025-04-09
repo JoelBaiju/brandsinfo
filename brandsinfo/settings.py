@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "usershome",
     'rest_framework',
-    'django_elasticsearch_dsl'
+    'django_elasticsearch_dsl',
+    'communications'
 ]
 
 MIDDLEWARE = [
@@ -245,10 +246,10 @@ FIREBASE_API_KEY = 'AIzaSyBF52Ah0ERtBRalBWwAOgEMPUhjKrlpVvo'
 
 
 
-DEV = False
+DEV = True
 
 
-
+    
 
 
 # dev

@@ -179,9 +179,7 @@ class BuisnessesSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         user=validated_data.pop('owner', None)  
-        # obj=Buisnesses.objects.create(**validated_data)
-        # obj.user=user
-        # return 
+        
         return Buisnesses.objects.create(**validated_data)
     
     
