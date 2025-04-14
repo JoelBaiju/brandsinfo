@@ -8,6 +8,7 @@ class UsershomeConfig(AppConfig):
 
 
     def ready(self):
+        import usershome.signals
         from .models import Plans , Buisnesses
         try:
             if not Plans.objects.filter(plan_name='Default Plan').exists():

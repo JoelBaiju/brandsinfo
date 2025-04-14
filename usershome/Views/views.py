@@ -188,6 +188,7 @@ class BuisnessesEdit(generics.UpdateAPIView):
             )
     
 
+
 class BuisnessesShortView(generics.ListAPIView):
     queryset = Buisnesses.objects.all()
     serializer_class = BuisnessesSerializerShort
@@ -950,32 +951,55 @@ class Delete_des_category(generics.DestroyAPIView):
     permission_classes = [IsAuthenticated]  
 
    
+@api_view(['GET'])
+def get_bdcats(request):
+    bid = request.GET.get('bid')
+    if not bid:
+        return Response('',status=status.HTTP_400_BAD_REQUEST)
+    
+    bdcats=Buisness_Descriptive_cats.objects.filter(buisness=Buisnesses.objects.get(id=bid))
+    serialized = BDescriptiveCatsSerializer(bdcats , many=True)
+    
+    return Response(serialized.data)
 
 
 
 
 
 
+    
+    
+@api_view(['GET'])
+def get_plans(request):
+    plans = Plans.objects.exclude(id='7')  # Correct usage
+    serialized = PlansSerializer(plans, many=True)
+    return Response(serialized.data)
 
-
     
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def add_device_id(request):
+    device_id = request.data.get('device_id')
     
+    if not device_id:
+        return Response(
+            {'status': 'error', 'message': 'Device ID is required.'},
+            status=400
+        )
     
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+    try:
+        # Update the user's device_id
+        Extended_User.objects.filter(id=request.user.id).update(device_id=device_id)
+        print(f'Successfully updated device ID for user {request.user.id}')
+        return Response(
+            {'status': 'success', 'message': 'Device ID added successfully.'}
+        )
+    except Exception as e:
+        print(f'Error updating device ID: {str(e)}')
+        return Response(
+            {'status': 'error', 'message': 'Failed to update device ID.'},
+            status=500
+        )
     
     
     
@@ -1035,6 +1059,13 @@ def HomeView(request):
 
 
 
+@api_view(['GET'])
+def get_buisnesses_with_no_plan(request):
+    plan = Plans.objects.get(plan_name='Default Plan')
+    buisnesses = Buisnesses.objects.filter(plan=plan , user =request.user)
+    serialized_buisness = BuisnessesSerializerMini(buisnesses, many=True)
+    
+    return Response(serialized_buisness.data, status=status.HTTP_200_OK)
 
 
 

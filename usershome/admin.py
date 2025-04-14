@@ -41,6 +41,7 @@ admin.site.register(Buisness_Offers)
 # admin.site.register(Descriptive_cats)
 admin.site.register(Product_General_category)
 admin.site.register(Product_Sub_category)
+admin.site.register(PhonePeTransaction)
 admin.site.register(Product_pics)
 admin.site.register(Products)
 # admin.site.register(City)
@@ -62,10 +63,27 @@ admin.site.register(Review_pics)
 admin.site.register(Home_Ads)
 admin.site.register(Auth_OTPs)
 admin.site.register(BuisnessVisitTracker)
-admin.site.register(Plans)
+    
+    
 admin.site.register(Buisness_keywords)
 admin.site.register(Keywords)
-admin.site.register(Sitemap_Links)
+
+
+
+class PlansAdmin(admin.ModelAdmin):
+    list_display = ['id', 'plan_name']
+    
+class plan_varientsAdmin(admin.ModelAdmin):
+    list_display = ['id', 'plan' , 'price']
+
+class BuisnessVideoAdmin(admin.ModelAdmin):
+    list_display = ['id', 'buisness']
+
+admin.site.register(Buisness_Videos , BuisnessVideoAdmin)
+    
+admin.site.register(Plans , PlansAdmin)
+admin.site.register(Plan_Varients , plan_varientsAdmin)
+    
 
 class ProductsAdmin(admin.ModelAdmin):
     list_display = ['name', 'price', 'cat']
@@ -77,3 +95,8 @@ class BuisnessesAdmin(admin.ModelAdmin):
     list_display = ['id','name']
     
 admin.site.register(Buisnesses ,BuisnessesAdmin)
+
+class SitemaplinksAdmin(admin.ModelAdmin):
+    list_display = ['id','link']
+    
+admin.site.register(Sitemap_Links , SitemaplinksAdmin)

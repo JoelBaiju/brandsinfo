@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice - Brandsinfo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 20px;
+        }
+        .logo {
+            max-width: 200px;
+            margin-bottom: 10px;
+        }
+        .invoice-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 10px 0;
+        }
+        .invoice-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        .client-info, .invoice-details {
+            width: 48%;
+        }
+        .info-box {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .info-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        th {
+            background-color: #2c3e50;
+            color: white;
+            text-align: left;
+            padding: 10px;
+        }
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .total-row {
+            font-weight: bold;
+            background-color: #f2f2f2;
+        }
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        .notes {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            background-color: #27ae60;
+            color: white;
+            border-radius: 3px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <!-- Replace with your actual logo path -->
+        <img src="https://www.brandsinfo.com/static/images/logo.png" alt="Brandsinfo Logo" class="logo">
+        <div class="invoice-title">INVOICE</div>
+        <div>Plan Purchase Confirmation</div>
+    </div>
+
+    <div class="invoice-info">
+        <div class="client-info">
+            <div class="info-box">
+                <div class="info-title">BILL TO</div>
+                <div>{{ business_name }}</div>
+                <div>{{ username }}</div>
+            </div>
+        </div>
+        <div class="invoice-details">
+            <div class="info-box">
+                <div class="info-title">INVOICE DETAILS</div>
+                <div>Invoice #: {{ invoice_number|default:"BI-"|add:timestamp }}</div>
+                <div>Date: {% now "F d, Y" %}</div>
+                <div>Status: <span class="status">PAID</span></div>
+            </div>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th>Plan Details</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    <strong>{{ plan_name }}</strong><br>
+                    Business Listing Plan
+                </td>
+                <td>
+                    Start Date: {{ start_date|date:"F d, Y" }}<br>
+                    Expiry Date: {{ expiry_date|date:"F d, Y" }}<br>
+                    Duration: {{ duration_days }} days
+                </td>
+                <td>₹{{ price }}</td>
+            </tr>
+            <tr>
+                <td colspan="2" style="text-align: right;">Subtotal:</td>
+                <td>₹{{ price }}</td>
+            </tr>
+            <tr>
+                <td colspan="2" style="text-align: right;">GST (18%):</td>
+                <td>₹{{ gst_amount|floatformat:2 }}</td>
+            </tr>
+            <tr class="total-row">
+                <td colspan="2" style="text-align: right;">TOTAL:</td>
+                <td>₹{{ total_amount|floatformat:2 }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="notes">
+        <strong>Notes:</strong>
+        <ul>
+            <li>This is a computer generated invoice and does not require a physical signature.</li>
+            <li>Please keep this invoice for your records.</li>
+            <li>For any queries regarding this invoice, please contact our support team at support@brandsinfo.com</li>
+            <li>Payment is due upon receipt. Thank you for your business!</li>
+        </ul>
+    </div>
+
+    <div class="footer">
+        <p>Brandsinfo &copy; {% now "Y" %}. All rights reserved.</p>
+        <p>Registered Office: [Your Company Address]</p>
+        <p>GSTIN: [Your GST Number] | CIN: [Your CIN Number]</p>
+        <p>Contact: support@brandsinfo.com | Phone: +91-XXXXXXXXXX</p>
+    </div>
+</body>
+</html>

@@ -36,18 +36,27 @@ class Plans(models.Model):
     todays_offer                                = models.BooleanField(default=False)
     bi_assured                                  = models.BooleanField(default=False)
     bi_certification                            = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return self.plan_name
+    
+    
+    
 
 class Plan_Varients(models.Model):
-    plan            = models.ForeignKey(Plans , on_delete=models.CASCADE)
+    plan            = models.ForeignKey(Plans ,related_name='varients', on_delete=models.CASCADE)
     duration        = models.CharField(max_length=50)
     price           = models.CharField(max_length=50)
+    
+    
+    
 
 class Extended_User(AbstractUser):
     mobile_number   = models.CharField(max_length=15, null=True, blank=True)
     is_customer     = models.BooleanField(default=False)
     is_vendor       = models.BooleanField(default=False)
     is_admin        = models.BooleanField(default=False)
-    
+    device_id    = models.CharField(max_length=255, null=True, blank=True)
     def __str__(self):
         return self.username
 
@@ -510,3 +519,79 @@ class Email_OTPs(models.Model):
     otp             = models.IntegerField()
     email           = models.CharField(max_length=100 )
     bid             = models.CharField(max_length=50, null=True)
+    
+    
+    
+# ================================================================================
+
+class Buisness_Videos(models.Model):
+    video_file = models.FileField(upload_to='Buisness_Videos/')
+    buisness   = models.ForeignKey(Buisnesses, on_delete=models.CASCADE, related_name='buisness_videos')
+    is_converted = models.BooleanField(default=False)
+    hls_path = models.CharField(max_length=255, blank=True, null=True)  # optional
+    
+
+
+
+# ================================================================================
+
+
+from django.db import models
+from django.core.validators import MinValueValidator
+from django.utils import timezone
+
+class PhonePeTransaction(models.Model):
+    class TransactionStatus(models.TextChoices):
+        PENDING = 'PENDING', 'Pending'
+        INITIATED = 'INITIATED', 'Initiated'
+        SUCCESS = 'SUCCESS', 'Success'
+        FAILED = 'FAILED', 'Failed'
+        EXPIRED = 'EXPIRED', 'Expired'
+        REFUNDED = 'REFUNDED', 'Refunded'
+        PARTIALLY_REFUNDED = 'PARTIALLY_REFUNDED', 'Partially Refunded'
+
+    order_id                    = models.CharField(max_length=100, unique=True, verbose_name="Transaction ID", help_text="Unique transaction identifier from PhonePe")
+    user                        = models.ForeignKey('Extended_User', on_delete=models.CASCADE, related_name='phonepe_transactions', verbose_name="User" , null=True )
+    amount                      = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0.01)], verbose_name="Amount (₹)", help_text="Transaction amount in INR")
+    status                      = models.CharField(max_length=20, choices=TransactionStatus.choices, default=TransactionStatus.PENDING, verbose_name="Payment Status")
+    phonepe_response            = models.JSONField(null=True, blank=True, verbose_name="PhonePe Response", help_text="Initial response from PhonePe API")
+    phonepe_callback            = models.JSONField(null=True, blank=True, verbose_name="Callback Data", help_text="Data received from PhonePe callback")
+    payment_url                 = models.URLField(null=True, blank=True, max_length=500, verbose_name="Payment URL", help_text="URL to redirect user for payment")
+    created_at                  = models.DateTimeField(auto_now_add=True, verbose_name="Created At")
+    updated_at                  = models.DateTimeField(auto_now=True, verbose_name="Updated At")
+    business                    = models.ForeignKey('Buisnesses', on_delete=models.CASCADE, null=True, blank=True, related_name='transactions', verbose_name="Business")
+    plan                        = models.ForeignKey('Plans', on_delete=models.SET_NULL, null=True, blank=True, related_name='transactions', verbose_name="Subscription Plan")
+    plan_variant                = models.ForeignKey(Plan_Varients , on_delete=models.SET_NULL, null=True, blank=True, related_name='transactions', verbose_name="Plan Variant")
+    is_active                   = models.BooleanField(default=True, verbose_name="Is Active", help_text="Mark as False for soft deletion")
+    payment_completed_at        = models.DateTimeField(null=True, blank=True, verbose_name="Payment Completed At")
+
+    class Meta:
+      
+        indexes = [
+            models.Index(fields=['order_id']),
+            models.Index(fields=['status']),
+            models.Index(fields=['user']),
+            models.Index(fields=['business']),
+            models.Index(fields=['created_at']),
+        ]
+        constraints = [
+            models.CheckConstraint(check=models.Q(amount__gte=0.01), name="amount_gte_0"),
+        ]
+
+    def __str__(self):
+        return f"{self.user} - {self.order_id} - {self.get_status_display()} - ₹{self.amount}"
+
+    def save(self, *args, **kwargs):
+        if self.status == self.TransactionStatus.SUCCESS and not self.payment_completed_at:
+            self.payment_completed_at = timezone.now()
+        super().save(*args, **kwargs)
+
+    @property
+    def is_successful(self): return self.status == self.TransactionStatus.SUCCESS
+
+    @property
+    def duration_days(self): return self.plan_variant.duration_days if self.plan_variant else None
+
+    def mark_as_refunded(self, partial=False):
+        self.status = self.TransactionStatus.PARTIALLY_REFUNDED if partial else self.TransactionStatus.REFUNDED
+        self.save(update_fields=['status', 'updated_at'])

@@ -5,6 +5,7 @@ from .Views import auth_views
 from .Views import sitemap_view
 from .Views import ps_views
 from .SearchEngines.e_searcher import *
+from .Views.streaming_views import VideoUploadView
 
 urlpatterns = [
     
@@ -13,6 +14,8 @@ urlpatterns = [
     path('getlocality/',views.get_locality_with_city),
     path('buisnesses/',views.BuisnessesView.as_view()),
     path('buisnesses_short/',views.BuisnessesShortView.as_view()),
+    path('bwithnplan/',views.get_buisnesses_with_no_plan),
+    
     path('buisnessesedit/<int:pk>/',views.BuisnessesEdit.as_view()),
     path('buisnesses_na/',views.BuisnessesView_for_customers.as_view()),
     path('buisness_pics/',views.BuisnessImages.as_view()),
@@ -33,16 +36,17 @@ urlpatterns = [
     path('signup2/',auth_views.signup_request_2),
     path('resendotp/',auth_views.resendotp),
     
-    
+# ========================== 
     
     path('searchpcats/',ps_views.search_products_category),
-    path('addproduct/', ps_views.AddProductWithImagesView.as_view()),
+    path('addproduct/' , ps_views.AddProductWithImagesView.as_view()),
     path('deleteproduct/<int:pk>/', ps_views.ProductDelete.as_view()),
     path('dlt_product_img/<int:pk>/', ps_views.ProductPics_Delete.as_view()),    
     path('edt_product/<int:id>/', ps_views.EditProductView.as_view()),    
     path('add_product_img/', ps_views.Add_product_images.as_view()),    
     
-     path('services/', ps_views.ServiceListCreateView.as_view()),
+    
+    path('services/', ps_views.ServiceListCreateView.as_view()),
     path('deleteservice/<int:pk>/', ps_views.ServiceDelete.as_view()),
     path('servicecats/', ps_views.ServiceCats.as_view()),
     path('dlt_service_img/<int:pk>/', ps_views.ServicePics_Delete.as_view()),    
@@ -56,13 +60,14 @@ urlpatterns = [
     path('get_descats/', views.get_des_category),    
     path('add_descats/',views.add_des_category),
     path('dlt_descats/<int:pk>/',views.Delete_des_category.as_view()),
+    path('get_bdcats/' , views.get_bdcats),
     
     path('addemail/',views.addemail),
     path('resendemailotp/',views.resendemailotp),
     path('verifyemailotp/',views.verifyemailotp),
     # path('search/',views.search),
     
-    
+    path('plans/',views.get_plans),
     
 #  ========================= Users URLs
     
@@ -84,6 +89,7 @@ urlpatterns = [
     path('reviews/add/', views.Reviews_Ratings_View.as_view()),
     path('reviews/', views.Get_Reviews_Ratings_View.as_view()),
 
+    path('add_deviceid/', views.add_device_id),
 
 
 
@@ -93,6 +99,11 @@ urlpatterns = [
     path('alpha/sitemap_generator_allatonce_CC/', sitemap_view.Site_Map_Generator_ALLATONCE_CC),
     path('alpha/sgs_test/', sitemap_view.Site_Map_Generator_SB_single_Test_api),
     
+    
+    
+# ========================== Video
+    path('uploadvideo/', VideoUploadView.as_view(), name='upload-video'),
+
 ]
 
 

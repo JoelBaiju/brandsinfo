@@ -10,10 +10,11 @@ from channels.auth import AuthMiddlewareStack
 #  Now it's safe to import anything that touches models
 from communications.routing import websocket_urlpatterns
 from django.core.asgi import get_asgi_application
+from communications.middleware import JWTAuthMiddleware
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
-    "websocket": AuthMiddlewareStack(
+    "websocket":JWTAuthMiddleware(
         URLRouter(websocket_urlpatterns)
     ),
 })

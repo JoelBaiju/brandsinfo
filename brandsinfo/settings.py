@@ -41,10 +41,12 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "usershome",
+    # "usershome",
     'rest_framework',
     'django_elasticsearch_dsl',
-    'communications'
+    'communications',
+    'corsheaders',
+    'usershome.apps.UsershomeConfig',
 ]
 
 MIDDLEWARE = [
@@ -246,7 +248,7 @@ FIREBASE_API_KEY = 'AIzaSyBF52Ah0ERtBRalBWwAOgEMPUhjKrlpVvo'
 
 
 
-DEV = True
+DEV = False
 
 
     
@@ -304,3 +306,17 @@ else :
         }
     }
 
+
+
+
+
+PHONEPE_MERCHANT_ID = "TEST_M22HLXACRTTPK_25040"
+PHONEPE_SALT_KEY = " "
+PHONEPE_SALT_INDEX = "your_salt_index"
+PHONEPE_BASE_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox"  # Use prod URL for live
+PHONEPE_REDIRECT_URL = "https://yourdomain.com/payment/callback/"
+
+
+
+ffmpeg_path = r'C:\Users\91703\ffmpeg\ffmpeg-2025-03-31-git-35c091f4b7-essentials_build\bin\ffmpeg.exe'
+os.environ['PATH'] = ffmpeg_path + ';' + os.environ['PATH']

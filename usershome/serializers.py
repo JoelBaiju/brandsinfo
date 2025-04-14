@@ -147,7 +147,25 @@ class PlansSerializer(serializers.ModelSerializer):
             'bi_assured','bi_certification','keywords','average_time_spend',
             'sa_rate'
         ]
+        
+                
+class PlanVarientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Plan_Varients
+        fields = '__all__'
 
+class PlansSerializer(serializers.ModelSerializer):
+    varients = PlanVarientSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Plans
+        fields = '__all__'
+
+class BuisnessVideosSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Buisness_Videos
+        fields = ['id', 'video_file','hls_path']
+        
 class BuisnessesSerializer(serializers.ModelSerializer):
     image       = serializers.ImageField(required=False)
     city        = serializers.PrimaryKeyRelatedField(queryset=City.objects.all())
@@ -193,6 +211,7 @@ class BuisnessesSerializerFull(serializers.ModelSerializer):
                     queryset=Extended_User.objects.all()
                     )
     image_gallery = BuisnessPicsSerializer(many=True, read_only=True)
+    video_gallery  = BuisnessVideosSerializer(many=True, read_only=True)
     plan = PlansSerializer( read_only=True)
 
     
@@ -203,13 +222,17 @@ class BuisnessesSerializerFull(serializers.ModelSerializer):
                 'latittude','longitude','opens_at','closes_at','since',
                 'no_of_views','instagram_link','facebook_link','web_link',
                 'x_link','youtube_link','whatsapp_number','incharge_number','user',
-                'score','image',  'no_of_enquiries','email','image_gallery','plan'
+                'score','image',  'no_of_enquiries','email','image_gallery','plan',
+                'video_gallery'
                 ]
     
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['image_gallery'] = BuisnessPicsSerializer(
             instance.buisness_pics_set.all(), many=True
+        ).data
+        representation['video_gallery'] = BuisnessVideosSerializer(
+            instance.buisness_videos.all(), many=True
         ).data
         return representation
 
@@ -226,6 +249,7 @@ class BuisnessesSerializerCustomers(serializers.ModelSerializer):
     site_data       = SiteSaplinksSerializerFull(source='sitemap_link', read_only=True)
     review_rating   = ReviewRatingSerializerMini(source='reviews_ratings_set', many=True, read_only=True)
     plan = PlansSerializer( read_only=True)
+    video_gallery = BuisnessVideosSerializer(many=True, read_only=True)
 
     class Meta:
         model   = Buisnesses
@@ -236,7 +260,7 @@ class BuisnessesSerializerCustomers(serializers.ModelSerializer):
                     'instagram_link','facebook_link','web_link','x_link',
                     'youtube_link','whatsapp_number','incharge_number','user',
                     'image','image_gallery','site_data','email','verified',
-                    'assured','review_rating','rating','plan'
+                    'assured','review_rating','rating','plan','video_gallery'
                  ]
     
    
@@ -249,6 +273,13 @@ class BuisnessesSerializerCustomers(serializers.ModelSerializer):
             ).data
         else:
             representation['image_gallery'] = []  # Set to empty if not allowed
+        
+        if plan and plan.video_gallery:
+            representation['video_gallery'] = BuisnessVideosSerializer(
+                instance.buisness_videos.all(), many=True
+            ).data
+        else:
+            representation['video_gallery'] = []  # Set to empty if not allowed
 
         
         sitemap_link = instance.sitemap_link.first() 
@@ -350,10 +381,6 @@ class BuisnessesSerializerShort(serializers.ModelSerializer):
                 ]
     
     
-
-
-
-
 
 
 
