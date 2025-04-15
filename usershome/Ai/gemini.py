@@ -1,4 +1,3 @@
-from openai import OpenAI
 from brandsinfo.settings import GEMINI_API_KEYS
 
 from rest_framework.decorators import api_view

@@ -241,9 +241,11 @@ def puchase_plan(request):
 @permission_classes([IsAuthenticated])
 def pcreds(request):
     response={
-        'client_id': phonepe.client_id,
-        'client_secret': phonepe.client_secret,
-        'client_version': phonepe.client_version,
+        'merchantId': 'SU2504091720243320731397',
+        'saltKey': '20435b66-f622-4903-ba22-40bead21262e',
+        'saltIndex': '1',
+        'appId': '',
+        'callbackUrl' : phonepe.PHONEPE_REDIRECT_URL
         
     }
     return Response(response)
