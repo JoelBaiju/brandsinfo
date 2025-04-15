@@ -12,7 +12,7 @@ from asgiref.sync import async_to_sync
 from .models import Notification
 from .serializers import *
 from usershome.models import PhonePeTransaction
-from usershome.Views.payment_view import generate_invoice_pdf
+from usershome.Tools_Utils.payment_utils import generate_invoice_pdf
 
 def notify_user(data):
     print('notiiiiiiii')
