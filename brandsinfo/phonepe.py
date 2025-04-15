@@ -33,7 +33,7 @@ def initiate_payment(amount_in_rupees):
         request = StandardCheckoutPayRequest.build_request(
             merchant_order_id=f"ORDER_{uuid4().hex[:10]}", 
             # amount=amount_in_rupees * 100,  
-            amount=10,              
+            amount=100,              
             redirect_url=PHONEPE_REDIRECT_URL,
           
         )
