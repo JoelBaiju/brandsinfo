@@ -550,21 +550,24 @@ class PhonePeTransaction(models.Model):
         REFUNDED = 'REFUNDED', 'Refunded'
         PARTIALLY_REFUNDED = 'PARTIALLY_REFUNDED', 'Partially Refunded'
 
-    order_id                    = models.CharField(max_length=100, unique=True, verbose_name="Transaction ID", help_text="Unique transaction identifier from PhonePe")
+    order_id                    = models.CharField(max_length=100, unique=True, verbose_name="Transaction ID",)
     user                        = models.ForeignKey('Extended_User', on_delete=models.CASCADE, related_name='phonepe_transactions', verbose_name="User" , null=True )
-    amount                      = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0.01)], verbose_name="Amount (₹)", help_text="Transaction amount in INR")
-    status                      = models.CharField(max_length=20, choices=TransactionStatus.choices, default=TransactionStatus.PENDING, verbose_name="Payment Status")
-    phonepe_response            = models.JSONField(null=True, blank=True, verbose_name="PhonePe Response", help_text="Initial response from PhonePe API")
-    phonepe_callback            = models.JSONField(null=True, blank=True, verbose_name="Callback Data", help_text="Data received from PhonePe callback")
-    payment_url                 = models.URLField(null=True, blank=True, max_length=500, verbose_name="Payment URL", help_text="URL to redirect user for payment")
+    amount                      = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0.01)], verbose_name="Amount (₹)", )
+    status                      = models.CharField(max_length=20, choices=TransactionStatus.choices, default=TransactionStatus.PENDING)
+    phonepe_response            = models.JSONField(null=True, blank=True, verbose_name="PhonePe Response")
+    phonepe_callback            = models.JSONField(null=True, blank=True, verbose_name="Callback Data")
+    payment_url                 = models.URLField(null=True, blank=True, max_length=500, verbose_name="Payment URL")
     created_at                  = models.DateTimeField(auto_now_add=True, verbose_name="Created At")
     updated_at                  = models.DateTimeField(auto_now=True, verbose_name="Updated At")
+    expire_at                   = models.DateTimeField(null=True, blank=True, verbose_name="Expiration Time")
     business                    = models.ForeignKey('Buisnesses', on_delete=models.CASCADE, null=True, blank=True, related_name='transactions', verbose_name="Business")
     plan                        = models.ForeignKey('Plans', on_delete=models.SET_NULL, null=True, blank=True, related_name='transactions', verbose_name="Subscription Plan")
     plan_variant                = models.ForeignKey(Plan_Varients , on_delete=models.SET_NULL, null=True, blank=True, related_name='transactions', verbose_name="Plan Variant")
-    is_active                   = models.BooleanField(default=True, verbose_name="Is Active", help_text="Mark as False for soft deletion")
+    is_active                   = models.BooleanField(default=True, verbose_name="Is Active")
     payment_completed_at        = models.DateTimeField(null=True, blank=True, verbose_name="Payment Completed At")
-
+    phonepe_order_id            = models.CharField(max_length=100, null=True, blank=True, verbose_name="PhonePe Order ID" )
+    transction_id               = models.CharField(max_length=100, null=True, blank=True, verbose_name="Transaction ID")
+    payment_mode                = models.CharField(max_length=50, null=True, blank=True, verbose_name="Payment Mode")
     class Meta:
       
         indexes = [

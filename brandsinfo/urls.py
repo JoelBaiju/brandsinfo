@@ -27,7 +27,6 @@ urlpatterns = [
     
     path('initiate-payment/', payment_view.initiate_payment_view, name='initiate_payment'),
     path('payment/callback/', payment_view.payment_callback, name='payment_callback'),
-    path('payment/callback2/', payment_view.payment_callback2, name='payment_callback'),
     # path('payment/status/<str:transaction_id>/', payment_view.check_payment_status, name='check_payment_status'),
 ]
 

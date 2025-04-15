@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from brandsinfo import phonepe
 from brandsinfo.phonepe import initiate_payment as phonepe_initiate_payment
 from rest_framework import status as rest_framework_status
+from datetime import datetime, timedelta
 
 @api_view(['POST'])
 def initiate_payment_view(request):
@@ -50,9 +51,8 @@ def initiate_payment_view(request):
                         business=business,
                         plan=plan_variant.plan,
                         plan_variant=plan_variant,
-                        # payment_url=response['redirect_url'],
+                        expire_at = datetime.now() + timedelta(days=plan_variant.duration),
                         payment_url='',
-                        # phonepe_response=response,
                         status='INITIATED'
                     )
             else:
@@ -90,58 +90,63 @@ def initiate_payment_view(request):
    
 import json
    
-   
-   
-@csrf_exempt
+@api_view(['POST'])   
 def payment_callback(request):
     print("\n=== PhonePe Callback Received ===")
     print("Method:", request.method)
     print("Headers:", dict(request.headers))
-    print("GET Params:", dict(request.GET))  # Check URL query params
-    print("Body:", request.body.decode('utf-8'))  # Empty for GET
-
-    # Handle GET request (redirect after payment)
-    if request.method == "GET":
-        transaction_id = request.GET.get("transactionId")  # Check PhonePe docs for actual param name
-        status = request.GET.get("status")  # e.g., "SUCCESS", "FAILED"
-
-        if not transaction_id:
-            return HttpResponseBadRequest("Missing transactionId")
-
-        try:
-            txn = PhonePeTransaction.objects.get(order_id=transaction_id)
-            txn.status = status
-            txn.save()
-            return JsonResponse({"status": "success"})
-        except PhonePeTransaction.DoesNotExist:
-            return HttpResponseBadRequest("Transaction not found")
-
+    print("GET Params:", dict(request.GET))
+    print("Body:", request.body.decode('utf-8'))
+    generate_invoice_pdf(request,order_id)
     # Handle POST request (webhook with JSON payload)
-    elif request.method == "POST":
-        auth_header = request.headers.get("X-VERIFY", "")
-        callback_body = request.body.decode('utf-8')
-
-        if not callback_body:
-            return HttpResponseBadRequest("Empty callback body")
-
+    if request.method == "POST":
         try:
-            client = phonepe.client
-            callback_response = client.validate_callback(
-                username="BrandsInfo",
-                password="Listing2025",
-                callback_header_data=auth_header,
-                callback_response_data=callback_body
-            )
-            order_id = callback_response.order_id
-            transaction_state = callback_response.state
-            txn = PhonePeTransaction.objects.get(order_id=order_id)
-            txn.status = transaction_state
-            txn.phonepe_callback = json.loads(callback_body)
-            txn.save()
-            return JsonResponse({"status": "success"})
+            callback_data = json.loads(request.body.decode('utf-8'))
+            print("Callback Data:", callback_data)
+            
+            if callback_data.get('type') != 'CHECKOUT_ORDER_COMPLETED':
+                return JsonResponse({"status": "ignored", "reason": "Not an order completion event"}, status=200)
+            
+            payload = callback_data.get('payload', {})
+            order_id = payload.get('orderId')
+            merchant_order_id = payload.get('merchantOrderId')  
+            state = payload.get('state')
+            
+            if not merchant_order_id:
+                return HttpResponseBadRequest("Missing merchantOrderId in payload")
+            print("merchant_order_id:", merchant_order_id)
+            print("order_id:", order_id)
+            try:
+                txn = PhonePeTransaction.objects.get(order_id=merchant_order_id)
+                txn.status = state
+                txn.phonepe_order_id = order_id  
+                
+                payment_details = payload.get('paymentDetails', [{}])[0]
+                if payment_details:
+                    txn.transaction_id = payment_details.get('transactionId')
+                    txn.payment_mode = payment_details.get('paymentMode')
+                    txn.amount = payment_details.get('amount')
+                
+                txn.save()
+                
+                if state == 'COMPLETED':
+                    pass
+                
+                return JsonResponse({"status": "success"})
+                
+            except PhonePeTransaction.DoesNotExist:
+                print(f"Transaction not found for order_id: {merchant_order_id}")
+                return HttpResponseBadRequest("Transaction not found")
+                
+        except json.JSONDecodeError:
+            return HttpResponseBadRequest("Invalid JSON in callback body")
         except Exception as e:
-            print("Callback Error:", str(e))
-            return HttpResponseBadRequest({"error": "Invalid callback"})
+            print("Callback Processing Error:", str(e))
+            return HttpResponseBadRequest("Error processing callback")
+
+    elif request.method == "GET":
+       
+        return HttpResponseBadRequest("Transaction not found")
 
     return HttpResponseBadRequest("Invalid request method")
    
@@ -157,136 +162,6 @@ def payment_callback(request):
    
    
    
-   
-@csrf_exempt
-def payment_callback2(request):
-    print("\n=== PhonePe Callback 22222 Received ===")
-    print("Method:", request.method)
-    print("Headers:", dict(request.headers))
-    print("GET Params:", dict(request.GET))  # Check URL query params
-    print("Body:", request.body.decode('utf-8'))  # Empty for GET
-
-    # Handle GET request (redirect after payment)
-    if request.method == "GET":
-        transaction_id = request.GET.get("transactionId")  # Check PhonePe docs for actual param name
-        status = request.GET.get("status")  # e.g., "SUCCESS", "FAILED"
-
-        if not transaction_id:
-            return HttpResponseBadRequest("Missing transactionId")
-
-        try:
-            txn = PhonePeTransaction.objects.get(order_id=transaction_id)
-            txn.status = status
-            txn.save()
-            return JsonResponse({"status": "success"})
-        except PhonePeTransaction.DoesNotExist:
-            return HttpResponseBadRequest("Transaction not found")
-
-    # Handle POST request (webhook with JSON payload)
-    elif request.method == "POST":
-        auth_header = request.headers.get("X-VERIFY", "")
-        callback_body = request.body.decode('utf-8')
-
-        if not callback_body:
-            return HttpResponseBadRequest("Empty callback body")
-
-        try:
-            client = phonepe.client
-            callback_response = client.validate_callback(
-                username="BrandsInfo",
-                password="Listing2025",
-                callback_header_data=auth_header,
-                callback_response_data=callback_body
-            )
-            order_id = callback_response.order_id
-            transaction_state = callback_response.state
-            txn = PhonePeTransaction.objects.get(order_id=order_id)
-            txn.status = transaction_state
-            txn.phonepe_callback = json.loads(callback_body)
-            txn.save()
-            return JsonResponse({"status": "success"})
-        except Exception as e:
-            print("Callback Error:", str(e))
-            return HttpResponseBadRequest({"error": "Invalid callback"})
-
-    return HttpResponseBadRequest("Invalid request method")
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -364,36 +239,37 @@ from xhtml2pdf import pisa
 from django.shortcuts import get_object_or_404
 import datetime
 
-# def generate_invoice_pdf(request, order_id):
-#     # Get order data - replace with your actual model and logic
-#     order = get_object_or_404(Order, id=order_id)
+def generate_invoice_pdf(request, order_id):
+    # Get order data - replace with your actual model and logic
+    txn = get_object_or_404(PhonePeTransaction, id=order_id)
     
-#     # Calculate additional fields
-#     context = {
-#         'username': order.user.username,
-#         'business_name': order.business.name,
-#         'plan_name': order.plan.name,
-#         'start_date': order.start_date,
-#         'expiry_date': order.expiry_date,
-#         'duration_days': (order.expiry_date - order.start_date).days,
-#         'price': order.plan.price,
-#         'gst_amount': order.plan.price * 0.18,  # Assuming 18% GST
-#         'total_amount': order.plan.price * 1.18,
-#         'invoice_number': f"BI-{order.id}",
-#         'timestamp': datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
-#     }
+    # Calculate additional fields
+   
+    context = {
+        'username': txn.user.first_name,
+        'business_name': txn.business.name,
+        'plan_name': txn.plan.plan_name,
+        'start_date': txn.created_at,
+        'expiry_date': txn.expire_at,
+        'duration_days': txn.plan_variant.duration,
+        'price': txn.plan_variant.price,
+        'gst_amount': 0,  # Assuming 18% GST
+        'total_amount': txn.plan.price ,
+        'invoice_number': f"BI-{txn.order_id}",
+        'timestamp': datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
+    }
     
-#     template_path = 'invoice_template.html'
-#     template = get_template(template_path)
-#     html = template.render(context)
+    template_path = 'invoice_template.html'
+    template = get_template(template_path)
+    html = template.render(context)
     
-#     # Create PDF
-#     response = HttpResponse(content_type='application/pdf')
-#     response['Content-Disposition'] = f'attachment; filename="Brandsinfo_Invoice_{order.id}.pdf"'
+    # Create PDF
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="Brandsinfo_Invoice_{txn.id}.pdf"'
     
-#     # Generate PDF
-#     pisa_status = pisa.CreatePDF(html, dest=response)
+    # Generate PDF
+    pisa_status = pisa.CreatePDF(html, dest=response)
     
-#     if pisa_status.err:
-#         return HttpResponse('We had some errors <pre>' + html + '</pre>')
-#     return response
+    if pisa_status.err:
+        return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response

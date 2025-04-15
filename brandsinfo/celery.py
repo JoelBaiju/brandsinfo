@@ -1,20 +1,19 @@
 import os
 from celery import Celery
+from celery.schedules import crontab
 
-# Set the default Django settings module for Celery
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'brandsinfo.settings')
 
-# Initialize Celery
 app = Celery('communications')
-
-# Load task modules from all registered Django app configs
 app.config_from_object('django.conf:settings', namespace='CELERY')
+
+# Configure beat schedule
+app.conf.beat_schedule = {
+    'send-events-every-second': {
+        'task': 'communications.tasks.QueuedEventPublisher.send_events',
+        'schedule': 1.0,  # Every second
+        'options': {'expires': 30}  # Prevent task pile-up
+    },
+}
+
 app.autodiscover_tasks()
-
-
-
-def load_tasks():
-    from ..communications import tasks
-    from ..usershome import tasks
-
-

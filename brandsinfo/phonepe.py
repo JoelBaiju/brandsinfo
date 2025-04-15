@@ -15,7 +15,7 @@ client = StandardCheckoutClient.get_instance(
     client_version=1,
     env=Env.PRODUCTION  # Change to Env.PRODUCTION for live
 )
-PHONEPE_REDIRECT_URL = "https://mq459llx-8000.inc1.devtunnels.ms/payment/callback2/"
+PHONEPE_REDIRECT_URL = "https://brandsinfo.in/pricing/success/"
 
 
 
@@ -33,7 +33,7 @@ def initiate_payment(amount_in_rupees):
         request = StandardCheckoutPayRequest.build_request(
             merchant_order_id=f"ORDER_{uuid4().hex[:10]}", 
             # amount=amount_in_rupees * 100,  
-            amount=100,              
+            amount=10,              
             redirect_url=PHONEPE_REDIRECT_URL,
           
         )
