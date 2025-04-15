@@ -49,7 +49,7 @@ def notify_user(data):
 
 
 from rest_framework.decorators import api_view
-from .notifications import new_plan_purchased
+from .ws_notifications import new_plan_purchased
 @api_view(['GET'])
 def notify_user_to_all(request):
     user = Extended_User.objects.get(id=request.GET.get('id'))

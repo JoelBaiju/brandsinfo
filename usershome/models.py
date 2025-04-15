@@ -560,7 +560,7 @@ class PhonePeTransaction(models.Model):
     created_at                  = models.DateTimeField(auto_now_add=True, verbose_name="Created At")
     updated_at                  = models.DateTimeField(auto_now=True, verbose_name="Updated At")
     expire_at                   = models.DateTimeField(null=True, blank=True, verbose_name="Expiration Time")
-    business                    = models.ForeignKey('Buisnesses', on_delete=models.CASCADE, null=True, blank=True, related_name='transactions', verbose_name="Business")
+    buisness                    = models.ForeignKey('Buisnesses', on_delete=models.CASCADE, null=True, blank=True, related_name='transactions', verbose_name="Business")
     plan                        = models.ForeignKey('Plans', on_delete=models.SET_NULL, null=True, blank=True, related_name='transactions', verbose_name="Subscription Plan")
     plan_variant                = models.ForeignKey(Plan_Varients , on_delete=models.SET_NULL, null=True, blank=True, related_name='transactions', verbose_name="Plan Variant")
     is_active                   = models.BooleanField(default=True, verbose_name="Is Active")
@@ -574,7 +574,7 @@ class PhonePeTransaction(models.Model):
             models.Index(fields=['order_id']),
             models.Index(fields=['status']),
             models.Index(fields=['user']),
-            models.Index(fields=['business']),
+            models.Index(fields=['buisness']),
             models.Index(fields=['created_at']),
         ]
         constraints = [

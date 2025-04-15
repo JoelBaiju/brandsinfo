@@ -36,10 +36,8 @@ class NotificationConsumer(AsyncWebsocketConsumer):
 
     async def send_notification(self, event):
         print("📬 Sending notification mesage")
-        await self.send(text_data=json.dumps({
-            'type': 'notification',
-            'message': event['message'],
-            'timestamp': event['timestamp'],
+        await self.send(text_data=json.dumps({           
+            'event': event,
         }))
         await self.send_notification_count( )
         
@@ -49,8 +47,11 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         print("📬 Sending notification count")
         count = await self.get_unread_notification_count()
         await self.send(text_data=json.dumps({
-            "type": "notification_count",
-            "count": count,
+            'event':{
+                "type": "notification_count",
+                "count": count,
+                "ntype":'notification_count',    
+            }     
         }))
 
         

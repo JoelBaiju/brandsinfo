@@ -2,6 +2,12 @@ from phonepe.sdk.pg.payments.v2.standard_checkout_client import StandardCheckout
 from phonepe.sdk.pg.env import Env
 import os
 
+
+client_id='SU2504091720243320731397',
+client_secret='20435b66-f622-4903-ba22-40bead21262e',
+client_version=1,
+env=Env.PRODUCTION
+
 # client = StandardCheckoutClient.get_instance(
 #     client_id='TEST-M22HLXACRTTPK_25041',
 #     client_secret='MzExODRmMmQtYTEzYi00Yjg2LTkwMDQtODYzZTVhMjg4ZDRm',

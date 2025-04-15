@@ -1,40 +1,71 @@
+
+from datetime import timedelta
+from django.utils.timezone import now
+
+
+
+
+from django.shortcuts import render
+
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from .models import Notification
-from django.utils.timezone import now
-from datetime import timedelta
-from django.http import JsonResponse
 from .serializers import *
-from rest_framework.permissions import IsAuthenticated
-from rest_framework import generics, filters, status
-from rest_framework.response import Response
+from usershome.models import PhonePeTransaction
+from usershome.Views.payment_view import generate_invoice_pdf
 
+def notify_user(data):
+    print('notiiiiiiii')
+    message     = data['message'] 
+    title       = data['title']
+    ntype       = data['type']
+    buisness    = data['business'] 
+    user        = data['user']
     
-from datetime import timedelta
-from django.utils.timezone import now
-from channels.layers import get_channel_layer
+    channel_layer = get_channel_layer()
+    
+    print('user:', user ,'from notify_user function')
+    notification = Notification.objects.create(
+        user=user, 
+        message=message,
+        title=title,
+        ntype=ntype,
+        buisness=buisness
+        )
+    notification.save()
+    
+    channel_layer = get_channel_layer()
+    group_name = f"user_{user}"
+
+    async_to_sync(channel_layer.group_send)(
+        group_name,
+        {
+            "type": "send_notification",  # This maps to the `send_notification` method in the consumer
+            "message": message,
+            "timestamp": now().isoformat(),  # or str(now()) for simplicity
+            "title": title, 
+            "ntype": ntype,
+            "business": buisness.name,  # Assuming you want to send the business name
+            "business_id": buisness.id,  # Assuming you want to send the business ID
+        }
+    )
+    
+    return {"sent": True}
 
 
-from .views import *
 
 
+def new_plan_purchased(business):   
+    print('business:', business, 'from new_plan_purchased function')
+    title = f"Plan {business.plan_variant.plan.name} purchased successfully!"
+    duration_days = int(business.plan_variant.duration)
+    expiry_date = now() + timedelta(days=duration_days)
 
-
-
-def new_plan_purchased(business):
-    """
-    Function to handle plan purchase notifications.
-    """
-    # print('business:', business, 'from new_plan_purchased function')
-    # title = f"Plan {business.plan_variant.plan.name} purchased successfully!"
-    # duration_days = int(business.plan_variant.duration)
-    # expiry_date = now() + timedelta(days=duration_days)
-
-    # message = (
-    #     f"Your new plan {business.plan_variant.plan.plan_name} has been purchased successfully! "
-    #     f"The plan will be active from {now().strftime('%Y-%m-%d %H:%M:%S')} "
-    #     f"and will expire on {expiry_date.strftime('%Y-%m-%d %H:%M:%S')}."
-    # )    
+    message = (
+        f"Your new plan {business.plan_variant.plan.plan_name} has been purchased successfully! "
+        f"The plan will be active from {now().strftime('%Y-%m-%d %H:%M:%S')} "
+        f"and will expire on {expiry_date.strftime('%Y-%m-%d %H:%M:%S')}."
+    )    
     
     data = {
         'message': 'message',
@@ -47,25 +78,61 @@ def new_plan_purchased(business):
     
     return  notify_user(data)  
 
-def plan_purchase_failed(business, error_message):
-    """
-    Function to handle failed plan purchase notifications.
-    """
-    title = "Plan purchase failed"
-    message = (
-        f"Failed to purchase plan {business.plan_varient.plan.plan_name}. "
-        f"Reason: {error_message}. Please try again or contact support."
-    )
+
+
+
+
+
+
+
+
+
+
+def payment_status_update(order_id,):
+    tnx = PhonePeTransaction.objects.get(order_id=order_id)
+    buisness = tnx.buisness
+    if tnx.status == 'COMPLETED':
+        title = "Payment Completed"
+        message = (
+            f"Your payment for plan {buisness.plan_variant.plan.plan_name} has been processed successfully! "
+            "Thank you for your purchase."
+        )
+    elif tnx.status == 'FAILED':
+        title = "Payment Failed"
+        message = (
+            f"Your payment for plan {buisness.plan_variant.plan.plan_name} has failed. "
+            "Please try again or contact support."
+        )
+    elif tnx.status == 'PENDING':   
+        title = "Payment Pending"
+        message = (
+            f"Your payment for plan {buisness.plan_variant.plan.plan_name} is pending. "
+            "Please check your payment method for confirmation."
+        )
     
     data = {
         'message': message,
         'title': title,
-        'type': 'plan_purchase_failed',
-        'business': business,
-        'user': business.user,
+        'type': 'payment_status_update',
+        'business': buisness,
+        'user': buisness.user,
+        'invoice':generate_invoice_pdf(tnx.order_id)
     }
 
-    return  notify_user(data)  
+    return notify_user(data)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def amount_refunded(business, amount, reason):
@@ -134,7 +201,7 @@ def plan_renewed(business):
 def business_updates(business, update_message):
     """
     Function to handle business update notifications.
-    """
+    """ 
     title = "Business update"
     message = f"Update regarding your business: {update_message}"
     

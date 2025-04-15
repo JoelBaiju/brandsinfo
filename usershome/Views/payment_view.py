@@ -5,12 +5,17 @@ from django.db import transaction
 from ..models import Plan_Varients, PhonePeTransaction, Buisnesses
 import uuid
 import logging
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from brandsinfo import phonepe
 from brandsinfo.phonepe import initiate_payment as phonepe_initiate_payment
 from rest_framework import status as rest_framework_status
-from datetime import datetime, timedelta
+from datetime import timedelta
+from django.utils.timezone import now
+from communications.ws_notifications import payment_status_update
+
+
 
 @api_view(['POST'])
 def initiate_payment_view(request):
@@ -51,7 +56,7 @@ def initiate_payment_view(request):
                         business=business,
                         plan=plan_variant.plan,
                         plan_variant=plan_variant,
-                        expire_at = datetime.now() + timedelta(days=plan_variant.duration),
+                        expire_at = now() + timedelta(days=int(plan_variant.duration)),
                         payment_url='',
                         status='INITIATED'
                     )
@@ -97,7 +102,6 @@ def payment_callback(request):
     print("Headers:", dict(request.headers))
     print("GET Params:", dict(request.GET))
     print("Body:", request.body.decode('utf-8'))
-    generate_invoice_pdf(request,order_id)
     # Handle POST request (webhook with JSON payload)
     if request.method == "POST":
         try:
@@ -129,8 +133,7 @@ def payment_callback(request):
                 
                 txn.save()
                 
-                if state == 'COMPLETED':
-                    pass
+                payment_status_update(merchant_order_id)
                 
                 return JsonResponse({"status": "success"})
                 
@@ -203,16 +206,18 @@ def check_payment_status(request, order_id):
     
     
     
-# from communications.notifications import new_plan_purchased
+from communications.ws_notifications import new_plan_purchased
     
-# def puchase_plan(request):
-#     pvid = request.POST.get('pvid')
-#     bid = request.POST.get('bid')
-#     plan_varient = Plan_Varients.objects.get(id=pvid)
-#     buisness = Buisnesses.objects.get(id=bid)
-#     if not pvid or not bid:
-#         return Response({'error': 'pvid and bid are required'}, 400)
-#     new_plan_purchased(buisness, plan_varient)
+@api_view(['GET'])
+def puchase_plan(request):
+    pvid = request.POST.get('pvid')
+    bid = request.POST.get('bid')
+    plan_varient = Plan_Varients.objects.get(id=3)
+    buisness = Buisnesses.objects.get(id=85)
+    # if not pvid or not bid:
+    #     return Response({'error': 'pvid and bid are required'}, 400)
+    new_plan_purchased(buisness)
+    return Response({'message': 'Notification sent successfully'}, 200)
 
 
 
@@ -232,44 +237,13 @@ def check_payment_status(request, order_id):
 
 
 
-
-from django.http import HttpResponse
-from django.template.loader import get_template
-from xhtml2pdf import pisa
-from django.shortcuts import get_object_or_404
-import datetime
-
-def generate_invoice_pdf(request, order_id):
-    # Get order data - replace with your actual model and logic
-    txn = get_object_or_404(PhonePeTransaction, id=order_id)
-    
-    # Calculate additional fields
-   
-    context = {
-        'username': txn.user.first_name,
-        'business_name': txn.business.name,
-        'plan_name': txn.plan.plan_name,
-        'start_date': txn.created_at,
-        'expiry_date': txn.expire_at,
-        'duration_days': txn.plan_variant.duration,
-        'price': txn.plan_variant.price,
-        'gst_amount': 0,  # Assuming 18% GST
-        'total_amount': txn.plan.price ,
-        'invoice_number': f"BI-{txn.order_id}",
-        'timestamp': datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def pcreds(request):
+    response={
+        'client_id': phonepe.client_id,
+        'client_secret': phonepe.client_secret,
+        'client_version': phonepe.client_version,
+        
     }
-    
-    template_path = 'invoice_template.html'
-    template = get_template(template_path)
-    html = template.render(context)
-    
-    # Create PDF
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="Brandsinfo_Invoice_{txn.id}.pdf"'
-    
-    # Generate PDF
-    pisa_status = pisa.CreatePDF(html, dest=response)
-    
-    if pisa_status.err:
-        return HttpResponse('We had some errors <pre>' + html + '</pre>')
-    return response
+    return Response(response)

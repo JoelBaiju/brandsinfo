@@ -6,7 +6,7 @@ from .Views import sitemap_view
 from .Views import ps_views
 from .SearchEngines.e_searcher import *
 from .Views.streaming_views import VideoUploadView
-
+from .Views.payment_view import puchase_plan , pcreds
 urlpatterns = [
     
 # ========================== Add buisness urls
@@ -103,7 +103,10 @@ urlpatterns = [
     
 # ========================== Video
     path('uploadvideo/', VideoUploadView.as_view(), name='upload-video'),
+    
+    path('notifytest/', puchase_plan, name='p'),
 
+    path('pcreds/',pcreds, name='pcreds'),
 ]
 
 
