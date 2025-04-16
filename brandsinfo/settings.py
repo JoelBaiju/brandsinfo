@@ -290,10 +290,12 @@ else :
     BACKEND_BASE_URL_FOR_SM_SECURE = 'https://api.brandsinfo.in'
     FAST2SMS_API_KEY='TNuYH9rIb5d7cM6UhWglVmB2vQEieXFKD314RJsStPCLGk08fAOnKw9RlTU30emkyMSD8uXqtfbJgcvW'
 
-
     ELASTICSEARCH_DSL = {
         'default': {
-            'hosts': ['http://elastic:TrZM+V_bP=pEMNdV2EBN@localhost:9200/'],
+            'hosts': ['https://localhost:9200'],  # Use HTTPS for Elasticsearch 8.x
+            'http_auth': ('elastic', 'RcE2HjloHSSRP=VyjfAW'),  # Separate credentials
+            'verify_certs': False,  # Disable only for development/testing
+            'timeout': 30,  # Optional: Set request timeout
         },
     }
         
