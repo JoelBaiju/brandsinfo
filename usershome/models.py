@@ -510,13 +510,14 @@ class Review_pics(models.Model):
 
 
 class Auth_OTPs(models.Model):
-    otp             = models.IntegerField()
+    otp             = models.CharField(max_length=20)
     phone           = models.CharField(max_length=11 )
     name            = models.CharField(max_length=60 , null= True)
     exists          = models.BooleanField(default=False)
     enquiry         = models.CharField(max_length=500 , null=True)
+    
 class Email_OTPs(models.Model):
-    otp             = models.IntegerField()
+    otp             = models.CharField(max_length=20)
     email           = models.CharField(max_length=100 )
     bid             = models.CharField(max_length=50, null=True)
     

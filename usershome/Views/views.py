@@ -820,8 +820,8 @@ def verifyemailotp(request):
         if eotp is None:
             return Response({'message': 'Unknown Error , probably you are invalid'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # print(type(otp))
-        # print(type(auth.otp))
+        print('incoming otp',otp,type(otp))
+        print('saved otp',eotp.otp,type(eotp.otp))
         if str(otp) != str(eotp.otp):
             return Response({'message': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
 
