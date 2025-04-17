@@ -145,12 +145,15 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 AUTH_USER_MODEL = 'usershome.Extended_User'
+CSRF_TRUSTED_ORIGINS = [
+    'https://api.brandsinfo.in',
+]
 
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     'https://f509rzm8-3000.inc1.devtunnels.ms',
-    # 'http://api.brandsinfo.in',
+    'https://api.brandsinfo.in',
 
 ]
 CORS_ALLOW_ALL_ORIGINS = True
