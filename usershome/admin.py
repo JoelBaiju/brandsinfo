@@ -102,6 +102,6 @@ admin.site.register(Sitemap_Links , SitemaplinksAdmin)
 
 
 class TransactionsAdmin(admin.ModelAdmin):
-    list_display = ['order_id','user','amount','status','business','transaction_id','phonepe_order_id']
+    list_display = ['order_id','user','amount','status','transaction_id','phonepe_order_id']
     
 admin.site.register(PhonePeTransaction , TransactionsAdmin)
