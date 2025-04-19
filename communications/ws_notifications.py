@@ -91,6 +91,7 @@ def new_plan_purchased(business):
 def payment_status_update(order_id,):
     tnx = PhonePeTransaction.objects.get(order_id=order_id)
     buisness = tnx.buisness
+    print('notifiation for payment status update: was calledddddddddd' 'from payment_status_update function')
     if tnx.status == 'COMPLETED':
         title = "Payment Completed"
         message = (
@@ -100,7 +101,7 @@ def payment_status_update(order_id,):
     elif tnx.status == 'FAILED':
         title = "Payment Failed"
         message = (
-            f"Your payment for plan {buisness.plan_variant.plan.plan_name} has failed. "
+            f"Your payment for plan {buisness.plan_variant.plan.plan_name} has failed."
             "Please try again or contact support."
         )
     elif tnx.status == 'PENDING':   

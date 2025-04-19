@@ -99,7 +99,7 @@ urlpatterns = [
     path('alpha/sitemap_generator_allatonce_CC/', sitemap_view.Site_Map_Generator_ALLATONCE_CC),
     path('alpha/sgs_test/', sitemap_view.Site_Map_Generator_SB_single_Test_api),
     
-    
+        
     
 # ========================== Video
     path('uploadvideo/', VideoUploadView.as_view(), name='upload-video'),
