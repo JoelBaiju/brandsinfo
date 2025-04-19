@@ -53,7 +53,7 @@ def initiate_payment_view(request):
                         order_id=response['order_id'],   
                         user=request.user if request.user.is_authenticated else None,
                         amount=plan_variant.price,
-                        business=business,
+                        buisness=business,
                         plan=plan_variant.plan,
                         plan_variant=plan_variant,
                         expire_at = now() + timedelta(days=int(plan_variant.duration)),
