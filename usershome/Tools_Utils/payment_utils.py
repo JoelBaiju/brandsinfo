@@ -25,8 +25,8 @@ def generate_invoice_pdf(order_id):
         'timestamp': datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
 
     }
-    logo_abspath = os.path.join(settings.MEDIA_ROOT, 'Home_pics', 'BI_logo.png')
-    context['logo_path'] = f'file://{logo_abspath}'
+    # logo_abspath = os.path.join(settings.MEDIA_ROOT, 'Home_pics', 'BI_logo.png')
+    # context['logo_path'] = f'file://{logo_abspath}'
 
 
     template_path = 'payment_invoice.html'
