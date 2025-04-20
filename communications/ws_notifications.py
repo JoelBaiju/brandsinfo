@@ -89,15 +89,18 @@ def new_plan_purchased(business):
 
 
 def payment_status_update(order_id,):
-    tnx = PhonePeTransaction.objects.get(order_id=order_id)
+    try:
+        tnx = PhonePeTransaction.objects.get(order_id=order_id)
+    except :
+        print('here is the issue the order id is going mad')
     buisness = tnx.buisness
     print('notifiation for payment status update: was calledddddddddd' 'from payment_status_update function')
 
-    tnx = print(buisness)
+    print(buisness)
     plan = tnx.plan
     if tnx.status == 'COMPLETED':
         title = "Payment Completed"
-        message = (
+        message = ( 
             f"Your payment for plan {plan.plan_name} has been processed successfully! "
             "Thank you for your purchase."
         )
