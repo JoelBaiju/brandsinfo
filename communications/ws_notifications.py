@@ -47,6 +47,7 @@ def notify_user(data):
             "ntype": ntype,
             "business": buisness.name,  # Assuming you want to send the business name
             "business_id": buisness.id,  # Assuming you want to send the business ID
+            "extras":data
         }
     )
     
