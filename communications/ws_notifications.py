@@ -14,7 +14,7 @@ from .serializers import *
 from usershome.models import PhonePeTransaction
 from usershome.Tools_Utils.payment_utils import generate_invoice_pdf
 
-def notify_user(data):
+def notify_user(data,extras=None):
     print('notiiiiiiii')
     message     = data['message'] 
     title       = data['title']
@@ -47,7 +47,7 @@ def notify_user(data):
             "ntype": ntype,
             "business": buisness.name,  # Assuming you want to send the business name
             "business_id": buisness.id,  # Assuming you want to send the business ID
-            "extras":data
+            "extras":extras
         }
     )
     
@@ -124,10 +124,9 @@ def payment_status_update(order_id,):
         'type': 'payment_status_update',
         'business': buisness,
         'user': buisness.user,
-        'invoice':generate_invoice_pdf(tnx.order_id)
     }
 
-    return notify_user(data)
+    return notify_user(data=data , extras = generate_invoice_pdf(tnx.order_id))
 
 
 
