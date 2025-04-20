@@ -39,7 +39,7 @@ def notify_user(data):
 
     async_to_sync(channel_layer.group_send)(
         group_name,
-        {
+        {   
             "type": "send_notification",  # This maps to the `send_notification` method in the consumer
             "message": message,
             "timestamp": now().isoformat(),  # or str(now()) for simplicity
