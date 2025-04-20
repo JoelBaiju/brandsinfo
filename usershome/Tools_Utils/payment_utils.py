@@ -14,14 +14,14 @@ def generate_invoice_pdf(order_id):
    
     context = {
         'username': txn.user.first_name,
-        'business_name': txn.business.name,
+        'business_name': txn.buisness.name,
         'plan_name': txn.plan.plan_name,
         'start_date': txn.created_at,
         'expiry_date': txn.expire_at,
         'duration_days': txn.plan_variant.duration,
         'price': txn.plan_variant.price,
         'gst_amount': 0,  # Assuming 18% GST
-        'total_amount': txn.plan.price ,
+        'total_amount': txn.plan_variant.price ,
         'invoice_number': f"BI-{txn.order_id}",
         'timestamp': datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
     }
