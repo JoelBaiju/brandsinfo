@@ -8,7 +8,7 @@ import datetime
 
 def generate_invoice_pdf(order_id):
     # Get order data - replace with your actual model and logic
-    txn = get_object_or_404(PhonePeTransaction, id=order_id)
+    txn = get_object_or_404(PhonePeTransaction, order_id=order_id)
     
     # Calculate additional fields
    
