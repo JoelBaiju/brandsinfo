@@ -569,6 +569,7 @@ class PhonePeTransaction(models.Model):
     phonepe_order_id            = models.CharField(max_length=100, null=True, blank=True, verbose_name="PhonePe Order ID" )
     transction_id               = models.CharField(max_length=100, null=True, blank=True, verbose_name="Transaction ID")
     payment_mode                = models.CharField(max_length=50, null=True, blank=True, verbose_name="Payment Mode")
+    invoice                     = models.FileField(upload_to='invoices/', null=True, blank=True, verbose_name="Invoice")
     class Meta:
       
         indexes = [
