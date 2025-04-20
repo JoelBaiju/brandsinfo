@@ -10,7 +10,6 @@ from ..models import PhonePeTransaction
 
 def generate_invoice_pdf(order_id):
     txn = get_object_or_404(PhonePeTransaction, order_id=order_id)
-    logo_path = os.path.join(settings.MEDIA_ROOT, 'Home_pics', 'BI_logo.png')
 
     context = {
         'username': txn.user.first_name,
@@ -24,9 +23,11 @@ def generate_invoice_pdf(order_id):
         'total_amount': txn.plan_variant.price,
         'invoice_number': f"BI-{txn.order_id}",
         'timestamp': datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
-        'logo_path': logo_path.replace("\\", "/")
 
     }
+    logo_abspath = os.path.join(settings.MEDIA_ROOT, 'Home_pics', 'BI_logo.png')
+    context['logo_path'] = f'file://{logo_abspath}'
+
 
     template_path = 'payment_invoice.html'
     template = get_template(template_path)
