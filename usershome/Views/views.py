@@ -1066,6 +1066,3 @@ def get_buisnesses_with_no_plan(request):
     serialized_buisness = BuisnessesSerializerMini(buisnesses, many=True)
     
     return Response(serialized_buisness.data, status=status.HTTP_200_OK)
-
-
-

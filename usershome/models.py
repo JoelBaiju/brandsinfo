@@ -564,7 +564,7 @@ class PhonePeTransaction(models.Model):
     buisness                    = models.ForeignKey('Buisnesses', on_delete=models.CASCADE, null=True, blank=True, related_name='transactions', verbose_name="Business")
     plan                        = models.ForeignKey('Plans', on_delete=models.SET_NULL, null=True, blank=True, related_name='transactions', verbose_name="Subscription Plan")
     plan_variant                = models.ForeignKey(Plan_Varients , on_delete=models.SET_NULL, null=True, blank=True, related_name='transactions', verbose_name="Plan Variant")
-    is_active                   = models.BooleanField(default=True, verbose_name="Is Active")
+    is_active                   = models.ForeignKey(default=True, verbose_name="Is Active")
     payment_completed_at        = models.DateTimeField(null=True, blank=True, verbose_name="Payment Completed At")
     phonepe_order_id            = models.CharField(max_length=100, null=True, blank=True, verbose_name="PhonePe Order ID" )
     transction_id               = models.CharField(max_length=100, null=True, blank=True, verbose_name="Transaction ID")

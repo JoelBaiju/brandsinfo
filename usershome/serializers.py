@@ -289,8 +289,9 @@ class BuisnessesSerializerCustomers(serializers.ModelSerializer):
             representation['site_data'] = None  
             
         representation['review_rating'] = ReviewRatingSerializerMini(
-            instance.reviews_ratings_set.all(), many=True   
+            instance.reviews_ratings_set.order_by('-rating'), many=True
         ).data
+
         
        
         return representation

@@ -102,3 +102,7 @@ def send_notification_to_device(device_token, title='', body='', data=None):
         print(f"Notification sent successfully: {response}")
     except Exception as e:
         print(f"Error sending notification: {e}")
+
+
+
+

@@ -12,7 +12,7 @@ from brandsinfo import phonepe
 from brandsinfo.phonepe import initiate_payment as phonepe_initiate_payment
 from rest_framework import status as rest_framework_status
 from datetime import timedelta
-from django.utils.timezone import now
+from django.utils.timezone import now, timezone
 from communications.ws_notifications import payment_status_update
 
 
@@ -94,78 +94,100 @@ def initiate_payment_view(request):
    
    
 import json
-   
-@api_view(['POST'])   
+from django.http import JsonResponse, HttpResponseBadRequest
+from rest_framework.decorators import api_view
+import json
+
+@api_view(['POST'])
 def payment_callback(request):
     print("\n=== PhonePe Callback Received ===")
     print("Method:", request.method)
     print("Headers:", dict(request.headers))
     print("GET Params:", dict(request.GET))
     print("Body:", request.body.decode('utf-8'))
-    # Handle POST request (webhook with JSON payload)
+
     if request.method == "POST":
         try:
             callback_data = json.loads(request.body.decode('utf-8'))
             print("Callback Data:", callback_data)
-            
+
             if callback_data.get('type') != 'CHECKOUT_ORDER_COMPLETED':
                 return JsonResponse({"status": "ignored", "reason": "Not an order completion event"}, status=200)
-            
+
             payload = callback_data.get('payload', {})
             order_id = payload.get('orderId')
-            merchant_order_id = payload.get('merchantOrderId')  
+            merchant_order_id = payload.get('merchantOrderId')
             state = payload.get('state')
-            
+
             if not merchant_order_id:
                 return HttpResponseBadRequest("Missing merchantOrderId in payload")
+            
+            if state != "COMPLETED":
+                return JsonResponse({"status": "ignored", "reason": f"Payment state is '{state}' not 'COMPLETED'"}, status=200)
+
             print("merchant_order_id:", merchant_order_id)
             print("order_id:", order_id)
+
             try:
                 txn = PhonePeTransaction.objects.get(order_id=merchant_order_id)
                 txn.status = state
-                txn.phonepe_order_id = order_id  
-                
+                txn.phonepe_order_id = order_id
+
                 payment_details = payload.get('paymentDetails', [{}])[0]
                 if payment_details:
                     txn.transaction_id = payment_details.get('transactionId')
                     txn.payment_mode = payment_details.get('paymentMode')
                     txn.amount = payment_details.get('amount')
-                
+
                 txn.save()
-                
+
+                # Trigger your business logic update
                 payment_status_update(merchant_order_id)
-                
+                addplantobuisness(merchant_order_id)
+                print("Payment status updated and business plan added successfully")
+
                 return JsonResponse({"status": "success"})
-                
+
             except PhonePeTransaction.DoesNotExist:
                 print(f"Transaction not found for order_id: {merchant_order_id}")
                 return HttpResponseBadRequest("Transaction not found")
-                
+
         except json.JSONDecodeError:
             return HttpResponseBadRequest("Invalid JSON in callback body")
         except Exception as e:
             print("Callback Processing Error:", str(e))
             return HttpResponseBadRequest("Error processing callback")
 
-    elif request.method == "GET":
-       
-        return HttpResponseBadRequest("Transaction not found")
-
     return HttpResponseBadRequest("Invalid request method")
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
 
+   
+   
+   
+   
+   
+   
+   
+   
+   
+def addplantobuisness(order_id):
+    try:
+        txn = PhonePeTransaction.objects.get(order_id=order_id)
+        buisness=Buisnesses.objects.filter(id=buisness.id)
+        
+        # Add the plan to the buisness
+        buisness.plan = (txn.plan)
+        buisness.plan_variant = txn.plan_variant
+        buisness.plan_start_date = timezone.now().date()
+        buisness.save()
+
+        # Update the transaction status to COMPLETED
+        txn.status = 'COMPLETED'
+        txn.save()
+
+        return True
+
+    except PhonePeTransaction.DoesNotExist:
+        return False
 
 
 

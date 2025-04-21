@@ -10,7 +10,7 @@ class NotificationsSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Notification
-        fields = ['id', 'user', 'buisness', 'message', 'timestamp','is_read']
+        fields = ['id', 'user', 'buisness', 'message', 'timestamp','is_read','ntype']
 
     def to_representation(self, instance):
         buisness = instance.buisness.name if instance.buisness else None

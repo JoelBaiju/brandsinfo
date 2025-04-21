@@ -44,7 +44,7 @@ class Pageing_assistant:
 
 
 @api_view(['GET'])
-def elasticsearch2(request):
+def elasticsearch2(request):    
     query       = request.GET.get('q', '')
     location    = request.GET.get('location', '')
     verified    = request.GET.get('verified' , 'False')

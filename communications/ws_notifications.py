@@ -19,7 +19,7 @@ def notify_user(data,extras=None):
     message     = data['message'] 
     title       = data['title']
     ntype       = data['type']
-    buisness    = data['business'] 
+    buisness    = data['buisness'] 
     user        = data['user']
     
     channel_layer = get_channel_layer()
@@ -56,28 +56,37 @@ def notify_user(data,extras=None):
 
 
 
-def new_plan_purchased(business):   
-    print('business:', business, 'from new_plan_purchased function')
-    title = f"Plan {business.plan_variant.plan.name} purchased successfully!"
-    duration_days = int(business.plan_variant.duration)
+def new_plan_purchased(buisness):   
+    print('buisness:', buisness, 'from new_plan_purchased function')
+    title = f"Plan {buisness.plan_variant.plan.name} purchased successfully!"
+    duration_days = int(buisness.plan_variant.duration)
     expiry_date = now() + timedelta(days=duration_days)
 
     message = (
-        f"Your new plan {business.plan_variant.plan.plan_name} has been purchased successfully! "
+        f"Your new plan {buisness.plan_variant.plan.plan_name} has been purchased successfully! "
         f"The plan will be active from {now().strftime('%Y-%m-%d %H:%M:%S')} "
         f"and will expire on {expiry_date.strftime('%Y-%m-%d %H:%M:%S')}."
     )    
+    title = "Plan purchased successfully"
+    noti = Notification.objects.create(    
+        user=buisness.user,
+        message=message,
+        title=title,
+        ntype=Notification.NotificationType.PLAN_PURCHASED,
+        buisness=buisness,
+    )
+        
     
     data = {
-        'message': 'message',
-        'title': 'title',
-        'type': 'plan_purchase',
-        'business': business,  # Add business info if needed
-        'user': business.user,
+        'message': message,
+        'title': title,
+        'type': noti.ntype,
+        'buisness': buisness,  
+        'user': buisness.user,
     }
      
     
-    return  notify_user(data)  
+    return  notify_user(data=data , extras ={'invoice': generate_invoice_pdf(buisness.order_id)})  
 
 
 
@@ -121,12 +130,12 @@ def payment_status_update(order_id,):
     data = {
         'message': message,
         'title': title,
-        'type': 'payment_status_update',
-        'business': buisness,
+        'type': 'payment',
+        'buisness': buisness,
         'user': buisness.user,
     }
 
-    return notify_user(data=data , extras = generate_invoice_pdf(tnx.order_id))
+    return notify_user(data=data , extras = {'invoice' : generate_invoice_pdf(tnx.order_id)})
 
 
 
@@ -142,7 +151,7 @@ def payment_status_update(order_id,):
 
 
 
-def amount_refunded(business, amount, reason):
+def amount_refunded(buisness, amount, reason):
     """
     Function to handle amount refund notifications.
     """
@@ -152,94 +161,111 @@ def amount_refunded(business, amount, reason):
         f"Reason: {reason}. Please check your payment method for confirmation."
     )
     
+    
+    noti = Notification.objects.create(    
+        user=buisness.user,
+        message=message,
+        title=title,
+        ntype=Notification.NotificationType.AMOUNT_REFUNDED,
+        buisness=buisness,
+    )
+        
+    
     data = {
         'message': message,
         'title': title,
-        'type': 'amount_refunded',
-        'business': business,
-        'user': business.user,
+        'type': noti.ntype,
+        'buisness': buisness,
+        'user': buisness.user,
     }
     
     return notify_user(data) 
 
-def plan_expired(business):
+
+
+def plan_expired(buisness):
     """
     Function to handle plan expiration notifications.
     """
     title = "Plan expired"
     message = (
-        f"Your plan {business.plan_varient.plan.plan_name} has expired. "
+        f"Your plan {buisness.plan_varient.plan.plan_name} has expired. "
         f"Please renew your plan to continue using premium features."
     )
     
-    data = {
-        'message': message,
-        'title': title,
-        'type': 'plan_expired',
-        'business': business,
-        'user': business.user,
-    }
-    
-    return notify_user(data) 
-
-def plan_renewed(business):
-    """
-    Function to handle plan renewal notifications.
-    """
-    duration_days = int(business.plan_varient.duration)
-    expiry_date = now() + timedelta(days=duration_days)
-    
-    title = "Plan renewed successfully"
-    message = (
-        f"Your plan {business.plan_varient.plan.plan_name} has been renewed successfully! "
-        f"The renewed plan will expire on {expiry_date.strftime('%Y-%m-%d %H:%M:%S')}."
+    noti = Notification.objects.create(    
+        user=buisness.user,
+        message=message,
+        title=title,
+        ntype=Notification.NotificationType.PLAN_EXPIRED,
+        buisness=buisness,
     )
+        
     
     data = {
         'message': message,
         'title': title,
-        'type': 'plan_renewed',
-        'business': business,
-        'user': business.user,
+        'type': noti.ntype,
+        'buisness': buisness,
+        'user': buisness.user,
     }
     
     return notify_user(data) 
 
-def business_updates(business, update_message):
+
+
+
+
+def business_updates(buisness, update_message):
     """
     Function to handle business update notifications.
     """ 
     title = "Business update"
     message = f"Update regarding your business: {update_message}"
-    
+    noti = Notification.objects.create(    
+        user=buisness.user,
+        message=message,
+        title=title,
+        ntype=Notification.NotificationType.BUISNESS_UPDATES,
+        buisness=buisness,
+    )
     data = {
         'message': message,
         'title': title,
-        'type': 'business_updates',
-        'business': business,
-        'user': business.user,
+        'type': noti.ntype,
+        'buisness': buisness,
+        'user': buisness.user,
     }
+   
+        
+    
     
     return notify_user(data) 
 
-def business_verified(business):
+def business_verified(buisness):
     """
     Function to handle business verification notifications.
     """
     title = "Business verified"
     message = "Congratulations! Your business has been successfully verified."
-    
+    noti = Notification.objects.create(    
+        user=buisness.user,
+        message=message,
+        title=title,
+        ntype=Notification.NotificationType.BI_VERIFIED,
+        buisness=buisness,
+    )
     data = {
         'message': message,
         'title': title,
-        'type': 'business_verified',
-        'business': business,
-        'user': business.user,
+        'type': noti.ntype,
+        'buisness': buisness,
+        'user': buisness.user,
     }
-    
+
     return notify_user(data) 
 
-def visit_report(business, visit_details):
+def visit_report(buisness, visit_details):
     """
     Function to handle visit report notifications.
     """
@@ -248,18 +274,24 @@ def visit_report(business, visit_details):
         f"A new visit has been recorded for your business. "
         f"Details: {visit_details}"
     )
-    
+    noti = Notification.objects.create(    
+        user=buisness.user,
+        message=message,
+        title=title,
+        ntype=Notification.NotificationType.VISIT_REPORT,
+        buisness=buisness,
+    )
     data = {
         'message': message,
         'title': title,
-        'type': 'visit_report',
-        'business': business,
-        'user': business.user,
+        'type': noti.ntype,
+        'buisness': buisness,
+        'user': buisness.user,
     }
     
     return notify_user(data) 
 
-def enquiry_report(business, enquiry_details):
+def enquiry_report(buisness, enquiry_details):
     """
     Function to handle enquiry report notifications.
     """
@@ -268,20 +300,27 @@ def enquiry_report(business, enquiry_details):
         f"A new enquiry has been received for your business. "
         f"Details: {enquiry_details}"
     )
+    noti = Notification.objects.create(    
+        user=buisness.user,
+        message=message,
+        title=title,
+        ntype=Notification.NotificationType.ENQUIRY_REPORT,
+        buisness=buisness,
+    )
     
     data = {
         'message': message,
         'title': title,
-        'type': 'enquiry_report',
-        'business': business,
-        'user': business.user,
+        'type': noti.ntype,
+        'buisness': buisness,
+        'user': buisness.user,
     }
     
     return notify_user(data) 
 
 # Additional suggested notification types
 
-def payment_reminder(business, days_remaining):
+def payment_reminder(buisness, days_remaining):
     """
     Function to handle payment reminder notifications.
     """
@@ -290,18 +329,25 @@ def payment_reminder(business, days_remaining):
         f"Your plan will expire in {days_remaining} days. "
         "Please renew to avoid service interruption."
     )
+    noti = Notification.objects.create(    
+        user=buisness.user,
+        message=message,
+        title=title,
+        ntype=Notification.NotificationType.PAYMENT_REMINDER,
+        buisness=buisness,
+    )
     
     data = {
         'message': message,
         'title': title,
-        'type': 'payment_reminder',
-        'business': business,
-        'user': business.user,
+        'type': noti.ntype,
+        'buisness': buisness,
+        'user': buisness.user,
     }
     
     return notify_user(data) 
 
-def new_feature_announcement(business, feature_details):
+def new_feature_announcement(buisness, feature_details):
     """
     Function to handle new feature announcements.
     """
@@ -311,52 +357,67 @@ def new_feature_announcement(business, feature_details):
         "Check it out in your dashboard!"
     )
     
-    data = {
-        'message': message,
-        'title': title,
-        'type': 'new_feature',
-        'business': business,
-        'user': business.user,
-    }
-    
-    return notify_user(data) 
-
-def support_ticket_update(business, ticket_id, status):
-    """
-    Function to handle support ticket updates.
-    """
-    title = "Support ticket update"
-    message = (
-        f"Your support ticket #{ticket_id} has been updated. "
-        f"Current status: {status}"
+    noti = Notification.objects.create(    
+        user=buisness.user,
+        message=message,
+        title=title,
+        ntype=Notification.NotificationType.BI_UPDATES,
+        buisness=buisness,
     )
     
     data = {
         'message': message,
         'title': title,
-        'type': 'support_ticket_update',
-        'business': business,
-        'user': business.user,
+        'type': noti.ntype,
+        'buisness': buisness,
+        'user': buisness.user,
     }
     
     return notify_user(data) 
 
-def system_maintenance_notice(business, maintenance_time):
-    """
-    Function to handle system maintenance notifications.
-    """
-    title = "Scheduled maintenance"
-    message = (
-        f"The system will be undergoing maintenance on {maintenance_time}. "
-        "Please plan your activities accordingly."
-    )
+# def support_ticket_update(buisness, ticket_id, status):
+#     """
+#     Function to handle support ticket updates.
+#     """
+#     title = "Support ticket update"
+#     message = (
+#         f"Your support ticket #{ticket_id} has been updated. "
+#         f"Current status: {status}"
+#     )
+#     noti = Notification.objects.create(    
+#         user=buisness.user,
+#         message=message,
+#         title=title,
+#         ntype=Notification.NotificationType.,
+#         buisness=buisness,
+#     )
     
-    data = {
-        'message': message,
-        'title': title,
-        'type': 'system_maintenance',
-        'business': business,
-        'user': business.user,
-    }
+#     data = {
+#         'message': message,
+#         'title': title,
+#         'type': 'support_ticket_update',
+#         'business': business,
+#         'user': business.user,
+#     }
     
-    return notify_user(data) 
+#     return notify_user(data) 
+
+# def system_maintenance_notice(business, maintenance_time):
+#     """
+#     Function to handle system maintenance notifications.
+#     """
+#     title = "Scheduled maintenance"
+#     message = (
+#         f"The system will be undergoing maintenance on {maintenance_time}. "
+#         "Please plan your activities accordingly."
+#     )
+    
+#     data = {
+#         'message': message,
+#         'title': title,
+#         'type': 'system_maintenance',
+#         'business': business,
+#         'user': business.user,
+#     }
+    
+#     return notify_user(data) 

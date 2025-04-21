@@ -10,7 +10,7 @@ from ..models import PhonePeTransaction
 
 def generate_invoice_pdf(order_id):
     txn = get_object_or_404(PhonePeTransaction, order_id=order_id)
-
+    print('generating invoice for order_id:', order_id)
     context = {
         'username': txn.user.first_name,
         'business_name': txn.buisness.name,
@@ -46,4 +46,4 @@ def generate_invoice_pdf(order_id):
     txn.invoice.save(file_name, File(result))
     txn.save()
 
-    return txn.invoice.url  # Return the URL to include in notifications or frontend
+    return txn.invoice.url  
