@@ -103,6 +103,7 @@ urlpatterns = [
     
 # ========================== Video
     path('uploadvideo/', VideoUploadView.as_view(), name='upload-video'),
+    path('deletevideo/<int:pk>/', views.VideoDelete.as_view(), name='delete-video'),
     
     path('notifytest/', puchase_plan, name='p'),
 

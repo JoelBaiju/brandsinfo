@@ -975,6 +975,29 @@ def get_plans(request):
     serialized = PlansSerializer(plans, many=True)
     return Response(serialized.data)
 
+
+
+
+
+class VideoDelete(generics.DestroyAPIView):
+    queryset = Buisness_Videos.objects.all()
+    serializer_class = BuisnessVideosSerializer
+    permission_classes = [IsAuthenticated]
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            return super().destroy(request, *args, **kwargs)
+        except Exception as e:
+            error_message = str(e)
+            traceback.print_exc()  
+
+            return Response(
+                {"error": error_message},   
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+            
+            
     
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
