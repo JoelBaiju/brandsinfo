@@ -111,9 +111,9 @@ def payment_callback(request):
             callback_data = json.loads(request.body.decode('utf-8'))
             print("Callback Data:", callback_data)
 
-            if callback_data.get('type') != 'CHECKOUT_ORDER_COMPLETED':
-                print("Not a checkout order completed event")
-                return JsonResponse({"status": "ignored", "reason": "Not an order completion event"}, status=200)
+            # if callback_data.get('type') != 'CHECKOUT_ORDER_COMPLETED':
+            #     print("Not a checkout order completed event")
+            #     return JsonResponse({"status": "ignored", "reason": "Not an order completion event"}, status=200)
 
             payload = callback_data.get('payload', {})
             order_id = payload.get('orderId')
