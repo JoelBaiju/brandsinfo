@@ -135,7 +135,7 @@ def payment_status_update(order_id,):
         'user': buisness.user,
     }
 
-    return notify_user(data=data , extras = {'invoice' : generate_invoice_pdf(tnx.order_id)})
+    return notify_user(data=data , extras = {'invoice' : generate_invoice_pdf(tnx.order_id),'status':tnx.status})
 
 
 
