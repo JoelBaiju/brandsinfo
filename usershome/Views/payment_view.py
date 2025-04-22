@@ -112,6 +112,7 @@ def payment_callback(request):
             print("Callback Data:", callback_data)
 
             if callback_data.get('type') != 'CHECKOUT_ORDER_COMPLETED':
+                print("Not a checkout order completed event")
                 return JsonResponse({"status": "ignored", "reason": "Not an order completion event"}, status=200)
 
             payload = callback_data.get('payload', {})
@@ -120,6 +121,7 @@ def payment_callback(request):
             state = payload.get('state')
 
             if not merchant_order_id:
+                print('no merchant order id')
                 return HttpResponseBadRequest("Missing merchantOrderId in payload")
             
             # if state != "COMPLETED":
