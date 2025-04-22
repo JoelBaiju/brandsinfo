@@ -17,9 +17,6 @@ logs/
 debug.log
 
 # Ignore Django migration files (optional)
-*/migrations/*.pyc
-*/migrations/__pycache__/
-*/migrations/*.py
 
 # Ignore database files
 db.sqlite3
