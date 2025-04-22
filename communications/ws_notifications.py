@@ -126,6 +126,7 @@ def payment_status_update(order_id,):
         title=title,
         ntype=Notification.NotificationType.PAYMENT_STATUS,
         buisness=buisness,
+        order_id=order_id,  # Store the order ID in the notification
     )
     data = {
         'message': message,
