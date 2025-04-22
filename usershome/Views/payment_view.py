@@ -143,9 +143,9 @@ def payment_callback(request):
 
                 txn.save()
 
-                # Trigger your business logic update
                 payment_status_update(merchant_order_id)
-                addplantobuisness(merchant_order_id)
+                print('plan added :',addplantobuisness(merchant_order_id))
+
                 print("Payment status updated and business plan added successfully")
 
                 return JsonResponse({"status": "success"})
@@ -172,8 +172,11 @@ def payment_callback(request):
    
    
 def addplantobuisness(order_id):
+    
     try:
         txn = PhonePeTransaction.objects.get(order_id=order_id)
+        if txn.status != 'COMPLETED':
+            return False
         buisness=Buisnesses.objects.filter(id=buisness.id)
         
         # Add the plan to the buisness
@@ -181,9 +184,6 @@ def addplantobuisness(order_id):
         buisness.plan_variant = txn.plan_variant
         buisness.plan_start_date = timezone.now().date()
         buisness.save()
-
-        # Update the transaction status to COMPLETED
-        txn.status = 'COMPLETED'
         txn.save()
 
         return True

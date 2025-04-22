@@ -25,14 +25,7 @@ def notify_user(data,extras=None):
     channel_layer = get_channel_layer()
     
     print('user:', user ,'from notify_user function')
-    notification = Notification.objects.create(
-        user=user, 
-        message=message,
-        title=title,
-        ntype=ntype,
-        buisness=buisness
-        )
-    notification.save()
+    
     
     channel_layer = get_channel_layer()
     group_name = f"user_{user}"
@@ -127,10 +120,17 @@ def payment_status_update(order_id,):
             "Please check your payment method for confirmation."
         )
     
+    noti = Notification.objects.create(    
+        user=buisness.user,
+        message=message,
+        title=title,
+        ntype=Notification.NotificationType.PLAN_PURCHASED,
+        buisness=buisness,
+    )
     data = {
         'message': message,
         'title': title,
-        'type': 'payment',
+        'type': noti.ntype,
         'buisness': buisness,
         'user': buisness.user,
     }
