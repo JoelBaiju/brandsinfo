@@ -124,7 +124,7 @@ def payment_status_update(order_id,):
         user=buisness.user,
         message=message,
         title=title,
-        ntype=Notification.NotificationType.PLAN_PURCHASED,
+        ntype=Notification.NotificationType.PAYMENT_STATUS,
         buisness=buisness,
     )
     data = {
