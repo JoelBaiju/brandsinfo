@@ -122,8 +122,8 @@ def payment_callback(request):
             if not merchant_order_id:
                 return HttpResponseBadRequest("Missing merchantOrderId in payload")
             
-            if state != "COMPLETED":
-                return JsonResponse({"status": "ignored", "reason": f"Payment state is '{state}' not 'COMPLETED'"}, status=200)
+            # if state != "COMPLETED":
+            #     return JsonResponse({"status": "ignored", "reason": f"Payment state is '{state}' not 'COMPLETED'"}, status=200)
 
             print("merchant_order_id:", merchant_order_id)
             print("order_id:", order_id)

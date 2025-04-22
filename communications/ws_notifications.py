@@ -120,7 +120,7 @@ def payment_status_update(order_id,):
             f"Your payment for plan {plan.plan_name} has failed."
             "Please try again or contact support."
         )
-    elif tnx.status == 'PENDING':   
+    elif tnx.status == 'PENDING':       
         title = "Payment Pending"
         message = (
             f"Your payment for plan {plan.plan_name} is pending. "
