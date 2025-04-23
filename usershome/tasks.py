@@ -90,7 +90,6 @@ def Expiry_Check():
         payment_reminder(buisness , '2')        
         
     for offer in expired_offers:
-        print(f"Offer {offer.title} has expired.")
         offer.is_active = False
         offer.save()    
        
