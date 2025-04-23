@@ -13,14 +13,17 @@ from .models import Notification
 from .serializers import *
 from usershome.models import PhonePeTransaction
 from usershome.Tools_Utils.payment_utils import generate_invoice_pdf
+from celery import shared_task
 
+@shared_task
 def notify_user(data,extras=None):
     print('notiiiiiiii')
-    message     = data['message'] 
-    title       = data['title']
-    ntype       = data['type']
-    buisness    = data['buisness'] 
-    user        = data['user']
+    message         = data['message'] 
+    title           = data['title']
+    ntype           = data['type']
+    buisness_name   = data['buisness_name'] 
+    buisness_id     = data['buisness_id'] 
+    user            = data['user']
     
     channel_layer = get_channel_layer()
     
@@ -38,8 +41,8 @@ def notify_user(data,extras=None):
             "timestamp": now().isoformat(),  # or str(now()) for simplicity
             "title": title, 
             "ntype": ntype,
-            "business": buisness.name,  # Assuming you want to send the business name
-            "business_id": buisness.id,  # Assuming you want to send the business ID
+            "business": buisness_name,  # Assuming you want to send the business name
+            "business_id": buisness_id,  # Assuming you want to send the business ID
             "extras":extras
         }
     )
@@ -74,13 +77,14 @@ def new_plan_purchased(buisness):
         'message': message,
         'title': title,
         'type': noti.ntype,
-        'buisness': buisness,  
+        'buisness_name': buisness.name,  
+        'buisness_id': buisness.id,  
         'user': buisness.user,
     }
      
     
-    return  notify_user(data=data , extras ={'invoice': generate_invoice_pdf(buisness.order_id)})  
-
+    notify_user.delay(data=data , extras ={'invoice': generate_invoice_pdf(buisness.order_id)})  
+    return True
 
 
 
@@ -132,12 +136,13 @@ def payment_status_update(order_id,):
         'message': message,
         'title': title,
         'type': noti.ntype,
-        'buisness': buisness,
+        'buisness_name': buisness.name,  
+        'buisness_id': buisness.id,  
         'user': buisness.user,
     }
 
-    return notify_user(data=data , extras = {'invoice' : generate_invoice_pdf(tnx.order_id),'status':tnx.status})
-
+    notify_user.delay(data=data , extras = {'invoice' : generate_invoice_pdf(tnx.order_id),'status':tnx.status})
+    return True
 
 
 
@@ -176,18 +181,19 @@ def amount_refunded(buisness, amount, reason):
         'message': message,
         'title': title,
         'type': noti.ntype,
-        'buisness': buisness,
+        'buisness_name': buisness.name,  
+        'buisness_id': buisness.id,  
         'user': buisness.user,
     }
     
-    return notify_user(data) 
-
+    notify_user.delay(data) 
+    return True
 
 
 def plan_expired(buisness):
     """
     Function to handle plan expiration notifications.
-    """
+    """ 
     title = "Plan expired"
     message = (
         f"Your plan {buisness.plan_varient.plan.plan_name} has expired. "
@@ -207,12 +213,13 @@ def plan_expired(buisness):
         'message': message,
         'title': title,
         'type': noti.ntype,
-        'buisness': buisness,
+        'buisness_name': buisness.name,  
+        'buisness_id': buisness.id,  
         'user': buisness.user,
     }
     
-    return notify_user(data) 
-
+    notify_user.delay(data) 
+    return True
 
 
 
@@ -234,14 +241,16 @@ def business_updates(buisness, update_message):
         'message': message,
         'title': title,
         'type': noti.ntype,
-        'buisness': buisness,
+        'buisness_name': buisness.name,  
+        'buisness_id': buisness.id,  
         'user': buisness.user,
     }
    
         
     
     
-    return notify_user(data) 
+    notify_user.delay(data) 
+    return True
 
 def business_verified(buisness):
     """
@@ -260,11 +269,13 @@ def business_verified(buisness):
         'message': message,
         'title': title,
         'type': noti.ntype,
-        'buisness': buisness,
+        'buisness_name': buisness.name,  
+        'buisness_id': buisness.id,  
         'user': buisness.user,
     }
 
-    return notify_user(data) 
+    notify_user.delay(data) 
+    return True
 
 def visit_report(buisness, visit_details):
     """
@@ -286,11 +297,14 @@ def visit_report(buisness, visit_details):
         'message': message,
         'title': title,
         'type': noti.ntype,
-        'buisness': buisness,
+        'buisness_name': buisness.name,  
+        'buisness_id': buisness.id,  
         'user': buisness.user,
     }
     
-    return notify_user(data) 
+    notify_user.delay(data) 
+    return True
+
 
 def enquiry_report(buisness, enquiry_details):
     """
@@ -313,11 +327,14 @@ def enquiry_report(buisness, enquiry_details):
         'message': message,
         'title': title,
         'type': noti.ntype,
-        'buisness': buisness,
+        'buisness_name': buisness.name,  
+        'buisness_id': buisness.id,  
         'user': buisness.user,
     }
     
-    return notify_user(data) 
+    notify_user.delay(data) 
+    return True
+
 
 # Additional suggested notification types
 
@@ -342,11 +359,14 @@ def payment_reminder(buisness, days_remaining):
         'message': message,
         'title': title,
         'type': noti.ntype,
-        'buisness': buisness,
+        'buisness_name': buisness.name,  
+        'buisness_id': buisness.id,  
         'user': buisness.user,
     }
     
-    return notify_user(data) 
+    notify_user.delay(data) 
+    return True
+
 
 def new_feature_announcement(buisness, feature_details):
     """
@@ -370,11 +390,14 @@ def new_feature_announcement(buisness, feature_details):
         'message': message,
         'title': title,
         'type': noti.ntype,
-        'buisness': buisness,
+        'buisness_name': buisness.name,  
+        'buisness_id': buisness.id,  
         'user': buisness.user,
     }
     
-    return notify_user(data) 
+    notify_user.delay(data) 
+    return True
+ 
 
 # def support_ticket_update(buisness, ticket_id, status):
 #     """

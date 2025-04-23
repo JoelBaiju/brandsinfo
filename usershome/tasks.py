@@ -2,8 +2,10 @@ from celery import shared_task
 import os
 import subprocess
 from django.conf import settings
-from .models import Buisness_Videos , Buisnesses
-
+from .models import Buisness_Videos , Buisnesses , Buisness_Offers
+from django.utils import timezone
+from communications.ws_notifications import plan_expired ,payment_reminder
+from datetime import timedelta
 
 
 @shared_task(bind=True, name="usershome.tasks.convert_video_to_hls")
@@ -60,8 +62,38 @@ def convert_video_to_hls(self, video_id, video_path):
 
 
 
+
 @shared_task
 def Expiry_Check():
     print("Running my daily task at 3 AM!")
-    expired_buisnesses = Buisnesses.objects.filter(is_expired=False, expiry_date__lt=timezone.now())        
+    default_plan = Buisnesses.objects.get(plan_name="Default Plan")
+    expired_buisnesses = Buisnesses.objects.filter( plan_expiry_date__lt=timezone.now())
+
+    two_days_from_now = timezone.now().date() + timedelta(days=2)
+    expiring_soon_businesses = Buisnesses.objects.filter(plan_expiry_date=two_days_from_now)
+    expired_offers = Buisness_Offers.objects.filter(valid_upto__lt=timezone.now())
+    
+    for buisness in expired_buisnesses:
+        print(f"Buisness {buisness.name} has expired.")
+        
+        plan_expired(buisness)
+        buisness.plan = default_plan
+        buisness.plan_expiry_date = None
+        buisness.plan_start_date = None
+        buisness.plan_variant = None
+        buisness.save()
+    
+    for buisness in expiring_soon_businesses:   
+        print(f"Buisness {buisness.name} is expiring soon.")
+        (buisness)
+        payment_reminder(buisness , '2')        
+        
+    for offer in expired_offers:
+        print(f"Offer {offer.title} has expired.")
+        offer.is_active = False
+        offer.save()    
+       
+    
+    
+    
     

@@ -345,7 +345,7 @@ class BuisnessesSerializerMini(serializers.ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['offers'] = BuisnessOffersSerializer(
-            instance.buisness_offers_set.all(), many=True
+            instance.buisness_offers_set.filter(is_active=True), many=True
         ).data  
         
         sitemap_link = instance.sitemap_link.first()  # Fetch first Sitemap_Links if multiple

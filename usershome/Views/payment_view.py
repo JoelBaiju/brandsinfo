@@ -183,6 +183,7 @@ def addplantobuisness(order_id):
         buisness.plan = (txn.plan)
         buisness.plan_variant = txn.plan_variant
         buisness.plan_start_date = timezone.now().date()
+        buisness.plan_expiry_date = timezone.now().date() + timedelta(days=int(txn.plan_variant.duration))
         buisness.save()
         txn.save()
 

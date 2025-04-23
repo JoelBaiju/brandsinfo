@@ -419,7 +419,7 @@ class GetOffersView(generics.ListAPIView):
         except Buisnesses.DoesNotExist:
             return Response({'error': 'Business not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        offers = Buisness_Offers.objects.filter(buisness=buisness)
+        offers = Buisness_Offers.objects.filter(buisness=buisness,is_active=True)
         return Response(BuisnessOffersSerializer(offers, many=True).data, status=status.HTTP_200_OK)
     
     

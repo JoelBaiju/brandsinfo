@@ -115,7 +115,7 @@ class Buisnesses(models.Model):
     plan                        = models.ForeignKey(Plans ,on_delete=models.CASCADE , null=True ,blank=True)
     plan_variant                = models.ForeignKey(Plan_Varients , on_delete=models.CASCADE , null=True , blank=True)
     plan_start_date             = models.DateField(auto_now_add=True , null=True , blank=True)
-    plan_expiry_date           = models.DateField(null=True , blank=True)
+    plan_expiry_date            = models.DateField(null=True , blank=True)
     search_priority             = models.IntegerField(default=0)
     user                        = models.ForeignKey(Extended_User , on_delete=models.CASCADE , null=True)
     name                        = models.CharField(max_length=100)
@@ -183,7 +183,8 @@ class Buisness_Offers(models.Model):
     is_percent              = models.BooleanField(default = False)
     is_flat                 = models.BooleanField(default = False)
     minimum_bill_amount     = models.IntegerField(blank = True)
-    valid_upto              = models.DateField(blank=True)    
+    valid_upto              = models.DateField(blank=True) 
+    is_active               = models.BooleanField(default=True)
     
 
 
