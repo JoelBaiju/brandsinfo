@@ -57,8 +57,8 @@ def elasticsearch2(request):
         future_cc_meta = executor.submit(CC_Check_and_add_metadata , location , query)
         
         search_query = Q("bool", should=[
-            Q("multi_match", query=query, fields=["name", "category" ,"keywords"], fuzziness="AUTO", max_expansions=50, prefix_length=2),
-            Q("multi_match", query=query, fields=["cat_name"], fuzziness="AUTO", max_expansions=50, prefix_length=2)
+            Q("multi_match", query=query, fields=["name", "category" ,"keywords"], fuzziness="AUTO", max_expansions=3, prefix_length=2),
+            Q("multi_match", query=query, fields=["cat_name"], fuzziness="AUTO", max_expansions=3, prefix_length=2)
         ])
         
         try:
@@ -94,6 +94,8 @@ def elasticsearch2(request):
         bdcats_buisness_ids = bdcats.values_list('buisness', flat=True).distinct()
         bgcats_buisness_ids = bgcats.values_list('buisness', flat=True).distinct()
         
+        
+        
         unique_buisness_ids = set(chain(product_buisness_ids, service_buisness_ids, bdcats_buisness_ids,bgcats_buisness_ids))
 
 
@@ -125,18 +127,21 @@ def elasticsearch2(request):
 
         buisnesses = buisnesses.filter(filters)
         buisnesses_direct = buisnesses_direct.filter(filters)
-        executor.submit(update_search_count_buisnesses , buisnesses)
-        executor.submit(update_search_count_buisnesses , buisnesses_direct)
+        if buisnesses_direct.count()!=0:
+            executor.submit(update_search_count_buisnesses , buisnesses_direct)
+            combined_queryset = buisnesses_direct          
+        else:
+            executor.submit(update_search_count_buisnesses , buisnesses)
+            combined_queryset = buisnesses
+            # executor.submit(update_search_count_buisnesses , buisnesses_direct)
 
         
-        combined_queryset = list(chain(buisnesses_direct, buisnesses))
+        # combined_queryset = list(chain(buisnesses_direct, buisnesses))       i dont wanted to combine them if data in buisenesses_direct is not empty then i will use it only
+        
         
         unique_combined_queryset = list(set(combined_queryset)) 
         
-        # future_tier1_buisnesses = executor.submit(CC_Check_and_add_metadata , location , query)
-        # future_tier1_buisnesses = executor.submit(CC_Check_and_add_metadata , location , query)
-        # future_tier1_buisnesses = executor.submit(CC_Check_and_add_metadata , location , query)
-        
+      
         unique_combined_queryset = sorted(
             unique_combined_queryset, 
             key=lambda x: (x.search_priority), 

@@ -81,6 +81,7 @@ class BuisnessVideoAdmin(admin.ModelAdmin):
 admin.site.register(Buisness_Videos , BuisnessVideoAdmin)
     
 admin.site.register(Plans , PlansAdmin)
+
 admin.site.register(Plan_Varients , plan_varientsAdmin)
     
 
@@ -105,3 +106,5 @@ class TransactionsAdmin(admin.ModelAdmin):
     list_display = ['order_id','user','amount','status','buisness','transction_id','phonepe_order_id']
     
 admin.site.register(PhonePeTransaction , TransactionsAdmin)
+
+

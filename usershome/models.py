@@ -48,7 +48,8 @@ class Plan_Varients(models.Model):
     duration        = models.CharField(max_length=50)
     price           = models.CharField(max_length=50)
     
-    
+    def __str__(self):
+        return self.plan.plan_name + ' - ' + self.duration + ' - ' + self.price
     
 
 class Extended_User(AbstractUser):

@@ -201,6 +201,8 @@ def verifyotp(request, utype, from_enquiry=False):
         refresh = RefreshToken.for_user(user)
         return Response({
             'message': 'OTP Verified',
+            'name':user.first_name,
+            'phone':user.mobile_number,
             'exists': auth.exists,
             'sessionid': str(refresh.access_token),
             'refresh_token': str(refresh)
