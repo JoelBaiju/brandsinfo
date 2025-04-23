@@ -2,7 +2,7 @@ from celery import shared_task
 import os
 import subprocess
 from django.conf import settings
-from .models import Buisness_Videos , Buisnesses , Buisness_Offers
+from .models import Buisness_Videos , Buisnesses , Buisness_Offers , Plans
 from django.utils import timezone
 from communications.ws_notifications import plan_expired ,payment_reminder
 from datetime import timedelta
@@ -66,7 +66,8 @@ def convert_video_to_hls(self, video_id, video_path):
 @shared_task(name='userhome.tasks.Expiry_Check')
 def Expiry_Check():
     print("Running my daily task at 3 AM!")
-    default_plan = Buisnesses.objects.get(plan_name="Default Plan")
+    default_plan = Plans.objects.get(plan_name="Default Plan")
+    
     expired_buisnesses = Buisnesses.objects.filter( plan_expiry_date__lt=timezone.now())
 
     two_days_from_now = timezone.now().date() + timedelta(days=2)

@@ -328,7 +328,7 @@ from celery.schedules import crontab
 CELERY_BEAT_SCHEDULE = {
     'chek-Expiries': {
         'task': 'userhome.tasks.Expiry_Check',
-        'schedule': timedelta(seconds=10)
+        'schedule': timedelta(minutes=2)
     },
 }
 
