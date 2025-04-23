@@ -196,7 +196,7 @@ def plan_expired(buisness):
     """ 
     title = "Plan expired"
     message = (
-        f"Your plan {buisness.plan_varient.plan.plan_name} has expired. "
+        f"Your plan {buisness.plan_variant.plan.plan_name} has expired. "
         f"Please renew your plan to continue using premium features."
     )
     
@@ -207,6 +207,7 @@ def plan_expired(buisness):
         ntype=Notification.NotificationType.PLAN_EXPIRED,
         buisness=buisness,
     )
+    noti.save()
         
     
     data = {
