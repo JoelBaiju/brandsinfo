@@ -716,8 +716,9 @@ class Get_Reviews_Ratings_View(generics.ListAPIView):
                 buisness = Buisnesses.objects.get(id=bid)
             except Buisnesses.DoesNotExist:
                 return Response({'error': 'Business not found'}, status=status.HTTP_404_NOT_FOUND)
-            queryset = Reviews_Ratings.objects.filter(buisness=buisness).reverse()
-            
+            # queryset = Reviews_Ratings.objects.filter(buisness=buisness).reverse()
+            queryset = Reviews_Ratings.objects.filter(buisness=buisness).order_by('-date')
+
             query_count=len(queryset)
             page_count = query_count/10
             page_count=floorit(page_count)
