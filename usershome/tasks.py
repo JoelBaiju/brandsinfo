@@ -63,7 +63,7 @@ def convert_video_to_hls(self, video_id, video_path):
 
 
 
-@shared_task
+@shared_task(name='userhome.tasks.Expiry_Check')
 def Expiry_Check():
     print("Running my daily task at 3 AM!")
     default_plan = Buisnesses.objects.get(plan_name="Default Plan")
