@@ -23,11 +23,8 @@ def notify_user(data,extras=None):
     ntype           = data['type']
     buisness_name   = data['buisness_name'] 
     buisness_id     = data['buisness_id'] 
-    user            = data['user']
+    user           = data['user']
     
-    channel_layer = get_channel_layer()
-    
-    print('user:', user ,'from notify_user function')
     
     
     channel_layer = get_channel_layer()
@@ -79,7 +76,7 @@ def new_plan_purchased(buisness):
         'type': noti.ntype,
         'buisness_name': buisness.name,  
         'buisness_id': buisness.id,  
-        'user': buisness.user,
+        'user': buisness.user.username,
     }
      
     
@@ -138,7 +135,7 @@ def payment_status_update(order_id,):
         'type': noti.ntype,
         'buisness_name': buisness.name,  
         'buisness_id': buisness.id,  
-        'user': buisness.user,
+        'user': buisness.user.username,
     }
 
     notify_user.delay(data=data , extras = {'invoice' : generate_invoice_pdf(tnx.order_id),'status':tnx.status})
@@ -183,7 +180,7 @@ def amount_refunded(buisness, amount, reason):
         'type': noti.ntype,
         'buisness_name': buisness.name,  
         'buisness_id': buisness.id,  
-        'user': buisness.user,
+        'user': buisness.user.username,
     }
     
     notify_user.delay(data) 
@@ -216,7 +213,7 @@ def plan_expired(buisness):
         'type': noti.ntype,
         'buisness_name': buisness.name,  
         'buisness_id': buisness.id,  
-        'user': buisness.user,
+        'user': buisness.user.username,
     }
     
     notify_user.delay(data) 
@@ -244,7 +241,7 @@ def business_updates(buisness, update_message):
         'type': noti.ntype,
         'buisness_name': buisness.name,  
         'buisness_id': buisness.id,  
-        'user': buisness.user,
+        'user': buisness.user.username,
     }
    
         
@@ -272,7 +269,7 @@ def business_verified(buisness):
         'type': noti.ntype,
         'buisness_name': buisness.name,  
         'buisness_id': buisness.id,  
-        'user': buisness.user,
+        'user': buisness.user.username,
     }
 
     notify_user.delay(data) 
@@ -300,7 +297,7 @@ def visit_report(buisness, visit_details):
         'type': noti.ntype,
         'buisness_name': buisness.name,  
         'buisness_id': buisness.id,  
-        'user': buisness.user,
+        'user': buisness.user.username,
     }
     
     notify_user.delay(data) 
@@ -330,7 +327,7 @@ def enquiry_report(buisness, enquiry_details):
         'type': noti.ntype,
         'buisness_name': buisness.name,  
         'buisness_id': buisness.id,  
-        'user': buisness.user,
+        'user': buisness.user.username,
     }
     
     notify_user.delay(data) 
@@ -362,7 +359,7 @@ def payment_reminder(buisness, days_remaining):
         'type': noti.ntype,
         'buisness_name': buisness.name,  
         'buisness_id': buisness.id,  
-        'user': buisness.user,
+        'user': buisness.user.username,
     }
     
     notify_user.delay(data) 
@@ -393,7 +390,7 @@ def new_feature_announcement(buisness, feature_details):
         'type': noti.ntype,
         'buisness_name': buisness.name,  
         'buisness_id': buisness.id,  
-        'user': buisness.user,
+        'user': buisness.user.username,
     }
     
     notify_user.delay(data) 
