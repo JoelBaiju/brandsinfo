@@ -2,7 +2,7 @@ from celery import shared_task
 import os
 import subprocess
 from django.conf import settings
-from .models import Buisness_Videos
+from .models import Buisness_Videos , Buisnesses
 
 
 
@@ -56,3 +56,12 @@ def convert_video_to_hls(self, video_id, video_path):
         
     except Exception as e:
         self.retry(exc=e, countdown=60, max_retries=3)
+        
+
+
+
+@shared_task
+def Expiry_Check():
+    print("Running my daily task at 3 AM!")
+    expired_buisnesses = Buisnesses.objects.filter(is_expired=False, expiry_date__lt=timezone.now())        
+    

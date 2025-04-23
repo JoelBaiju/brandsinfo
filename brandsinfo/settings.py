@@ -44,12 +44,12 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # "usershome",
     'rest_framework',
     'django_elasticsearch_dsl',
     'communications',
     'corsheaders',
     'usershome.apps.UsershomeConfig',
+    'django_celery_beat'
 ]
 
 MIDDLEWARE = [
@@ -210,19 +210,6 @@ DEFAULT_FROM_EMAIL = 'brandsinfoguide@gmail.com'  # Default from email (can be y
 INSTALLED_APPS += ['channels']
 ASGI_APPLICATION = "brandsinfo.asgi.application"
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],  # Redis Server
-        },
-    },
-}
-
-
-CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
 
 
 
@@ -255,9 +242,10 @@ FIREBASE_API_KEY = 'AIzaSyBF52Ah0ERtBRalBWwAOgEMPUhjKrlpVvo'
 
 
 
-DEV = False
+DEV = True
 
     
+
 
 
 # dev
@@ -284,6 +272,8 @@ if DEV:
             'PORT': '3306',         
         }
     }
+    
+    redisPort = 6380
     
     
 
@@ -313,8 +303,34 @@ else :
             'PORT': '3306',         
         }
     }
+    redisPort = 6379
 
 
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", redisPort)],  # Redis Server
+        },
+    },
+}
+
+
+CELERY_BROKER_URL = f"redis://127.0.0.1:{redisPort}/0"
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+
+
+
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    'chek-Expiries': {
+        'task': 'userhome.tasks.Expiry_Check',
+        'schedule': timedelta(seconds=10)
+    },
+}
 
 
 
