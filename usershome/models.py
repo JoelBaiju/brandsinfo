@@ -14,6 +14,13 @@ from django.contrib.auth.models import AbstractUser
 class Plans(models.Model):
     plan_name                                   = models.CharField(max_length=100)
     # trier 1
+    business_hours                              = models.BooleanField(default=False)
+    review_ratings                              = models.BooleanField(default=False)
+    social_meida                                = models.BooleanField(default=False)
+    offers                                      = models.BooleanField(default=False)    
+    enquiry                                     = models.BooleanField(default=False)
+    call                                        = models.BooleanField(default=False)
+    
     profile_visit                               = models.BooleanField(default=False)
     average_time_spend                          = models.BooleanField(default=False)
     chat                                        = models.BooleanField(default=False)
