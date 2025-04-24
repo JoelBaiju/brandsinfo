@@ -313,6 +313,7 @@ class BuisnessImages(generics.ListCreateAPIView):
     
     def get(self , request):
         bid = request.GET.get('bid')
+        print(bid)
         images=Buisness_pics.objects.filter(buisness=Buisnesses.objects.get(id=bid))
         
         return Response(BuisnessPicsSerializer(images,many=True).data,status=status.HTTP_200_OK)

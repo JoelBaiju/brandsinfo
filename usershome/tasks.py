@@ -15,6 +15,7 @@ def convert_video_to_hls(self, video_id, video_path):
         ffmpeg_executable = r'C:\Users\91703\ffmpeg\ffmpeg-2025-03-31-git-35c091f4b7-essentials_build\bin\ffmpeg.exe'
         
         if not os.path.exists(ffmpeg_executable):
+            print('FFmpeg not found at:', ffmpeg_executable)
             raise Exception(f"FFmpeg not found at {ffmpeg_executable}")
         
         # Create output directory
@@ -46,6 +47,7 @@ def convert_video_to_hls(self, video_id, video_path):
         )
         
         if result.returncode != 0:
+            print('FFmpeg error:', result.stderr)
             raise Exception(f"FFmpeg failed: {result.stderr}")
         
         # Update model
@@ -57,6 +59,7 @@ def convert_video_to_hls(self, video_id, video_path):
         return f"Successfully converted video {video_id}"
         
     except Exception as e:
+        print(f"Error converting video {video_id}: {e}")    
         self.retry(exc=e, countdown=60, max_retries=3)
         
 

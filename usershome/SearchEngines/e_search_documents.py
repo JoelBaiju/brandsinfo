@@ -83,7 +83,7 @@ class ServiceDocument(Document):
 class BuisnessDocument(Document):
     name = fields.TextField(analyzer="edge_ngram_analyzer", search_analyzer="standard")
     
-    keywords = fields.ListField(fields.TextField())
+    # keywords = fields.ListField(fields.TextField())
 
     class Index:
         name = 'businesses_index'

@@ -36,7 +36,6 @@ admin.site.register( City,cityAdmin)
 admin.site.register(Buisness_Descriptive_cats)
 admin.site.register(Buisness_General_cats)
 admin.site.register(General_cats)
-admin.site.register(Buisness_pics)
 admin.site.register(Buisness_Offers)
 # admin.site.register(Descriptive_cats)
 admin.site.register(Product_General_category)
@@ -107,4 +106,6 @@ class TransactionsAdmin(admin.ModelAdmin):
     
 admin.site.register(PhonePeTransaction , TransactionsAdmin)
 
-
+class BuisnessPicsAdmin(admin.ModelAdmin):
+    list_display = ['id','buisness']
+admin.site.register(Buisness_pics,BuisnessPicsAdmin)
