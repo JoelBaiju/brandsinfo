@@ -250,6 +250,10 @@ DEV = False
 
 # dev
 if DEV:
+
+
+    ffmpeg_executable = r'C:\Users\91703\ffmpeg\ffmpeg-2025-03-31-git-35c091f4b7-essentials_build\bin\ffmpeg.exe'
+
     FRONTEND_BASE_URL_FOR_SM = 'https://45jfqx2q-3000.inc1.devtunnels.ms'
     BACKEND_BASE_URL_FOR_SM = 'https://mq459llx-8000.inc1.devtunnels.ms'
     BACKEND_BASE_URL_FOR_SM_SECURE = 'https://mq459llx-8000.inc1.devtunnels.ms'
@@ -278,6 +282,10 @@ if DEV:
     
 
 else :
+    
+    ffmpeg_executable = "/usr/bin/ffmpeg"
+
+
     FRONTEND_BASE_URL_FOR_SM = 'https://brandsinfo.in'
     BACKEND_BASE_URL_FOR_SM = 'https://api.brandsinfo.in'
     BACKEND_BASE_URL_FOR_SM_SECURE = 'https://api.brandsinfo.in'
