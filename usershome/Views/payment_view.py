@@ -170,7 +170,9 @@ def payment_callback(request):
    
    
    
-   
+
+from ..models import Plans 
+
 def addplantobuisness(order_id):
     
     try:
@@ -184,6 +186,18 @@ def addplantobuisness(order_id):
         buisness.plan_variant = txn.plan_variant
         buisness.plan_start_date = timezone.now().date()
         buisness.plan_expiry_date = timezone.now().date() + timedelta(days=int(txn.plan_variant.duration))
+        plan=Plans.objects.get(id=txn.plan.id)
+        if plan.search_priority_1:
+            buisness.search_priority = 1
+        elif plan.search_priority_2:
+            buisness.search_priority = 2
+        elif plan.search_priority_3:
+            buisness.search_priority = 3
+        
+        if plan.bi_assured:
+            buisness.assured = True
+        if plan.bi_verification:
+            buisness.verified = True
         buisness.save()
         txn.save()
 
