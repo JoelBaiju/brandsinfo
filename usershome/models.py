@@ -127,6 +127,7 @@ class Buisnesses(models.Model):
     search_priority             = models.IntegerField(default=0)
     user                        = models.ForeignKey(Extended_User , on_delete=models.CASCADE , null=True)
     name                        = models.CharField(max_length=100)
+    created_on                  = models.DateField(auto_now_add=True ,null=True)
     description                 = models.CharField(max_length=1000 , blank=True , null=True)
     buisness_type               = models.CharField(max_length=50)
     manager_name                = models.CharField(max_length=100 , blank=True) 

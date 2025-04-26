@@ -8,5 +8,5 @@ from . import auth_views
 urlpatterns = [
     
     path('login/',auth_views.admin_auth_view),
-    
+    path('dash/',views.admin_dashboard_view),   
 ]
