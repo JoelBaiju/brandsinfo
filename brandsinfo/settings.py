@@ -49,7 +49,8 @@ INSTALLED_APPS = [
     'communications',
     'corsheaders',
     'usershome.apps.UsershomeConfig',
-    'django_celery_beat'
+    'django_celery_beat',
+    'analytics',
 ]
 
 MIDDLEWARE = [
@@ -61,6 +62,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     'corsheaders.middleware.CorsMiddleware',
+    'analytics.middlewares.RequestTrackingMiddleware',
 
     # "usershome.middleware.PlanCheckMiddleware",
 
@@ -242,7 +244,7 @@ FIREBASE_API_KEY = 'AIzaSyBF52Ah0ERtBRalBWwAOgEMPUhjKrlpVvo'
 
 
 
-DEV = False
+DEV = True
 
     
 
