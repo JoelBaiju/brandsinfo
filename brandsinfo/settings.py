@@ -62,7 +62,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     'corsheaders.middleware.CorsMiddleware',
-    'analytics.middlewares.RequestTrackingMiddleware',
+    
+    # 'analytics.middlewares.RequestTrackingMiddleware',
 
     # "usershome.middleware.PlanCheckMiddleware",
 
