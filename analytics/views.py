@@ -55,14 +55,18 @@ def get_client_ip(request):
     return ip
 
 
-
-
+from django.db import connection
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
+import logging
+
+logger = logging.getLogger(__name__)
 
 class CustomIPLogPagination(PageNumberPagination):
-    page_size = 20  # Default page size
-    page_size_query_param = 'page_size'  # Allow client to override
-    max_page_size = 100  # Maximum limit
+    page_size = 20
+    page_size_query_param = 'page_size'
+    max_page_size = 100
     
     def get_paginated_response(self, data):
         return Response({
@@ -74,31 +78,69 @@ class CustomIPLogPagination(PageNumberPagination):
             'page_size': self.get_page_size(self.request),
             'results': data
         })
-        
-        
-        
-        
-from django.db.models import Count, F, Value
-from django.db.models.functions import Concat, GroupConcat
 
 class IPLogView(APIView):
+    """
+    API endpoint that returns IP access logs with pagination
+    
+    Query Parameters:
+    - page: Page number (default: 1)
+    - page_size: Items per page (default: 20, max: 100)
+    - start_date: Filter logs from this date (YYYY-MM-DD)
+    - end_date: Filter logs until this date (YYYY-MM-DD)
+    """
+    pagination_class = CustomIPLogPagination
+    
     def get(self, request):
-        # MySQL compatible version using GROUP_CONCAT
-        queryset = RequestLog.objects.values('ip_address').annotate(
-            visited_paths=GroupConcat('path', distinct=True),
-            visit_count=Count('id')
-        ).order_by('ip_address')
-        
-        # Create paginator instance
-        paginator = PageNumberPagination()
-        paginator.page_size = request.query_params.get('page_size', 20)
-        
-        # Paginate the queryset
-        page = paginator.paginate_queryset(queryset, request)
-        
-        # Convert the GROUP_CONCAT string to a list
-        for item in page:
-            item['visited_paths'] = item['visited_paths'].split(',') if item['visited_paths'] else []
-        
-        serializer = IPLogSerializer(page, many=True)
-        return paginator.get_paginated_response(serializer.data)
+        try:
+            # Get filter parameters
+            start_date = request.query_params.get('start_date')
+            end_date = request.query_params.get('end_date')
+            
+            # Build query
+            query = """
+                SELECT 
+                    ip_address,
+                    GROUP_CONCAT(DISTINCT path) as visited_paths,
+                    COUNT(*) as visit_count
+                FROM analytics_requestlog
+                {where_clause}
+                GROUP BY ip_address
+                ORDER BY ip_address
+            """
+            
+            where_clause = ""
+            params = []
+            if start_date and end_date:
+                where_clause = "WHERE timestamp BETWEEN %s AND %s"
+                params.extend([start_date, end_date])
+            elif start_date:
+                where_clause = "WHERE timestamp >= %s"
+                params.append(start_date)
+            elif end_date:
+                where_clause = "WHERE timestamp <= %s"
+                params.append(end_date)
+            
+            # Execute query
+            with connection.cursor() as cursor:
+                cursor.execute(query.format(where_clause=where_clause), params)
+                columns = [col[0] for col in cursor.description]
+                results = [
+                    dict(zip(columns, row))
+                    for row in cursor.fetchall()
+                ]
+            
+            # Process results
+            for item in results:
+                item['visited_paths'] = item['visited_paths'].split(',') if item.get('visited_paths') else []
+            
+            # Paginate
+            paginator = self.pagination_class()
+            page = paginator.paginate_queryset(results, request)
+            serializer = IPLogSerializer(page, many=True, context={'request': request})
+            
+            return paginator.get_paginated_response(serializer.data)
+            
+        except Exception as e:
+            logger.error(f"Error in IPLogView: {str(e)}", exc_info=True)
+            return Response({"error": "An error occurred while processing your request"}, status=500)
