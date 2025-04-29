@@ -1,7 +1,12 @@
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+from django.contrib.postgres.aggregates import ArrayAgg
+from django.db.models import Count
 from .models import RequestLog
+from .serializers import IPLogSerializer  # Import the serializer
 import json
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
 @csrf_exempt
 def track_visit(request):
@@ -48,3 +53,39 @@ def get_client_ip(request):
     else:
         ip = request.META.get('REMOTE_ADDR')
     return ip
+
+
+
+
+from rest_framework.pagination import PageNumberPagination
+
+class CustomIPLogPagination(PageNumberPagination):
+    page_size = 20  # Default page size
+    page_size_query_param = 'page_size'  # Allow client to override
+    max_page_size = 100  # Maximum limit
+    
+    def get_paginated_response(self, data):
+        return Response({
+            'links': {
+                'next': self.get_next_link(),
+                'previous': self.get_previous_link()
+            },
+            'count': self.page.paginator.count,
+            'page_size': self.get_page_size(self.request),
+            'results': data
+        })
+
+class IPLogView(APIView):
+    pagination_class = CustomIPLogPagination
+    
+    def get(self, request):
+        queryset = RequestLog.objects.values('ip_address').annotate(
+            visited_paths=ArrayAgg('path', distinct=True),
+            visit_count=Count('id')
+        ).order_by('ip_address')
+        
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(queryset, request)
+        
+        serializer = IPLogSerializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
