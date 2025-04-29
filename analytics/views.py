@@ -74,18 +74,31 @@ class CustomIPLogPagination(PageNumberPagination):
             'page_size': self.get_page_size(self.request),
             'results': data
         })
+        
+        
+        
+        
+from django.db.models import Count, F, Value
+from django.db.models.functions import Concat, GroupConcat
 
 class IPLogView(APIView):
-    pagination_class = CustomIPLogPagination
-    
     def get(self, request):
+        # MySQL compatible version using GROUP_CONCAT
         queryset = RequestLog.objects.values('ip_address').annotate(
-            visited_paths=ArrayAgg('path', distinct=True),
+            visited_paths=GroupConcat('path', distinct=True),
             visit_count=Count('id')
         ).order_by('ip_address')
         
-        paginator = self.pagination_class()
+        # Create paginator instance
+        paginator = PageNumberPagination()
+        paginator.page_size = request.query_params.get('page_size', 20)
+        
+        # Paginate the queryset
         page = paginator.paginate_queryset(queryset, request)
+        
+        # Convert the GROUP_CONCAT string to a list
+        for item in page:
+            item['visited_paths'] = item['visited_paths'].split(',') if item['visited_paths'] else []
         
         serializer = IPLogSerializer(page, many=True)
         return paginator.get_paginated_response(serializer.data)
