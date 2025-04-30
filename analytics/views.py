@@ -7,6 +7,8 @@ from .serializers import IPLogSerializer  # Import the serializer
 import json
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.decorators import api_view, permission_classes
+
 
 @csrf_exempt
 def track_visit(request):
@@ -150,6 +152,7 @@ class IPLogView(APIView):
         
 from django.db.models.functions import TruncDay, TruncWeek, TruncMonth, TruncYear
 
+@api_view(['GET'])
 def log_count(request):
     if request.method == 'GET':
         format = request.GET.get('format')
