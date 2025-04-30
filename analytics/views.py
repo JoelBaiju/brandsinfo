@@ -60,6 +60,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
 import logging
+from django.utils.timezone import now
 
 logger = logging.getLogger(__name__)
 
@@ -144,3 +145,22 @@ class IPLogView(APIView):
         except Exception as e:
             logger.error(f"Error in IPLogView: {str(e)}", exc_info=True)
             return Response({"error": "An error occurred while processing your request"}, status=500)
+        
+        
+        
+        
+def log_count(request):
+    if request.method == 'GET':
+        format = request.GET.get('format')
+      
+        if format == 'week':
+            logs = RequestLog.objects.extra(select={'week': 'date_trunc(\'week\', timestamp)'}).values('week').annotate(count=Count('id')).order_by('week')
+        elif format == 'month':
+            logs = RequestLog.objects.extra(select={'month': 'date_trunc(\'month\', timestamp)'}).values('month').annotate(count=Count('id')).order_by('month')
+        elif format == 'year':
+            logs = RequestLog.objects.extra(select={'year': 'date_trunc(\'year\', timestamp)'}).values('year').annotate(count=Count('id')).order_by('year')
+        else:
+            today = now().date()
+            logs = RequestLog.objects.filter(timestamp__date=today).extra(select={'day': 'date_trunc(\'day\', timestamp)'}).values('day').annotate(count=Count('id')).order_by('day')
+        
+        return Response({'count': logs.count()})
