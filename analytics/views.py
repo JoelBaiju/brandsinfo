@@ -148,19 +148,20 @@ class IPLogView(APIView):
         
         
         
-        
+from django.db.models.functions import TruncDay, TruncWeek, TruncMonth, TruncYear
+
 def log_count(request):
     if request.method == 'GET':
         format = request.GET.get('format')
-      
+
         if format == 'week':
-            logs = RequestLog.objects.extra(select={'week': 'date_trunc(\'week\', timestamp)'}).values('week').annotate(count=Count('id')).order_by('week')
+            logs = RequestLog.objects.annotate(period=TruncWeek('timestamp')).values('period').annotate(count=Count('id')).order_by('period')
         elif format == 'month':
-            logs = RequestLog.objects.extra(select={'month': 'date_trunc(\'month\', timestamp)'}).values('month').annotate(count=Count('id')).order_by('month')
+            logs = RequestLog.objects.annotate(period=TruncMonth('timestamp')).values('period').annotate(count=Count('id')).order_by('period')
         elif format == 'year':
-            logs = RequestLog.objects.extra(select={'year': 'date_trunc(\'year\', timestamp)'}).values('year').annotate(count=Count('id')).order_by('year')
+            logs = RequestLog.objects.annotate(period=TruncYear('timestamp')).values('period').annotate(count=Count('id')).order_by('period')
         else:
             today = now().date()
-            logs = RequestLog.objects.filter(timestamp__date=today).extra(select={'day': 'date_trunc(\'day\', timestamp)'}).values('day').annotate(count=Count('id')).order_by('day')
-        
-        return Response({'count': logs.count()})
+            logs = RequestLog.objects.filter(timestamp__date=today).annotate(period=TruncDay('timestamp')).values('period').annotate(count=Count('id')).order_by('period')
+
+        return Response({'logs': list(logs)})
