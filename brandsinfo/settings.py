@@ -245,7 +245,7 @@ FIREBASE_API_KEY = 'AIzaSyBF52Ah0ERtBRalBWwAOgEMPUhjKrlpVvo'
 
 
 
-DEV = False
+DEV = True
     
 
 
@@ -338,7 +338,11 @@ from celery.schedules import crontab
 CELERY_BEAT_SCHEDULE = {
     'chek-Expiries': {
         'task': 'userhome.tasks.Expiry_Check',
-        'schedule': timedelta(minutes=2)
+        'schedule': crontab(hour=0 , minute=0)
+    },
+    'update-counts': {
+        'task': 'analysis.tasks.record_daily_count',
+        'schedule': crontab(hour=0,minute=0)
     },
 }
 
