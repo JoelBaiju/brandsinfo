@@ -9,4 +9,6 @@ urlpatterns = [
     
     path('login/',auth_views.admin_auth_view),
     path('dash/',views.admin_dashboard_view),   
+    path('add-general-cats/', views.AddGeneralCatsView.as_view(), name='add-general-cats'),
+    path('add-descriptive-cats/', views.AddDescriptiveCatsView.as_view(), name='add-descriptive-cats'),
 ]

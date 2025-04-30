@@ -118,6 +118,45 @@ def admin_dashboard_view(request):
     
     
 
-# class GeneralCats(APIView):
-#     def post(self,request):
-        
+
+
+
+# views.py
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import General_cats, Descriptive_cats
+from .serializers import GeneralCatsSerializer, DescriptiveCatsSerializer
+
+class AddGeneralCatsView(APIView):
+    def post(self, request):
+        categories = request.data.get('gcats', [])
+        created = []
+
+        for cat in categories:
+            obj, created_obj = General_cats.objects.get_or_create(cat_name=cat.strip())
+            created.append(GeneralCatsSerializer(obj).data)
+
+        return Response({'created': created}, status=status.HTTP_201_CREATED)
+
+class AddDescriptiveCatsView(APIView):
+    def post(self, request):
+        general_cat_id = request.data.get('gid')
+        descriptive_cats = request.data.get('dcats', [])
+
+        if not general_cat_id or not descriptive_cats:
+            return Response({'error': 'general_cat_id and categories are required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            general_cat = General_cats.objects.get(id=general_cat_id)
+        except General_cats.DoesNotExist:
+            return Response({'error': 'General category not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        created = []
+        for cat_name in descriptive_cats:
+            obj, _ = Descriptive_cats.objects.get_or_create(
+                cat_name=cat_name.strip(), general_cat=general_cat
+            )
+            created.append(DescriptiveCatsSerializer(obj).data)
+
+        return Response({'created': created}, status=status.HTTP_201_CREATED)
