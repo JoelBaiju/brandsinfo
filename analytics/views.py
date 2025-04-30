@@ -151,6 +151,13 @@ class IPLogView(APIView):
         
         
 from django.db.models.functions import TruncDay, TruncWeek, TruncMonth, TruncYear
+from django.db.models import Count
+from django.db.models.functions import TruncDay, TruncWeek, TruncMonth, TruncYear
+from rest_framework.response import Response
+from django.utils.timezone import now
+from .models import RequestLog
+
+
 
 @api_view(['GET'])
 def log_count(request):
@@ -158,13 +165,13 @@ def log_count(request):
         format = request.GET.get('format')
 
         if format == 'week':
-            logs = RequestLog.objects.annotate(period=TruncWeek('timestamp')).values('period').annotate(count=Count('id')).order_by('period')
+            logs = RequestLog.objects.annotate(period=TruncWeek('timestamp')).values('period').annotate(count=Count('id'))
         elif format == 'month':
-            logs = RequestLog.objects.annotate(period=TruncMonth('timestamp')).values('period').annotate(count=Count('id')).order_by('period')
+            logs = RequestLog.objects.annotate(period=TruncMonth('timestamp')).values('period').annotate(count=Count('id'))
         elif format == 'year':
-            logs = RequestLog.objects.annotate(period=TruncYear('timestamp')).values('period').annotate(count=Count('id')).order_by('period')
+            logs = RequestLog.objects.annotate(period=TruncYear('timestamp')).values('period').annotate(count=Count('id'))
         else:
             today = now().date()
-            logs = RequestLog.objects.filter(timestamp__date=today).annotate(period=TruncDay('timestamp')).values('period').annotate(count=Count('id')).order_by('period')
+            logs = RequestLog.objects.filter(timestamp__date=today).annotate(period=TruncDay('timestamp')).values('period').annotate(count=Count('id'))
 
-        return Response({'logs': list(logs)})
+        return Response({'count': logs.count()})
