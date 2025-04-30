@@ -19,6 +19,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from usershome.Tools_Utils.fast2_sms_service import send_otp
 
+from rest_framework.views import APIView
 
 # Local app imports
 
@@ -98,7 +99,8 @@ def admin_dashboard_view(request):
 
             'total_products': Products.objects.count(),
             'total_services': Services.objects.count(),
-            
+            'total_descriptive_cats': Buisness_Descriptive_cats.objects.count(),
+            'total_general_cats':Buisness_General_cats.objects.count(),
             'buisness_signup_rates': buisness_signup_rates,
             }
         
@@ -109,3 +111,13 @@ def admin_dashboard_view(request):
     
     # else:
     #     return Response('You are not authorized to access this api', status=status.HTTP_403_FORBIDDEN)
+    
+    
+    
+    
+    
+    
+
+class GeneralCats(APIView):
+    def post(self,request):
+        

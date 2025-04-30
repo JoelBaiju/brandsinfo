@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 
 
-@csrf_exempt
+@api_view(['POST'])
 def track_visit(request):
     if request.method == 'POST':
         ip_address = get_client_ip(request)

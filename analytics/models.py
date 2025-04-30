@@ -18,3 +18,16 @@ class RequestLog(models.Model):
     def __str__(self):
         return f"{self.ip_address} - {self.path} [{self.method}]"
 
+
+
+
+
+class Count_Per_Day(models.Model):
+    buisness    = models.IntegerField(default=0)
+    products    = models.IntegerField(default=0)
+    services    = models.IntegerField(default=0)
+    users       = models.IntegerField(default=0)
+    timestamp   = models.DateTimeField(auto_now_add=True)
+  
+    def __str__(self):
+        return f"{self.timestamp} "
