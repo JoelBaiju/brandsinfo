@@ -150,33 +150,19 @@ class IPLogView(APIView):
         
         
         
-from django.db.models.functions import TruncDay, TruncWeek, TruncMonth, TruncYear
-from django.db.models import Count
-from django.db.models.functions import TruncDay, TruncWeek, TruncMonth, TruncYear
-from rest_framework.response import Response
 from django.utils.timezone import now
-from .models import RequestLog
+from datetime import datetime, timedelta
 
+def get_todays_request_count(request):
 
-
-class LogCountView(APIView):
-    def get(self,request):
-        
-        if request.method == 'GET':
-            format = request.GET.get('order_by')
-
-            rl= RequestLog.objects.all()
-            for i in rl:
-                print(i.timestamp)
-
-            if format == 'week':
-                logs = RequestLog.objects.annotate(period=TruncWeek('timestamp')).values('period').annotate(count=Count('id'))
-            elif format == 'month':
-                logs = RequestLog.objects.annotate(period=TruncMonth('timestamp')).values('period').annotate(count=Count('id'))
-            elif format == 'year':
-                logs = RequestLog.objects.annotate(period=TruncYear('timestamp')).values('period').annotate(count=Count('id'))
-            else:
-                today = now().date()
-                logs = RequestLog.objects.filter(timestamp__date=today).annotate(period=TruncDay('timestamp')).values('period').annotate(count=Count('id'))
-
-            return Response({'count': logs.count()})
+    today_start = now().replace(hour=0, minute=0, second=0, microsecond=0)
+    today_end = today_start + timedelta(days=1)
+    
+    # Count the RequestLog objects created today
+    count = RequestLog.objects.filter(
+        timestamp__gte=today_start,
+        timestamp__lt=today_end
+    ).count()
+    
+    # Return the count as JSON response
+    return Response({'count': count})
