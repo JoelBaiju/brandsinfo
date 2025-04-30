@@ -125,7 +125,7 @@ def admin_dashboard_view(request):
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import General_cats, Descriptive_cats
+from usershome.models import General_cats, Descriptive_cats
 from .serializers import GeneralCatsSerializer, DescriptiveCatsSerializer
 
 class AddGeneralCatsView(APIView):
