@@ -118,6 +118,6 @@ def admin_dashboard_view(request):
     
     
 
-class GeneralCats(APIView):
-    def post(self,request):
+# class GeneralCats(APIView):
+#     def post(self,request):
         
