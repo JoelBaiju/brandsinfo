@@ -150,20 +150,72 @@ class IPLogView(APIView):
         
         
         
-from django.utils.timezone import now
 from datetime import datetime, timedelta
+from django.http import JsonResponse
+from django.utils import timezone
+import pytz
 
 @api_view(['GET'])
-def Logcount(request):
-
-    today_start = now().replace(hour=0, minute=0, second=0, microsecond=0)
-    today_end = today_start + timedelta(days=1)
+def get_request_count(request):
+    # Get parameters from the request
+    start_date_str = request.GET.get('start_date')
+    end_date_str = request.GET.get('end_date')
     
-    # Count the RequestLog objects created today
-    count = RequestLog.objects.filter(
-        timestamp__gte=today_start,
-        timestamp__lt=today_end
-    ).count()
+    # If no parameters provided, default to today
+    if not start_date_str and not end_date_str:
+        today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        today_end = today_start + timedelta(days=1)
+        
+        count = RequestLog.objects.filter(
+            timestamp__gte=today_start,
+            timestamp__lt=today_end
+        ).count()
+        
+        return JsonResponse({
+            'count': count,
+            'start_date': today_start.date().isoformat(),
+            'end_date': today_start.date().isoformat(),
+            'message': 'Showing today\'s count (default)'
+        })
     
-    # Return the count as JSON response
-    return Response({'count': count})
+    # Validate if only one date is provided
+    if not start_date_str or not end_date_str:
+        return JsonResponse(
+            {'error': 'Please provide both start_date and end_date or none for today\'s count'},
+            status=400
+        )
+    
+    try:
+        # Parse dates (assuming format YYYY-MM-DD)
+        start_date = datetime.strptime(start_date_str, '%Y-%m-%d').replace(
+            tzinfo=pytz.UTC,
+            hour=0, minute=0, second=0, microsecond=0
+        )
+        end_date = datetime.strptime(end_date_str, '%Y-%m-%d').replace(
+            tzinfo=pytz.UTC,
+            hour=23, minute=59, second=59, microsecond=999999
+        )
+        
+        # Validate date range
+        if start_date > end_date:
+            return JsonResponse(
+                {'error': 'start_date must be before or equal to end_date'},
+                status=400
+            )
+        
+        # Count the RequestLog objects in the date range
+        count = RequestLog.objects.filter(
+            timestamp__range=(start_date, end_date)
+        ).count()
+        
+        return JsonResponse({
+            'count': count,
+            'start_date': start_date_str,
+            'end_date': end_date_str
+        })
+        
+    except ValueError:
+        return JsonResponse(
+            {'error': 'Invalid date format. Use YYYY-MM-DD'},
+            status=400
+        )
