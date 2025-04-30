@@ -129,6 +129,7 @@ from usershome.models import General_cats, Descriptive_cats
 from .serializers import GeneralCatsSerializer, DescriptiveCatsSerializer
 
 class AddGeneralCatsView(APIView):
+    permission_classes = [IsAuthenticated]
     def post(self, request):
         categories = request.data.get('gcats', [])
         created = []
@@ -140,6 +141,7 @@ class AddGeneralCatsView(APIView):
         return Response({'created': created}, status=status.HTTP_201_CREATED)
 
 class AddDescriptiveCatsView(APIView):
+    permission_classes = [IsAuthenticated]
     def post(self, request):
         general_cat_id = request.data.get('gid')
         descriptive_cats = request.data.get('dcats', [])
