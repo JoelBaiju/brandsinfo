@@ -156,7 +156,7 @@ from django.utils import timezone
 import pytz
 
 @api_view(['GET'])
-def get_request_count(request):
+def log_count(request):
     # Get parameters from the request
     start_date_str = request.GET.get('start_date')
     end_date_str = request.GET.get('end_date')
