@@ -163,7 +163,7 @@ class LogCountView(APIView):
     def get(self,request):
         
         if request.method == 'GET':
-            format = request.GET.get('format')
+            format = request.GET.get('order_by')
 
             if format == 'week':
                 logs = RequestLog.objects.annotate(period=TruncWeek('timestamp')).values('period').annotate(count=Count('id'))
