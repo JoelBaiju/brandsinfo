@@ -1,5 +1,4 @@
 from django.views.decorators.csrf import csrf_exempt
-from django.http import Response
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.db.models import Count
 from .models import RequestLog
@@ -151,7 +150,6 @@ class IPLogView(APIView):
         
         
 from datetime import datetime, timedelta
-from django.http import JsonResponse
 from django.utils import timezone
 import pytz
 
