@@ -1,5 +1,5 @@
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
+from django.http import Response
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.db.models import Count
 from .models import RequestLog
@@ -29,7 +29,7 @@ def track_visit(request):
 
         # Check if IP already exists
         if RequestLog.objects.filter(ip_address=ip_address, path=path, method='VISIT').exists():
-            return JsonResponse({'status': 'already_tracked'})
+            return Response({'status': 'already_tracked'})
 
         # Save if not already tracked
         RequestLog.objects.create(
@@ -43,9 +43,9 @@ def track_visit(request):
             query_params=extra,
         )
 
-        return JsonResponse({'status': 'ok'})
+        return Response({'status': 'ok'})
     
-    return JsonResponse({'error': 'invalid method'}, status=400)
+    return Response({'error': 'invalid method'}, status=400)
 
 
 def get_client_ip(request):
@@ -171,7 +171,7 @@ def log_count(request):
             timestamp__lt=today_end
         ).count()
         
-        return JsonResponse({
+        return Response({
             'count': count,
             'start_date': today_start.date().isoformat(),
             'end_date': today_start.date().isoformat(),
@@ -180,7 +180,7 @@ def log_count(request):
     
     # Validate if only one date is provided
     if not start_date_str or not end_date_str:
-        return JsonResponse(
+        return Response(
             {'error': 'Please provide both start_date and end_date or none for today\'s count'},
             status=400
         )
@@ -198,7 +198,7 @@ def log_count(request):
         
         # Validate date range
         if start_date > end_date:
-            return JsonResponse(
+            return Response(
                 {'error': 'start_date must be before or equal to end_date'},
                 status=400
             )
@@ -208,14 +208,14 @@ def log_count(request):
             timestamp__range=(start_date, end_date)
         ).count()
         
-        return JsonResponse({
+        return Response({
             'count': count,
             'start_date': start_date_str,
             'end_date': end_date_str
         })
         
     except ValueError:
-        return JsonResponse(
+        return Response(
             {'error': 'Invalid date format. Use YYYY-MM-DD'},
             status=400
         )
