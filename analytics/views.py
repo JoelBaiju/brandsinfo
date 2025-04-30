@@ -159,19 +159,20 @@ from .models import RequestLog
 
 
 
-@api_view(['GET'])
-def log_count(request):
-    if request.method == 'GET':
-        format = request.GET.get('format')
+class LogCountView(APIView):
+    def get(self,request):
+        
+        if request.method == 'GET':
+            format = request.GET.get('format')
 
-        if format == 'week':
-            logs = RequestLog.objects.annotate(period=TruncWeek('timestamp')).values('period').annotate(count=Count('id'))
-        elif format == 'month':
-            logs = RequestLog.objects.annotate(period=TruncMonth('timestamp')).values('period').annotate(count=Count('id'))
-        elif format == 'year':
-            logs = RequestLog.objects.annotate(period=TruncYear('timestamp')).values('period').annotate(count=Count('id'))
-        else:
-            today = now().date()
-            logs = RequestLog.objects.filter(timestamp__date=today).annotate(period=TruncDay('timestamp')).values('period').annotate(count=Count('id'))
+            if format == 'week':
+                logs = RequestLog.objects.annotate(period=TruncWeek('timestamp')).values('period').annotate(count=Count('id'))
+            elif format == 'month':
+                logs = RequestLog.objects.annotate(period=TruncMonth('timestamp')).values('period').annotate(count=Count('id'))
+            elif format == 'year':
+                logs = RequestLog.objects.annotate(period=TruncYear('timestamp')).values('period').annotate(count=Count('id'))
+            else:
+                today = now().date()
+                logs = RequestLog.objects.filter(timestamp__date=today).annotate(period=TruncDay('timestamp')).values('period').annotate(count=Count('id'))
 
-        return Response({'count': logs.count()})
+            return Response({'count': logs.count()})
