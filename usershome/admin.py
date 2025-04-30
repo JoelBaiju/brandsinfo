@@ -6,6 +6,10 @@ from django.contrib.auth.models import User  # Import default User model
 class dcatsAdmin(admin.ModelAdmin):
     list_display = ('id', 'cat_name', 'general_cat')  
 
+
+class gcatsAdmin(admin.ModelAdmin):
+    list_display = ('id', 'cat_name')  
+
 class cityAdmin(admin.ModelAdmin):
     list_display = ('id', 'city_name')  
 
@@ -30,12 +34,13 @@ class site_links_Admin(admin.ModelAdmin):
 
 
 admin.site.register( Descriptive_cats,dcatsAdmin)
+admin.site.register(General_cats,gcatsAdmin)
+
 admin.site.register( City,cityAdmin)
 
 
 admin.site.register(Buisness_Descriptive_cats)
 admin.site.register(Buisness_General_cats)
-admin.site.register(General_cats)
 admin.site.register(Buisness_Offers)
 # admin.site.register(Descriptive_cats)
 admin.site.register(Product_General_category)
