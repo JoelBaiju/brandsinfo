@@ -153,7 +153,7 @@ class IPLogView(APIView):
 from django.utils.timezone import now
 from datetime import datetime, timedelta
 
-def get_todays_request_count(request):
+def Logcount(request):
 
     today_start = now().replace(hour=0, minute=0, second=0, microsecond=0)
     today_end = today_start + timedelta(days=1)

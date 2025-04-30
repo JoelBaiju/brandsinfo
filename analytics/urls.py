@@ -8,5 +8,5 @@ urlpatterns = [
     
     path('track_visit/',views.track_visit ),   
     path('get_ip_logs/',views.IPLogView.as_view(), name='get_ip_logs'),  
-    path('log_count/',views.LogCountView.as_view(), name='log_count'),
+    path('log_count/',views.Logcount, name='log_count'),
 ]
