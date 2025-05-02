@@ -243,8 +243,9 @@ def keyword_suggestions_for_bdcats(request):
     for doc in dcats_docs:
         if hasattr(doc, 'cat_name'):
             keywords.append(
-                    {'cat_name' : doc.cat_name ,'id' : doc.meta.id}
+                    {'cat_name' : doc.cat_name ,'id' : doc.meta.id }
                             )
+            
 
     return Response({"suggestions": list(keywords)})
 

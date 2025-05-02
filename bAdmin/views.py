@@ -162,3 +162,59 @@ class AddDescriptiveCatsView(APIView):
             created.append(DescriptiveCatsSerializer(obj).data)
 
         return Response({'created': created}, status=status.HTTP_201_CREATED)
+
+
+
+
+from django.db.models import Count
+
+
+
+from rest_framework.pagination import PageNumberPagination
+
+
+
+class CustomPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+    
+    def get_paginated_response(self, data):
+        return Response({
+            'links': {
+                'next': self.get_next_link(),
+                'previous': self.get_previous_link()
+            },
+            'count': self.page.paginator.count,
+            'page_size': self.get_page_size(self.request),
+            'results': data
+        })
+        
+        
+class GetAllGcats(generics.ListAPIView):
+    serializer_class = GeneralCatsSerializer
+    pagination_class = CustomPagination
+
+    def get_queryset(self):
+        return General_cats.objects.annotate(
+            dcats_count=Count('descriptive_cats')
+        )
+
+
+
+
+
+
+class GetAllDcats(generics.ListAPIView):
+    serializer_class = DescriptiveCatsSerializer
+    pagination_class = CustomPagination
+    
+    
+    def get(self , request):
+        gid = request.GET.get('gid')
+        queryset = Descriptive_cats.objects.filter(general_cat = gid    )
+        return Response({'kf':'haii Buddy','data':DescriptiveCatsSerializer(queryset , many = True).data})
+    
+    
+    
+# class SearchDcats(generics)/

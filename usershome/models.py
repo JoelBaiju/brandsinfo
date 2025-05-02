@@ -553,6 +553,15 @@ class Buisness_Videos(models.Model):
 # ================================================================================
 
 
+# class Search_history(models.Model):
+#     keyword = models.CharField(max_length=100)
+#     user    = models.ForeignKey(Extended_User , null=True , blank=True , on_delete=models.CASCADE)
+#     location = models.CharField(max_length=100)
+#     matched_cats = models.
+
+
+# ================================================================================
+
 from django.db import models
 from django.core.validators import MinValueValidator
 from django.utils import timezone
