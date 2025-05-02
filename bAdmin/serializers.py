@@ -20,7 +20,7 @@ class GeneralCatsSerializer(serializers.ModelSerializer):
     # dcats       = serializers.SerializerMethodField()
     class Meta:
         model = General_cats
-        fields = ['id', 'cat_name', 'dcats_count' , 'dcats']
+        fields = ['id', 'cat_name', 'dcats_count' ]
 
     # def get_dcats(self, obj):
     #     return DescriptiveCatsSerializer(Descriptive_cats.objects.filter(general_cat = obj) , many=True).data
