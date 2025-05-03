@@ -126,7 +126,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from usershome.models import General_cats, Descriptive_cats
-from .serializers import GeneralCatsSerializer, DescriptiveCatsSerializer
+from .serializers import *
 
 class AddGeneralCatsView(APIView):
     permission_classes = [IsAuthenticated]
@@ -215,6 +215,146 @@ class GetAllDcats(generics.ListAPIView):
         queryset = Descriptive_cats.objects.filter(general_cat = gid    )
         return Response({'kf':'haii Buddy','data':DescriptiveCatsSerializer(queryset , many = True).data})
     
+
+
+
+
+
+
+class GetAllProductGeneralCats(generics.ListAPIView):
+    serializer_class = ProductGeneralCatsSerializer
+    pagination_class = CustomPagination
     
     
-# class SearchDcats(generics)/
+    def get_queryset(self):
+        return Product_General_category.objects.annotate(
+            subCats_count=Count('product_sub_category_set')
+        )
+
+
+
+    
+class GetAllProductSubCats(generics.ListAPIView):
+    serializer_class = ProductSubCatsSerializer
+    pagination_class = CustomPagination
+    
+    
+    def get(self , request):
+        gid = request.GET.get('gid')
+        queryset = Descriptive_cats.objects.filter(general_cat = gid    )
+        
+        return Response({'kf':'haii Buddy','data':DescriptiveCatsSerializer(queryset , many = True).data})
+    
+    
+    
+    
+    
+    
+import traceback
+
+class EditGcats(generics.UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = GeneralCatsSerializer
+    queryset = General_cats.objects.all()
+    
+    def update(self, request, *args, **kwargs):
+        try:
+            return super().update(request, *args, **kwargs)
+        except Exception as e:
+            error_message = str(e)
+            traceback.print_exc()  # Prints full traceback in the console
+
+            return Response(
+                {"error": error_message}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
+class EditDcats(generics.UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = DescriptiveCatsSerializer
+    queryset = Descriptive_cats.objects.all()
+    
+    def update(self, request, *args, **kwargs):
+        try:
+            return super().update(request, *args, **kwargs)
+        except Exception as e:
+            error_message = str(e)
+            traceback.print_exc()  # Prints full traceback in the console
+
+            return Response(
+                {"error": error_message}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
+    
+
+
+
+class EditProductGcats(generics.UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ProductGeneralCatsSerializer
+    queryset = Product_General_category.objects.all()
+    
+    def update(self, request, *args, **kwargs):
+        try:
+            return super().update(request, *args, **kwargs)
+        except Exception as e:
+            error_message = str(e)
+            traceback.print_exc()  # Prints full traceback in the console
+
+            return Response(
+                {"error": error_message}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
+class EditProductSubcats(generics.UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ProductSubCatsSerializer
+    queryset = Product_Sub_category.objects.all()
+    
+    def update(self, request, *args, **kwargs):
+        try:
+            return super().update(request, *args, **kwargs)
+        except Exception as e:
+            error_message = str(e)
+            traceback.print_exc()  # Prints full traceback in the console
+
+            return Response(
+                {"error": error_message}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
+    
+    
+from usershome.serializers import BuisnessesSerializer
+
+
+@api_view(['POST'])
+def add_buisness_from_admin(request):
+    if request.user.is_superuser:
+        return Response(
+            {"detail": "You dont have the right privilage to access this api //FCKOF// "},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+    print(request.user)
+    # user = Extended_User.objects.get(id=request.data["UID"])
+    plan = Plans.objects.get(plan_name='Default Plan')  
+    
+    request.data['user'] = request.data["UID"]
+    request.data['plan'] = plan.id
+        
+    serializer = BuisnessesSerializer(data = request.data)
+    print('incoming dataa hereeeee',request.data)
+    if serializer.is_valid():
+        # print(serializer.data)
+
+        business = serializer.save(owner = request.user)
+        business.plan = plan
+        business.save()
+        print(business.city)
+        return Response(
+            BuisnessesSerializer(business).data,
+            status=status.HTTP_201_CREATED
+        )
+    print(serializer.errors)
+    return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)

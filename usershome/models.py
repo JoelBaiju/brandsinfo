@@ -245,7 +245,7 @@ class Product_General_category(models.Model):
    
 class Product_Sub_category(models.Model):
     cat_name        = models.CharField(max_length=50)
-    general_cat     = models.ForeignKey(Product_General_category , on_delete=models.CASCADE)    
+    general_cat     = models.ForeignKey(Product_General_category , on_delete=models.CASCADE )     
     
     
     def __str__(self):
