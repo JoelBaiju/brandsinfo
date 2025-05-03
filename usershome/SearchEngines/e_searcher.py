@@ -218,65 +218,79 @@ def keyword_suggestions_for_major_suggestions(request):
 
 
 
-
+class CustomPagination(PageNumberPagination):
+    page_size = 10
 
 
 @api_view(['GET'])
 def keyword_suggestions_for_bdcats(request):
     query = request.GET.get('q', '').strip()
-    for_admin = request.get('for_admin','').strip()
-    print('query', query)
-    
-    if not query:
-        return Response({"suggestions": []})
+    for_admin = request.GET.get('for_admin', '').strip().lower() == 'true'
 
-    # Build the Elasticsearch query
+    if not query:
+        return Response({"count": 0, "results": [] if for_admin else {"suggestions": []}})
+
+    # ElasticSearch query
     search_query = Q("bool", should=[
-    Q("multi_match", query=query, fields=["cat_name"], fuzziness="AUTO"),
-    Q("match_phrase_prefix", cat_name={"query": query})
+        Q("multi_match", query=query, fields=["cat_name"], fuzziness="AUTO"),
+        Q("match_phrase_prefix", cat_name={"query": query})
     ])
 
-    # Search using the Elasticsearch DSL document
-    dcats_docs = DesCatDocument.search().query(search_query).source(['cat_name'])
-    print('dcats_docs', dcats_docs)
-    # Collect suggestions
-    keywords = []
-    for doc in dcats_docs:
-        if hasattr(doc, 'cat_name'):
-            keywords.append(
-                    {'cat_name' : doc.cat_name ,'id' : doc.meta.id }
-                            )
-            
+    dcats_docs = DesCatDocument.search().query(search_query).source(['cat_name'])[:100]
+    ids = [doc.meta.id for doc in dcats_docs if hasattr(doc, 'cat_name')]
 
-    return Response({"suggestions": list(keywords)})
-
-
-
+    if for_admin:
+        # Return paginated + full serializer data
+        queryset = Descriptive_cats.objects.filter(id__in=ids)
+        paginator = CustomPagination()
+        paginated_qs = paginator.paginate_queryset(queryset, request)
+        serializer = DescriptiveCatsSerializer(paginated_qs, many=True)
+        return paginator.get_paginated_response(serializer.data)
+    else:
+        # Return simple suggestions
+        keywords = [{'cat_name': doc.cat_name, 'id': doc.meta.id} for doc in dcats_docs if hasattr(doc, 'cat_name')]
+        return Response({"suggestions": keywords})
 
 
 
+
+
+
+
+
+
+
+
+
+
+from bAdmin.serializers import GeneralCatsSerializer
 
 
 @api_view(['GET'])
 def keyword_suggestions_for_gcats(request):
     query = request.GET.get('q', '').strip()
-    print('query', query)
-    
-    if not query:
-        return Response({"suggestions": []})
+    for_admin = request.GET.get('for_admin', '').strip().lower() == 'true'
 
+    if not query:
+        return Response({"count": 0, "results": [] if for_admin else {"suggestions": []}})
+
+    # ElasticSearch query
     search_query = Q("bool", should=[
-    Q("multi_match", query=query, fields=["cat_name"], fuzziness="AUTO"),
-    Q("match_phrase_prefix", cat_name={"query": query})
+        Q("multi_match", query=query, fields=["cat_name"], fuzziness="AUTO"),
+        Q("match_phrase_prefix", cat_name={"query": query})
     ])
 
-    gcats_docs = GenCatDocument.search().query(search_query).source(['cat_name'])
-    
-    keywords = []
-    for doc in gcats_docs:
-        if hasattr(doc, 'cat_name'):
-            keywords.append(
-                    {'name' : doc.cat_name ,'id' : doc.meta.id}
-                            )
+    gcats_docs = GenCatDocument.search().query(search_query).source(['cat_name'])[:100]
+    ids = [doc.meta.id for doc in gcats_docs if hasattr(doc, 'cat_name')]
 
-    return Response(list(keywords))
+    if for_admin:
+        queryset = General_cats.objects.filter(id__in=ids).annotate(
+            dcats_count=Count('descriptive_cats')
+        )
+        paginator = CustomPagination()
+        paginated_qs = paginator.paginate_queryset(queryset, request)
+        serializer = GeneralCatsSerializer(paginated_qs, many=True)
+        return paginator.get_paginated_response(serializer.data)
+    else:
+        keywords = [{'name': doc.cat_name, 'id': doc.meta.id} for doc in gcats_docs if hasattr(doc, 'cat_name')]
+        return Response({"suggestions": keywords})
