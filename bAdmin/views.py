@@ -228,7 +228,7 @@ class GetAllProductGeneralCats(generics.ListAPIView):
     
     def get_queryset(self):
         return Product_General_category.objects.annotate(
-            subCats_count=Count('product_sub_category')
+            subCats_count=Count('subcats')
         )
 
 
