@@ -199,7 +199,10 @@ class GetAllGcats(generics.ListAPIView):
         return General_cats.objects.annotate(
             dcats_count=Count('descriptive_cats')
         )
-
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        response.data['total_dcat_count'] = Descriptive_cats.objects.count()
+        return response
 
 
 
@@ -327,34 +330,43 @@ class EditProductSubcats(generics.UpdateAPIView):
     
     
 from usershome.serializers import BuisnessesSerializer
-
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
 
 @api_view(['POST'])
 def add_buisness_from_admin(request):
-    if request.user.is_superuser:
+    if not request.user.is_superuser:
         return Response(
-            {"detail": "You dont have the right privilage to access this api //FCKOF// "},
+            {"detail": "You don't have the right privilege to access this API"},
             status=status.HTTP_401_UNAUTHORIZED
         )
-    print(request.user)
-    # user = Extended_User.objects.get(id=request.data["UID"])
-    plan = Plans.objects.get(plan_name='Default Plan')  
     
-    request.data['user'] = request.data["UID"]
-    request.data['plan'] = plan.id
-        
-    serializer = BuisnessesSerializer(data = request.data)
-    print('incoming dataa hereeeee',request.data)
-    if serializer.is_valid():
-        # print(serializer.data)
+    print("Requesting admin user:", request.user)
+    
+    try:
+        plan = Plans.objects.get(plan_name='Default Plan')  
+    except Plans.DoesNotExist:
+        return Response(
+            {"detail": "Default Plan not found."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
-        business = serializer.save(owner = request.user)
-        business.plan = plan
+    request.data['user'] = request.data.get("UID")
+    request.data['plan'] = plan.id
+
+    serializer = BuisnessesSerializer(data=request.data)
+    print('Incoming data:', request.data)
+
+    if serializer.is_valid():
+        business = serializer.save(owner=request.user)
+        business.plan = plan 
         business.save()
-        print(business.city)
+
         return Response(
             BuisnessesSerializer(business).data,
             status=status.HTTP_201_CREATED
         )
-    print(serializer.errors)
-    return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
+
+    print('Validation errors:', serializer.errors)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
