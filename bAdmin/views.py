@@ -206,18 +206,15 @@ class GetAllGcats(generics.ListAPIView):
 
 
 
-
-
 class GetAllDcats(generics.ListAPIView):
     serializer_class = DescriptiveCatsSerializer
     pagination_class = CustomPagination
-    
-    
-    def get(self , request):
-        gid = request.GET.get('gid')
-        queryset = Descriptive_cats.objects.filter(general_cat = gid    )
-        return Response({'kf':'haii Buddy','data':DescriptiveCatsSerializer(queryset , many = True).data})
-    
+
+    def get_queryset(self):
+        gid = self.request.GET.get('gid')
+        if gid:
+            return Descriptive_cats.objects.filter(general_cat=gid)
+        return Descriptive_cats.objects.all()
 
 
 
@@ -235,19 +232,16 @@ class GetAllProductGeneralCats(generics.ListAPIView):
         )
 
 
-
-    
 class GetAllProductSubCats(generics.ListAPIView):
     serializer_class = ProductSubCatsSerializer
     pagination_class = CustomPagination
-    
-    
-    def get(self , request):
-        gid = request.GET.get('gid')
-        queryset = Descriptive_cats.objects.filter(general_cat = gid    )
-        
-        return Response({'kf':'haii Buddy','data':DescriptiveCatsSerializer(queryset , many = True).data})
-    
+
+    def get_queryset(self):
+        gid = self.request.GET.get('gid')
+        if gid:
+            return Product_Sub_category.objects.filter(main_category_id=gid)
+        return Product_Sub_category.objects.all()
+
     
     
     
@@ -353,7 +347,7 @@ def add_buisness_from_admin(request):
         )
 
     request.data['user'] = request.data.get("UID")
-    request.data['plan'] = plan.id
+    request.data['plan'] = plan.id  
 
     serializer = BuisnessesSerializer(data=request.data)
     print('Incoming data:', request.data)

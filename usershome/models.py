@@ -557,7 +557,7 @@ class Buisness_Videos(models.Model):
 #     keyword = models.CharField(max_length=100)
 #     user    = models.ForeignKey(Extended_User , null=True , blank=True , on_delete=models.CASCADE)
 #     location = models.CharField(max_length=100)
-#     matched_cats = models.
+#     # matched_cats = models.
 
 
 # ================================================================================
