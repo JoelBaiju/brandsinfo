@@ -9,8 +9,8 @@ urlpatterns = [
     
     path('login/',auth_views.admin_auth_view),
     path('dash/',views.admin_dashboard_view),   
-    path('add-general-cats/', views.AddGeneralCatsView.as_view(), name='add-general-cats'),
-    path('add-descriptive-cats/', views.AddDescriptiveCatsView.as_view(), name='add-descriptive-cats'),
+    path('add_general_cats/', views.AddGeneralCatsView.as_view(), name='add-general-cats'),
+    path('add_descriptive_cats/', views.AddDescriptiveCatsView.as_view(), name='add-descriptive-cats'),
     path('get_gcats/',views.GetAllGcats.as_view()),
     path('get_dcats/',views.GetAllDcats.as_view()),
     path('edit_dcats/<int:pk>/',views.EditDcats.as_view()),
