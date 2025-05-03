@@ -17,6 +17,7 @@ urlpatterns = [
     path('bwithnplan/',views.get_buisnesses_with_no_plan),
     
     path('buisnessesedit/<int:pk>/',views.BuisnessesEdit.as_view()),
+    
     path('buisnesses_na/',views.BuisnessesView_for_customers.as_view()),
     path('buisness_pics/',views.BuisnessImages.as_view()),
     path('delete_pic/<int:pk>/', views.BuisnessPics_Delete.as_view()),

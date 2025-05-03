@@ -320,8 +320,62 @@ class EditProductSubcats(generics.UpdateAPIView):
                 {"error": error_message}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
+            
+            
+            
+            
+@api_view(['POST'])
+def get_dcat_with_id_single(request):
+    id = request.GET.get('id')
+    if not id:
+        return Response({'detail': 'ID is required'}, status=400)
+    try:
+        obj = Descriptive_cats.objects.get(id=id)
+    except Descriptive_cats.DoesNotExist:
+        return Response({'detail': 'Descriptive category not found'}, status=404)
     
+    return Response(DescriptiveCatsSerializer(obj).data)
+
+
+
+
+            
+@api_view(['POST'])
+def get_gcat_with_id_single(request):
+    id = request.GET.get('id')
+    if not id:
+        return Response({'detail': 'ID is required'}, status=400)
+    try:
+        obj = General_cats.objects.get(id=id)
+    except General_cats.DoesNotExist:
+        return Response({'detail': 'Descriptive category not found'}, status=404)
     
+    return Response(GeneralCatsSerializer(obj).data)
+
+
+
+
+            
+# @api_view(['POST'])
+# def get_dcat_with_id(request):
+#     id = request.GET.get('id')
+#     if not id:
+#         return Response({'detail': 'ID is required'}, status=400)
+#     try:
+#         obj = Descriptive_cats.objects.get(id=id)
+#     except Descriptive_cats.DoesNotExist:
+#         return Response({'detail': 'Descriptive category not found'}, status=404)
+    
+#     return Response(DescriptiveCatsSerializer(obj).data)
+
+
+
+
+
+
+
+
+
     
 from usershome.serializers import BuisnessesSerializer
 from rest_framework.decorators import api_view

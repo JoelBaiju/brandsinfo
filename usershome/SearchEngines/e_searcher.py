@@ -224,6 +224,7 @@ def keyword_suggestions_for_major_suggestions(request):
 @api_view(['GET'])
 def keyword_suggestions_for_bdcats(request):
     query = request.GET.get('q', '').strip()
+    for_admin = request.get('for_admin','').strip()
     print('query', query)
     
     if not query:
