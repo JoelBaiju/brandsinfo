@@ -204,6 +204,7 @@ class GetAllGcats(generics.ListAPIView):
     def list(self, request, *args, **kwargs):
         response = super().list(request, *args, **kwargs)
         response.data['total_dcat_count'] = Descriptive_cats.objects.count()
+        response.data['total_gcat_count'] = General_cats.objects.count()
         return response
 
 
