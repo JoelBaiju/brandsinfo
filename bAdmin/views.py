@@ -128,9 +128,15 @@ from rest_framework import status
 from usershome.models import General_cats, Descriptive_cats
 from .serializers import *
 
+
+
 class AddGeneralCatsView(APIView):
     permission_classes = [IsAuthenticated]
+
     def post(self, request):
+        if not request.user.is_superuser:
+            return Response({'detail': 'You do not have permission to perform this action.'}, status=status.HTTP_403_FORBIDDEN)
+
         categories = request.data.get('gcats', [])
         created = []
 
@@ -363,19 +369,48 @@ def get_gcat_with_id_single(request):
 
 
 
+class AddProductGeneralCatsView(APIView):
+    permission_classes = [IsAuthenticated]
 
-            
-# @api_view(['POST'])
-# def get_dcat_with_id(request):
-#     id = request.GET.get('id')
-#     if not id:
-#         return Response({'detail': 'ID is required'}, status=400)
-#     try:
-#         obj = Descriptive_cats.objects.get(id=id)
-#     except Descriptive_cats.DoesNotExist:
-#         return Response({'detail': 'Descriptive category not found'}, status=404)
-    
-#     return Response(DescriptiveCatsSerializer(obj).data)
+    def post(self, request):
+        if not request.user.is_superuser:
+            return Response({'detail': 'You do not have permission to perform this action.'}, status=status.HTTP_403_FORBIDDEN)
+
+        categories = request.data.get('gcats', [])
+        created = []
+
+        for cat in categories:
+            obj, created_obj = Product_General_category.objects.get_or_create(cat_name=cat.strip())
+            created.append(ProductGeneralCatsSerializer(obj).data)
+
+        return Response({'created': created}, status=status.HTTP_201_CREATED)
+
+
+
+
+class AddProductSubCatsView(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request):
+        general_cat_id = request.data.get('gid')
+        descriptive_cats = request.data.get('dcats', [])
+
+        if not general_cat_id or not descriptive_cats:
+            return Response({'error': 'general_cat_id and categories are required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            general_cat = Product_General_category.objects.get(id=general_cat_id)
+        except General_cats.DoesNotExist:
+            return Response({'error': 'General category not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        created = []
+        for cat_name in descriptive_cats:
+            obj, _ = Product_Sub_category.objects.get_or_create(
+                cat_name=cat_name.strip(), general_cat=general_cat
+            )
+            created.append(ProductSubCatsSerializer(obj).data)
+
+        return Response({'created': created}, status=status.HTTP_201_CREATED)
+
 
 
 

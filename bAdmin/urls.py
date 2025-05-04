@@ -18,6 +18,9 @@ urlpatterns = [
     
     path('get_p_gcats/',views.GetAllProductGeneralCats.as_view()),
     path('get_p_subcats/',views.GetAllProductSubCats.as_view()),
+    path('add_p_subcats/',views.AddProductSubCatsView.as_view()),
+    path('add_p_gcats/',views.AddProductGeneralCatsView.as_view()),
+    
     
     path('add_buisness/',views.add_buisness_from_admin),
     
