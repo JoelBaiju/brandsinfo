@@ -271,7 +271,7 @@ from bAdmin.serializers import *
 
 
 @api_view(['GET'])
-def keyword_suggestions_for_gcats(request):
+def keyword_suggestions_for_Product_gcats(request):
     query = request.GET.get('q', '').strip()
     for_admin = request.GET.get('for_admin', '').strip().lower() == 'true'
 
@@ -327,7 +327,7 @@ from bAdmin.serializers import GeneralCatsSerializer
 
 
 @api_view(['GET'])
-def keyword_suggestions_for_Product_gcats(request):
+def keyword_suggestions_for_gcats(request):
     query = request.GET.get('q', '').strip()
     for_admin = request.GET.get('for_admin', '').strip().lower() == 'true'
 
@@ -340,7 +340,7 @@ def keyword_suggestions_for_Product_gcats(request):
         Q("match_phrase_prefix", cat_name={"query": query})
     ])
 
-    gcats_docs = GenCatDocument.search().query(search_query).source(['cat_name'])[:100]
+    gcats_docs = PGeneralCatsDocument.search().query(search_query).source(['cat_name'])[:100]
     ids = [doc.meta.id for doc in gcats_docs if hasattr(doc, 'cat_name')]
 
     if for_admin:
