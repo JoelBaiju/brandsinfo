@@ -469,16 +469,14 @@ def add_buisness_from_admin(request):
 
 
 from usershome.Views.auth_views import create_new_user
-
+from types import SimpleNamespace
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def add_users_from_admin(request):
-    # Check superuser permission
     if not request.user.is_superuser:
         return Response({'detail': 'You do not have permission to perform this action.'}, status=status.HTTP_403_FORBIDDEN)
 
-    # Extract and validate inputs
     phone = request.data.get('phone')
     name = request.data.get('name')
 
@@ -489,7 +487,7 @@ def add_users_from_admin(request):
         return Response({'error': 'Invalid or missing name.'}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        auth = {'name': name}
+        auth = SimpleNamespace(name=name)
         utype = 'buisness'
         user = create_new_user(phone, auth, utype)
 
