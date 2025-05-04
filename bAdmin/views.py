@@ -444,7 +444,7 @@ def add_buisness_from_admin(request):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    request.data['user'] = request.data.get("UID")
+    request.data['user'] = request.data.get("uid")
     request.data['plan'] = plan.id  
 
     serializer = BuisnessesSerializer(data=request.data)
@@ -466,4 +466,34 @@ def add_buisness_from_admin(request):
 
 
 
-# def add_users(request):
+
+
+from usershome.Views.auth_views import create_new_user
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def add_users_from_admin(request):
+    # Check superuser permission
+    if not request.user.is_superuser:
+        return Response({'detail': 'You do not have permission to perform this action.'}, status=status.HTTP_403_FORBIDDEN)
+
+    # Extract and validate inputs
+    phone = request.data.get('phone')
+    name = request.data.get('name')
+
+    if not phone or not isinstance(phone, str) or len(phone) < 10:
+        return Response({'error': 'Invalid or missing phone number.'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    if not name or not isinstance(name, str):
+        return Response({'error': 'Invalid or missing name.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        auth = {'name': name}
+        utype = 'buisness'
+        user = create_new_user(phone, auth, utype)
+
+        return Response({'detail': 'User created successfully.'}, status=status.HTTP_201_CREATED)
+    
+    except Exception as e:
+        return Response({'error': f'Failed to create user: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

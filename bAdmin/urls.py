@@ -23,6 +23,7 @@ urlpatterns = [
     
     
     path('add_buisness/',views.add_buisness_from_admin),
+    path('add_user/',views.add_users_from_admin),
     
 
 ]
