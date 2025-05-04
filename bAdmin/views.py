@@ -495,3 +495,50 @@ def add_users_from_admin(request):
     
     except Exception as e:
         return Response({'error': f'Failed to create user: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+from usershome.serializers import UserSerializer
+
+
+class get_users(generics.ListAPIView):
+    serializer_class = UserSerializer
+    pagination_class = CustomPagination
+    
+    def get(self, request, *args, **kwargs):
+        if not request.user.is_superuser:
+            return Response({'detail': 'You do not have permission to perform this action. //FCKOF//'}, status=status.HTTP_403_FORBIDDEN)
+        return super().get(request, *args, **kwargs)
+    
+    def get_queryset(self):
+
+        vendor = self.request.GET.get('vendor') == 'true'
+        customer = self.request.GET.get('customer') == 'true'
+        
+        if vendor:
+            users_queryset = Extended_User.objects.filter(is_vendor=True)
+        elif customer :
+            users_queryset = Extended_User.objects.filter(is_customer=True)
+        else:
+            users_queryset = Extended_User.objects.all()
+
+        return users_queryset
+    
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        response.data['total_user_count'] = Extended_User.objects.count()
+        response.data['total_vendors_count'] = Extended_User.objects.filter(is_vendor =True).count()
+        response.data['total_customer_count'] = Extended_User.objects.filter(is_customer =True).count()
+        return response
+
