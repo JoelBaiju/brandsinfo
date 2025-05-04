@@ -140,6 +140,8 @@ class AddGeneralCatsView(APIView):
 
         return Response({'created': created}, status=status.HTTP_201_CREATED)
 
+
+
 class AddDescriptiveCatsView(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request):
@@ -239,7 +241,7 @@ class GetAllProductSubCats(generics.ListAPIView):
     def get_queryset(self):
         gid = self.request.GET.get('gid')
         if gid:
-            return Product_Sub_category.objects.filter(main_category_id=gid)
+            return Product_Sub_category.objects.filter(general_cat_id=gid)
         return Product_Sub_category.objects.all()
 
     
@@ -418,3 +420,8 @@ def add_buisness_from_admin(request):
 
     print('Validation errors:', serializer.errors)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+# def add_users(request):
