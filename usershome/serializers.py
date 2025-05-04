@@ -6,7 +6,7 @@ from .models import *
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = Extended_User
-        fields=['mobile_number','first_name', 'date_joined' , 'is_vendor', 'is_customer']
+        fields=['id','mobile_number','first_name', 'date_joined' , 'is_vendor', 'is_customer']
         
 
 class SiteSaplinksSerializerFull(serializers.ModelSerializer):
