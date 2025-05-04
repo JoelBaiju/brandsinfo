@@ -232,6 +232,12 @@ class GetAllProductGeneralCats(generics.ListAPIView):
         return Product_General_category.objects.annotate(
             dcats_count=Count('subcats')
         )
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        response.data['total_dcat_count'] = Product_Sub_category.objects.count()
+        response.data['total_gcat_count'] = Product_General_category.objects.count()
+        return response
+
 
 
 class GetAllProductSubCats(generics.ListAPIView):

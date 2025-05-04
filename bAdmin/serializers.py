@@ -38,7 +38,7 @@ class GeneralCatsSerializer(serializers.ModelSerializer):
 
 class ProductGeneralCatsSerializer(serializers.ModelSerializer):
     dcats_count = serializers.IntegerField(read_only=True)
-
+    
     class Meta:
         model = Product_General_category
         fields = ['id', 'cat_name','dcats_count']
