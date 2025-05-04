@@ -96,7 +96,7 @@ urlpatterns = [
     path('add_deviceid/', views.add_device_id),
     
     path('search_p_gcats/', keyword_suggestions_for_Product_gcats),
-    path('search_p_sub_cats/', keyword_suggestions_for_Product_gcats),
+    path('search_p_sub_cats/', keyword_suggestions_for_Product_sub_cats),
 
 
 
