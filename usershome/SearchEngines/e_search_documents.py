@@ -137,20 +137,6 @@ class BGenCatDocument(Document):
     
         
 
-# Product Subcategories Document
-@registry.register_document
-class PSubCatsDocument(Document):
-    cat_name = fields.TextField(analyzer="edge_ngram_analyzer", search_analyzer="standard")
-
-    class Index:
-        name = 'pscats_index'
-        settings = index_settings  # Use custom index settings
-
-    class Django:
-        model = Product_Sub_category
-
-
-
 
 @registry.register_document
 class DesCatDocument(Document):
@@ -179,3 +165,32 @@ class GenCatDocument(Document):
         
     
         
+        
+        
+
+# Product Subcategories Document
+@registry.register_document
+class PSubCatsDocument(Document):
+    cat_name = fields.TextField(analyzer="edge_ngram_analyzer", search_analyzer="standard")
+
+    class Index:
+        name = 'pscats_index'
+        settings = index_settings  # Use custom index settings
+
+    class Django:
+        model = Product_Sub_category
+
+
+
+@registry.register_document
+class PGeneralCatsDocument(Document):
+    cat_name = fields.TextField(analyzer="edge_ngram_analyzer", search_analyzer="standard")
+
+    class Index:
+        name = 'pgcats_index'
+        settings = index_settings  # Use custom index settings
+
+    class Django:
+        model = Product_General_category
+
+

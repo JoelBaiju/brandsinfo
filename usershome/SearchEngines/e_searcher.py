@@ -245,7 +245,11 @@ def keyword_suggestions_for_bdcats(request):
         paginator = CustomPagination()
         paginated_qs = paginator.paginate_queryset(queryset, request)
         serializer = DescriptiveCatsSerializer(paginated_qs, many=True)
-        return paginator.get_paginated_response(serializer.data)
+        paginated_response = paginator.get_paginated_response(serializer.data)
+        paginated_response.data['total_dcat_count'] = Descriptive_cats.objects.count()
+        paginated_response.data['total_gcat_count'] = General_cats.objects.count()
+        return paginated_response    
+    
     else:
         # Return simple suggestions
         keywords = [{'cat_name': doc.cat_name, 'id': doc.meta.id} for doc in dcats_docs if hasattr(doc, 'cat_name')]
@@ -263,11 +267,67 @@ def keyword_suggestions_for_bdcats(request):
 
 
 
-from bAdmin.serializers import GeneralCatsSerializer
+from bAdmin.serializers import *
 
 
 @api_view(['GET'])
 def keyword_suggestions_for_gcats(request):
+    query = request.GET.get('q', '').strip()
+    for_admin = request.GET.get('for_admin', '').strip().lower() == 'true'
+
+    if not query:
+        return Response({"count": 0, "results": [] if for_admin else {"suggestions": []}})
+
+    # ElasticSearch query
+    search_query = Q("bool", should=[
+        Q("multi_match", query=query, fields=["cat_name"], fuzziness="AUTO"),
+        Q("match_phrase_prefix", cat_name={"query": query})
+    ])
+
+    gcats_docs = PGeneralCatsDocument.search().query(search_query).source(['cat_name'])[:100]
+    ids = [doc.meta.id for doc in gcats_docs if hasattr(doc, 'cat_name')]
+
+    if for_admin:
+        queryset = Product_General_category.objects.filter(id__in=ids).annotate(
+            dcats_count=Count('subcats')
+        )
+        paginator = CustomPagination()
+        paginated_qs = paginator.paginate_queryset(queryset, request)
+        serializer = ProductGeneralCatsSerializer(paginated_qs, many=True)
+        paginated_response = paginator.get_paginated_response(serializer.data)
+        paginated_response.data['total_dcat_count'] = Product_Sub_category.objects.count()
+        paginated_response.data['total_gcat_count'] = Product_General_category.objects.count()
+        return paginated_response
+
+    else:
+        keywords = [{'name': doc.cat_name, 'id': doc.meta.id} for doc in gcats_docs if hasattr(doc, 'cat_name')]
+        return Response({"suggestions": keywords})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+from bAdmin.serializers import GeneralCatsSerializer
+
+
+@api_view(['GET'])
+def keyword_suggestions_for_Product_gcats(request):
     query = request.GET.get('q', '').strip()
     for_admin = request.GET.get('for_admin', '').strip().lower() == 'true'
 
@@ -290,7 +350,11 @@ def keyword_suggestions_for_gcats(request):
         paginator = CustomPagination()
         paginated_qs = paginator.paginate_queryset(queryset, request)
         serializer = GeneralCatsSerializer(paginated_qs, many=True)
-        return paginator.get_paginated_response(serializer.data)
+        paginated_response = paginator.get_paginated_response(serializer.data)
+        paginated_response.data['total_dcat_count'] = Descriptive_cats.objects.count()
+        paginated_response.data['total_gcat_count'] = General_cats.objects.count()
+        return paginated_response
+
     else:
         keywords = [{'name': doc.cat_name, 'id': doc.meta.id} for doc in gcats_docs if hasattr(doc, 'cat_name')]
         return Response({"suggestions": keywords})

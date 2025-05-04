@@ -72,6 +72,9 @@ urlpatterns = [
     
 #  ========================= Users URLs
     
+    
+    
+    
     path('esearch/', elasticsearch2),
     path('suggestions/', keyword_suggestions_for_major_suggestions),
     path('suggestions_bdcats/', keyword_suggestions_for_bdcats),
@@ -91,6 +94,8 @@ urlpatterns = [
     path('reviews/', views.Get_Reviews_Ratings_View.as_view()),
 
     path('add_deviceid/', views.add_device_id),
+    
+    path('search_p_gcats/', keyword_suggestions_for_Product_gcats),
 
 
 
@@ -109,6 +114,13 @@ urlpatterns = [
     path('notifytest/', puchase_plan, name='p'),
 
     path('pcreds/',pcreds, name='pcreds'),
+    
+    
+    
+    
+    
+    
+    
 ]
 
 
