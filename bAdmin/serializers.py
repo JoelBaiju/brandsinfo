@@ -48,7 +48,7 @@ class ProductSubCatsSerializer(serializers.ModelSerializer):
     gcat = serializers.SerializerMethodField()
     class Meta:
         model = Product_Sub_category
-        fields = ['id', 'catname','gcat']
+        fields = ['id', 'cat_name','gcat']
     
     def get_gcat(self , obj):
         return obj.general_cat.cat_name
