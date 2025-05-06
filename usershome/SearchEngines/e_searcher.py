@@ -276,7 +276,7 @@ def keyword_suggestions_for_gcats(request):
         Q("match_phrase_prefix", cat_name={"query": query})
     ])
 
-    gcats_docs = PGeneralCatsDocument.search().query(search_query).source(['cat_name'])[:100]
+    gcats_docs = GenCatDocument.search().query(search_query).source(['cat_name'])[:100]
     ids = [doc.meta.id for doc in gcats_docs if hasattr(doc, 'cat_name')]
 
     if for_admin:
