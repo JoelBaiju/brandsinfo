@@ -205,10 +205,10 @@ def keyword_suggestions_for_major_suggestions(request):
     keywords = set()
    
     for doc in bdcats_docs:
-        keywords.add(doc.dcat.cat_name)
+        keywords.add(doc.cat_name)
     
     for doc in chain(product_docs, service_docs, business_docs):
-        keywords.add(doc.cat_name)
+        keywords.add(doc.name.lower())
     
   
     return Response({"suggestions": keywords})
