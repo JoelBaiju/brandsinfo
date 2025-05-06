@@ -196,7 +196,7 @@ class PGeneralCatsDocument(Document):
 
 
 
-
+@registry.register_document
 class UsersDocument(Document):
     username =  fields.TextField(analyzer="edge_ngram_analyzer", search_analyzer="standard")
     first_name =  fields.TextField(analyzer="edge_ngram_analyzer", search_analyzer="standard")
