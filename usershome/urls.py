@@ -77,6 +77,7 @@ urlpatterns = [
     
     path('esearch/', elasticsearch2),
     path('suggestions/', keyword_suggestions_for_major_suggestions),
+    path('search_users/', search_users),
     path('suggestions_bdcats/', keyword_suggestions_for_bdcats),
     path('suggestions_gcats/', keyword_suggestions_for_gcats),
     path('tracktime/',views.tracker_addtime),
