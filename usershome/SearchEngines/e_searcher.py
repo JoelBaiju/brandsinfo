@@ -401,6 +401,35 @@ def keyword_suggestions_for_Product_sub_cats(request):
 
 
 
+@api_view(['GET'])
+def search_users(request):
+    query = request.GET.get('q', '').strip()
+
+
+    # ElasticSearch query
+    search_query = Q("bool", should=[
+        Q("multi_match", query=query, fields=["cat_name"], fuzziness="AUTO"),
+        Q("match_phrase_prefix", cat_name={"query": query})
+    ])
+
+    user_docs = UsersDocument.search().query(search_query).source(['first_name','username'])[:100]
+    ids = [doc.meta.id for doc in user_docs if hasattr(doc, 'username')]
+
+   
+    queryset = Extended_User.objects.filter(id__in=ids)
+    paginator = CustomPagination()
+    paginated_qs = paginator.paginate_queryset(queryset, request)
+    serializer = UserSerializer(paginated_qs, many=True)
+    paginated_response = paginator.get_paginated_response(serializer.data)
+    return paginated_response    
+
+
+
+
+
+
+
+
 
 
 

@@ -39,7 +39,7 @@ def Add_plan (request):
     try:
         plan                = Plans.objects.get(plan_name = plan_name)
         buisnesss.plan      = plan
-        if plan.search_priority_1:
+        if plan.search_priority_1:          
             buisnesss.search_priority  = 1 
         elif plan.search_priority_2:
             buisnesss.search_priority  = 2

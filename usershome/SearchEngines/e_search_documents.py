@@ -194,3 +194,16 @@ class PGeneralCatsDocument(Document):
         model = Product_General_category
 
 
+
+
+
+class UsersDocument(Document):
+    username =  fields.TextField(analyzer="edge_ngram_analyzer", search_analyzer="standard")
+    first_name =  fields.TextField(analyzer="edge_ngram_analyzer", search_analyzer="standard")
+
+    class Index:
+        name = 'users_index'
+        settings = index_settings  
+
+    class Django:
+        model = Extended_User
