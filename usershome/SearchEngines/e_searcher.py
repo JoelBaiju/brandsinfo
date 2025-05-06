@@ -408,7 +408,7 @@ def search_users(request):
 
     # ElasticSearch query
     search_query = Q("bool", should=[
-        Q("multi_match", query=query, fields=["cat_name"], fuzziness="AUTO"),
+        Q("multi_match", query=query, fields=["username","first_name"], fuzziness="AUTO"),
         Q("match_phrase_prefix", cat_name={"query": query})
     ])
 
