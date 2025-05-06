@@ -208,7 +208,7 @@ def keyword_suggestions_for_major_suggestions(request):
         keywords.add(doc.dcat.cat_name)
     
     for doc in chain(product_docs, service_docs, business_docs):
-        keywords.add(doc.name.lower())
+        keywords.add(doc.cat_name)
     
   
     return Response({"suggestions": keywords})
