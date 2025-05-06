@@ -115,7 +115,7 @@ class BDesCatDocument(Document):
         model = Buisness_Descriptive_cats
         
     
-    def prepare_name(self, instance):
+    def prepare_cat_name(self, instance):
         # Fetch the `cat_name` from the related `Descriptive_cats` model
         return instance.dcat.cat_name
     
