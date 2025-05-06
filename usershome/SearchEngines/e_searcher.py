@@ -200,12 +200,13 @@ def keyword_suggestions_for_major_suggestions(request):
     service_docs = ServiceDocument.search().query(search_query).source(['name']).to_queryset()
     business_docs = BuisnessDocument.search().query(search_query).source(['name']).to_queryset()
     bdcats_docs = BDesCatDocument.search().query(search_query).source(['cat_name']).to_queryset()
+    print(bdcats_docs)
 
     # Extract keywords from documents
     keywords = set()
    
     for doc in bdcats_docs:
-        keywords.add(doc.cat_name)
+        keywords.add(doc.dcat.cat_name)
     
     for doc in chain(product_docs, service_docs, business_docs):
         keywords.add(doc.name.lower())
