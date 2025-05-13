@@ -54,15 +54,34 @@ class ProductSubCatsSerializer(serializers.ModelSerializer):
         return obj.general_cat.cat_name
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
 class BuisnessesAdminlistSerializer(serializers.ModelSerializer):
     plan = serializers.SerializerMethodField()
-    image = serializers.ImageField()
+    image = serializers.ImageField(allow_null=True, required=False)
     city = serializers.SerializerMethodField()
     locality = serializers.SerializerMethodField()
+
     class Meta:
         model = Buisnesses
-        fields = ['id', 'name', 'building_name','locality', 'city', 'state', 'verified', 'created_on', 'assured', 'plan' , 'rating','image' , 'buisness_type']
-    
+        fields = [
+            'id', 'name', 'building_name', 'locality', 'city', 'state',
+            'verified', 'created_on', 'assured', 'plan', 'rating',
+            'image', 'buisness_type'
+        ]
+
     def get_plan(self, obj):
         return obj.plan.plan_name if obj.plan else None
-    
+
+    def get_city(self, obj):
+        return obj.city.city_name if obj.city else None
+
+    def get_locality(self, obj):
+        return obj.locality.locality_name if obj.locality else None
