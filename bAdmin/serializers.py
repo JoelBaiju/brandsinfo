@@ -57,4 +57,4 @@ class ProductSubCatsSerializer(serializers.ModelSerializer):
 class BuisnessesAdminlistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Buisnesses
-        fields = ['id', 'name', 'building_name','locality', 'city', 'state', 'country', 'verified', 'created_on' , 'plan' , 'rating']
+        fields = ['id', 'name', 'building_name','locality', 'city', 'state', 'verified', 'created_on' , 'plan' , 'rating']
