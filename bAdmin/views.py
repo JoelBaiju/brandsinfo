@@ -542,3 +542,20 @@ class get_users(generics.ListAPIView):
         response.data['total_customer_count'] = Extended_User.objects.filter(is_customer =True).count()
         return response
 
+
+
+
+class get_buisnesses(generics.ListAPIView):
+    serializer_class = BuisnessesAdminlistSerializer
+    pagination_class = CustomPagination
+    
+    def get_queryset(self):
+        return Buisnesses.objects.all()
+    
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        response.data['total_buisness_count'] = Buisnesses.objects.count()
+        response.data['total_product_buisness_count'] = Buisnesses.objects.filter(buisness_type='Product').count()
+        response.data['total_service_buisness_count'] = Buisnesses.objects.filter(buisness_type='Service').count()
+        response.data['total_hybrid_buisness_count'] = Buisnesses.objects.filter(buisness_type='Products & Services').count()
+        return response

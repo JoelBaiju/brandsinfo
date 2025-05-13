@@ -25,6 +25,6 @@ urlpatterns = [
     path('add_buisness/',views.add_buisness_from_admin),
     path('add_user/',views.add_users_from_admin),
     path('get_users/',views.get_users.as_view()),
-    
+    path('get_buisnesses/',views.get_buisnesses.as_view()),
 
 ]

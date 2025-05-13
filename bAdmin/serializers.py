@@ -52,3 +52,9 @@ class ProductSubCatsSerializer(serializers.ModelSerializer):
     
     def get_gcat(self , obj):
         return obj.general_cat.cat_name
+    
+    
+class BuisnessesAdminlistSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Buisnesses
+        fields = ['id', 'name', 'address', 'city', 'state', 'country', 'verified', 'created_on' , 'plan' , 'rating']
