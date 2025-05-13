@@ -59,7 +59,7 @@ class BuisnessesAdminlistSerializer(serializers.ModelSerializer):
     image = serializers.ImageField()
     class Meta:
         model = Buisnesses
-        fields = ['id', 'name', 'building_name','locality', 'city', 'state', 'verified', 'created_on', 'assured', 'plan' , 'rating','image']
+        fields = ['id', 'name', 'building_name','locality', 'city', 'state', 'verified', 'created_on', 'assured', 'plan' , 'rating','image' , 'buisness_type']
     
     def get_plan(self, obj):
         return obj.plan.plan_name if obj.plan else None
