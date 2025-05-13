@@ -128,6 +128,7 @@ def elasticsearch2(request):
 
         buisnesses = buisnesses.filter(filters)
         buisnesses_direct = buisnesses_direct.filter(filters)
+        
         if buisnesses_direct.count()!=0:
             executor.submit(update_search_count_buisnesses , buisnesses_direct)
             combined_queryset = buisnesses_direct          

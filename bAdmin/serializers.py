@@ -58,7 +58,7 @@ class BuisnessesAdminlistSerializer(serializers.ModelSerializer):
     plan = serializers.SerializerMethodField()
     class Meta:
         model = Buisnesses
-        fields = ['id', 'name', 'building_name','locality', 'city', 'state', 'verified', 'created_on' , 'plan' , 'rating']
+        fields = ['id', 'name', 'building_name','locality', 'city', 'state', 'verified', 'created_on', 'assured', 'plan' , 'rating']
     
     def get_plan(self, obj):
         return obj.plan.plan_name if obj.plan else None
