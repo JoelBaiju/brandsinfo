@@ -160,6 +160,7 @@ class Buisnesses(models.Model):
     assured                     = models.BooleanField(default=False)    
     rating                      = models.FloatField(default=0)    
     total_no_of_ratings         = models.IntegerField(default=0)
+    is_active                   = models.BooleanField(default=True)
 
 
     def __str__(self):

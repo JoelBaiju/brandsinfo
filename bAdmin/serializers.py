@@ -85,3 +85,5 @@ class BuisnessesAdminlistSerializer(serializers.ModelSerializer):
 
     def get_locality(self, obj):
         return obj.locality.locality_name if obj.locality else None
+
+

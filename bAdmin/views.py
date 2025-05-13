@@ -559,3 +559,5 @@ class get_buisnesses(generics.ListAPIView):
         response.data['total_service_buisness_count'] = Buisnesses.objects.filter(buisness_type='Service').count()
         response.data['total_hybrid_buisness_count'] = Buisnesses.objects.filter(buisness_type='Products & Services').count()
         return response
+
+
