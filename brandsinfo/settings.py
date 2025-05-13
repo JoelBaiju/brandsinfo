@@ -295,7 +295,7 @@ else :
     ELASTICSEARCH_DSL = {
         'default': {
             'hosts': ['https://localhost:9200'],  # Use HTTPS for Elasticsearch 8.x
-            'http_auth': ('elastic', 'RcE2HjloHSSRP=VyjfAW'),  # Separate credentials
+            'http_auth': ('elastic', 'i1XcRSql5nr9hCHx2aDd'),  # Separate credentials
             'verify_certs': False,  # Disable only for development/testing
             'timeout': 30,  # Optional: Set request timeout
         },
