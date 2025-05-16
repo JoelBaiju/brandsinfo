@@ -429,7 +429,7 @@ def search_users(request):
 
 
 
-
+from bAdmin.serializers import BuisnessesAdminlistSerializer
 
 @api_view(['GET'])
 def search_buisnesses(request):
@@ -446,7 +446,7 @@ def search_buisnesses(request):
     queryset = Buisnesses.objects.filter(id__in=ids)
     paginator = CustomPagination()
     paginated_qs = paginator.paginate_queryset(queryset, request)
-    serializer = BuisnessesSerializer(paginated_qs, many=True)
+    serializer = BuisnessesAdminlistSerializer(paginated_qs, many=True)
     paginated_response = paginator.get_paginated_response(serializer.data)
     return paginated_response    
 

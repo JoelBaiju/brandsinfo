@@ -83,7 +83,7 @@ urlpatterns = [
     path('suggestions_gcats/', keyword_suggestions_for_gcats),
     path('tracktime/',views.tracker_addtime),
 
-    path('home/',views.HomeView),
+    path('home/',views.HomeView),   
     
     path('groups/', views.Create_Group_View.as_view(), name='create-group'), 
     path('groups/user/', views.User_Groups_View.as_view(), name='user-groups'), 
