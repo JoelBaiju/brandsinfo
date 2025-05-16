@@ -245,7 +245,7 @@ FIREBASE_API_KEY = 'AIzaSyBF52Ah0ERtBRalBWwAOgEMPUhjKrlpVvo'
 
 
 
-DEV = False
+DEV = True
     
 
 
@@ -271,8 +271,8 @@ if DEV:
         'default': {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'brandsinfo',   
-            'USER': 'root',       
-            'PASSWORD': 'root123',  
+            'USER': 'berlin',       
+            'PASSWORD': 'berlin@123',  
             'HOST': 'localhost',    
             'PORT': '3306',         
         }
