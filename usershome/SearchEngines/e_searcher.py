@@ -446,7 +446,7 @@ def search_buisnesses(request):
     queryset = Buisnesses.objects.filter(id__in=ids)
     paginator = CustomPagination()
     paginated_qs = paginator.paginate_queryset(queryset, request)
-    serializer = BuisnessesAdminlistSerializer(paginated_qs, many=True)
+    serializer = BuisnessesAdminlistSerializer(paginated_qs, many=True, context={'request': request})
     paginated_response = paginator.get_paginated_response(serializer.data)
     return paginated_response    
 
