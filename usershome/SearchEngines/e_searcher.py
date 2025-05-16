@@ -431,6 +431,31 @@ def search_users(request):
 
 
 
+@api_view(['GET'])
+def search_buisnesses(request):
+    query = request.GET.get('q', '').strip()
+
+
+    # ElasticSearch query
+    search_query = Q("multi_match", query=query, fields=["name"], fuzziness="AUTO")
+
+    b_docs = BuisnessDocument.search().query(search_query).source(['name'])[:100]
+    ids = [doc.meta.id for doc in b_docs if hasattr(doc, 'name')]
+
+   
+    queryset = Buisnesses.objects.filter(id__in=ids)
+    paginator = CustomPagination()
+    paginated_qs = paginator.paginate_queryset(queryset, request)
+    serializer = BuisnessesSerializer(paginated_qs, many=True)
+    paginated_response = paginator.get_paginated_response(serializer.data)
+    return paginated_response    
+
+
+
+
+
+
+
 
 
 
