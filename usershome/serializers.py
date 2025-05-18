@@ -139,7 +139,7 @@ class PlansSerializer(serializers.ModelSerializer):
     class Meta:
         model = Plans
         fields = [
-            'plan_name','profile_visit','image_gallery',
+            'plan_name','verbouse_name','profile_visit','image_gallery',
             'google_map','whatsapp_chat',
             'profile_view_count',
             'video_gallery',

@@ -13,6 +13,7 @@ from django.contrib.auth.models import AbstractUser
 
 class Plans(models.Model):
     plan_name                                   = models.CharField(max_length=100)
+    verbouse_name                               = models.CharField(max_length=100,default='')
     # trier 1
     business_hours                              = models.BooleanField(default=False)
     review_ratings                              = models.BooleanField(default=False)
