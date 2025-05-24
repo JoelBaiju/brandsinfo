@@ -132,7 +132,7 @@ class Buisnesses(models.Model):
     description                 = models.CharField(max_length=1000 , blank=True , null=True)
     buisness_type               = models.CharField(max_length=50)
     manager_name                = models.CharField(max_length=100 , blank=True) 
-    building_name               = models.CharField(max_length=400 , blank=True , null=True)
+    building_name               = models.CharField(max_length=2000 , blank=True , null=True)
     landmark                    = models.CharField(max_length=50 , blank=True , null=True)
     locality                    = models.ForeignKey(Locality , on_delete=models.CASCADE)
     city                        = models.ForeignKey(City , on_delete=models.CASCADE , null=True , blank=True)
