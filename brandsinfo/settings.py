@@ -271,8 +271,8 @@ if DEV:
         'default': {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'brandsinfo',   
-            'USER': 'berlin',       
-            'PASSWORD': 'berlin@123',  
+            'USER': 'root',       
+            'PASSWORD': 'root@123',  
             'HOST': 'localhost',    
             'PORT': '3306',         
         }

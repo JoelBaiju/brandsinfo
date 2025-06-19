@@ -25,3 +25,4 @@ class UsershomeConfig(AppConfig):
                 print("Plans are set ready to go")
         except OperationalError:
             print("❌ Database not ready yet. Skipping startup check.")
+        

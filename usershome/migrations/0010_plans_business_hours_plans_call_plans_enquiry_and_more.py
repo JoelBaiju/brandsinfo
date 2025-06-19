@@ -10,34 +10,34 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='plans',
-            name='business_hours',
-            field=models.BooleanField(default=False),
-        ),
-        migrations.AddField(
-            model_name='plans',
-            name='call',
-            field=models.BooleanField(default=False),
-        ),
-        migrations.AddField(
-            model_name='plans',
-            name='enquiry',
-            field=models.BooleanField(default=False),
-        ),
-        migrations.AddField(
-            model_name='plans',
-            name='offers',
-            field=models.BooleanField(default=False),
-        ),
-        migrations.AddField(
-            model_name='plans',
-            name='review_ratings',
-            field=models.BooleanField(default=False),
-        ),
-        migrations.AddField(
-            model_name='plans',
-            name='social_meida',
-            field=models.BooleanField(default=False),
-        ),
+        # migrations.AddField(
+        #     model_name='plans',
+        #     name='business_hours',
+        #     field=models.BooleanField(default=False),
+        # ),
+        # migrations.AddField(
+        #     model_name='plans',
+        #     name='call',
+        #     field=models.BooleanField(default=False),
+        # ),
+        # migrations.AddField(
+        #     model_name='plans',
+        #     name='enquiry',
+        #     field=models.BooleanField(default=False),
+        # ),
+        # migrations.AddField(
+        #     model_name='plans',
+        #     name='offers',
+        #     field=models.BooleanField(default=False),
+        # ),
+        # migrations.AddField(
+        #     model_name='plans',
+        #     name='review_ratings',
+        #     field=models.BooleanField(default=False),
+        # ),
+        # migrations.AddField(
+        #     model_name='plans',
+        #     name='social_meida',
+        #     field=models.BooleanField(default=False),
+        # ),
     ]

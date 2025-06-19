@@ -7,6 +7,8 @@ from .Views import ps_views
 from .SearchEngines.e_searcher import *
 from .Views.streaming_views import VideoUploadView
 from .Views.payment_view import puchase_plan , pcreds
+
+from communications.draft4sms import senddd
 urlpatterns = [
     
 # ========================== Add buisness urls
@@ -119,6 +121,9 @@ urlpatterns = [
     path('pcreds/',pcreds, name='pcreds'),
     
     
+
+# =============================
+    path('send/' , senddd )
     
     
     
