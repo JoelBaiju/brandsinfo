@@ -33,7 +33,7 @@ def send_sms_draft4sms():
 
     # Construct final URL
     url = f"{BASE_URL}?apikey={API_KEY}&senderid={SENDER_ID}&number={number_string}&message={encoded_message}&format=json"
-    url = f"https://text.draft4sms.com/vb/apikey.php?apikey=rbdRxHQu02qRCGIU&senderid=BRNSIF&number=7034761676&message=Hello There"
+    url = f"https://text.draft4sms.com/vb/apikey.php?apikey=rbdRxHQu02qRCGIU&senderid=BRNSIF&templateid=otptemplate1&number=7034761676&message=Hello There"
     try:
         response = requests.get(url)
         return response.json()
