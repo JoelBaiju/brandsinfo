@@ -219,7 +219,7 @@ def verify_payment_FE(request):
             'business_id': tnx.buisness.id,  
             "timestamp": now().isoformat(),  
             "type": "send_notification",
-            "extras":{"invoice":tnx.invoice , "status":tnx.status}
+            "extras":{"invoice":tnx.invoice.url , "status":tnx.status}
         })
 
     except Exception as e:
