@@ -236,7 +236,7 @@ def addplantobuisness(order_id):
         txn = PhonePeTransaction.objects.get(order_id=order_id)
         if txn.status != 'COMPLETED':
             return False
-        buisness=Buisnesses.objects.filter(id=txn.buisness.id)
+        buisness=Buisnesses.objects.get(id=txn.buisness.id)
         
         # Add the plan to the buisness
         buisness.plan = (txn.plan)
