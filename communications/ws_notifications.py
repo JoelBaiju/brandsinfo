@@ -140,7 +140,7 @@ def payment_status_update(order_id,):
         'user': buisness.user.username,
     }
     print("passing control to prime notfication sender")
-    notify_user.delay(data=data , extras = {'invoice' : generate_invoice_pdf(tnx.order_id),'status':tnx.status})
+    notify_user(data=data , extras = {'invoice' : generate_invoice_pdf(tnx.order_id),'status':tnx.status})
     return True
 
 
