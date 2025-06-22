@@ -8,13 +8,13 @@
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
         
         :root {
-            --primary: #6C63FF;
-            --primary-light: #8E85FF;
-            --secondary: #FF6584;
+            --primary: #6C63FF;  /* Vibrant purple-blue */
+            --primary-light: #8E85FF; /* Lighter purple */
+            --secondary: #FF6584; /* Pink accent */
             --dark: #2D3748;
             --light: #F7FAFC;
             --gray: #A0AEC0;
-            --success: #48BB78;
+            --success: #48BB78; /* Green for status */
         }
         
         * {
@@ -55,11 +55,14 @@
             gap: 1rem;
         }
         
+        .logo img {
+            height: 45px;
+        }
+        
         .logo-text {
             font-weight: 700;
             font-size: 1.6rem;
             letter-spacing: 0.5px;
-            color: #636362;
         }
         
         .invoice-title {
@@ -106,7 +109,7 @@
         .bill-to h3 {
             font-size: 1.2rem;
             margin-bottom: 0.75rem;
-            color: #f48e22;
+            color:#f48e22;
             font-weight: 600;
         }
         
@@ -144,6 +147,9 @@
             overflow: hidden;
             border: 1px solid #EDF2F7;
         }
+        .table-container th {
+           color: #f48e22;
+        }
         
         table {
             width: 100%;
@@ -161,7 +167,7 @@
         
         th {
             font-weight: 600;
-            color: #f48e22;
+            color: var(--primary);
             font-size: 0.95rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -226,7 +232,7 @@
         .thank-you {
             font-size: 1.3rem;
             margin-bottom: 1.25rem;
-            color: #636362;
+            color:#636362;
             font-weight: 600;
         }
         
@@ -253,6 +259,7 @@
             letter-spacing: 0.5px;
         }
         
+        /* Added some subtle animations */
         .invoice-container {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
@@ -267,7 +274,7 @@
     <div class="invoice-container">
         <div class="invoice-header">
             <div class="logo">
-                <img src="./static/bi_name_logo.png" alt="BrandsInfo Logo">
+                <img src="https://via.placeholder.com/150x50?text=BrandsInfo" alt="BrandsInfo Logo">
             </div>
             <div class="invoice-title">INVOICE</div>
         </div>
@@ -275,16 +282,26 @@
         <div class="invoice-body">
             <div class="company-info">
                 <div class="info-block">
-                    <h3>Bill To</h3>
-                    <p>{{ business_name }}</p>
-                    <p>{{ username }}</p>
+                    <h3>BrandsInfo</h3>
+                    <p>123 Business Street</p>
+                    <p>Tiruppur, Tamil Nadu 641604</p>
+                    <p>+91 9876543210</p>
                 </div>
                 <div class="info-block" style="text-align: right;">
                     <h3>Invoice Details</h3>
-                    <p>Invoice #: {{ invoice_number|default:"BI-"|add:timestamp }}</p>
-                    <p>Date: {% now "F d, Y" %}</p>
+                    <p>Invoice #: INV-2023-001</p>
+                    <p>Date: <span id="current-date"></span></p>
                     <p>Status: <span class="status-badge">Paid</span></p>
                 </div>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="bill-to">
+                <h3>Bill To</h3>
+                <p>ABC Textiles</p>
+                <p>456 Customer Avenue</p>
+                <p>Tiruppur, Tamil Nadu 641605</p>
             </div>
             
             <div class="divider"></div>
@@ -293,19 +310,19 @@
                 <div class="details-grid">
                     <div class="detail-item">
                         <h4>Package Name</h4>
-                        <p>{{ plan_name }}</p>
+                        <p>Premium Business Package</p>
                     </div>
                     <div class="detail-item">
-                        <h4>Start Date</h4>
-                        <p>{{ start_date|date:"F d, Y" }}</p>
+                        <h4>Payment Method</h4>
+                        <p>Online Transfer</p>
                     </div>
                     <div class="detail-item">
-                        <h4>Expiry Date</h4>
-                        <p>{{ expiry_date|date:"F d, Y" }}</p>
+                        <h4>Invoice Date</h4>
+                        <p><span id="invoice-date"></span></p>
                     </div>
                     <div class="detail-item">
-                        <h4>Duration</h4>
-                        <p>{{ duration_days }} days</p>
+                        <h4>Transaction ID</h4>
+                        <p>TXN123456789</p>
                     </div>
                 </div>
             </div>
@@ -320,11 +337,8 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td>
-                                <strong>{{ plan_name }}</strong><br>
-                                Business Listing Plan
-                            </td>
-                            <td>₹{{ price }}</td>
+                            <td>Premium Business Package (Annual)</td>
+                            <td>₹25,000.00</td>
                         </tr>
                     </tbody>
                 </table>
@@ -334,11 +348,15 @@
                 <div class="total-box">
                     <div class="total-row">
                         <span class="total-label">Subtotal</span>
-                        <span class="total-value">₹{{ price }}</span>
+                        <span class="total-value">₹25,000.00</span>
+                    </div>
+                    <div class="total-row">
+                        <span class="total-label">Discount</span>
+                        <span class="total-value">₹0.00</span>
                     </div>
                     <div class="total-row grand-total">
                         <span class="total-label">Total Paid</span>
-                        <span class="total-value">₹{{ total_amount|floatformat:2 }}</span>
+                        <span class="total-value">₹25,000.00</span>
                     </div>
                 </div>
             </div>
@@ -346,9 +364,20 @@
         
         <div class="invoice-footer">
             <p class="thank-you">Thank you for your business!</p>
-            <p class="support-info">For any questions, please contact <a href="mailto:support@brandsinfo.com">support@brandsinfo.com</a></p>
-            <p class="support-info">Invoice generated on: {% now "F d, Y" %}</p>
+            <p class="support-info">For any questions, please contact <a href="mailto:support@brandsinfo.in">support@brandsinfo.in</a></p>
+            <p class="support-info">Invoice generated on: <span id="footer-date"></span></p>
         </div>
     </div>
+
+    <script>
+        // Set current date and time
+        const now = new Date();
+        const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+        const formattedDate = now.toLocaleDateString('en-IN', options);
+        
+        document.getElementById('current-date').textContent = formattedDate;
+        document.getElementById('invoice-date').textContent = formattedDate;
+        document.getElementById('footer-date').textContent = formattedDate;
+    </script>
 </body>
 </html>

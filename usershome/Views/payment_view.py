@@ -12,7 +12,6 @@ from brandsinfo import phonepe
 from brandsinfo.phonepe import initiate_payment as phonepe_initiate_payment
 from rest_framework import status as rest_framework_status
 from datetime import timedelta
-from django.utils.timezone import now, timezone
 from communications.ws_notifications import payment_status_update
 
 
@@ -57,7 +56,7 @@ def initiate_payment_view(request):
                         buisness=business,
                         plan=plan_variant.plan,
                         plan_variant=plan_variant,
-                        expire_at = now() + timedelta(days=int(plan_variant.duration)),
+                        expire_at = timezone.now() + timedelta(days=int(plan_variant.duration)),
                         payment_url='',
                         status='INITIATED'
                     )
@@ -178,7 +177,7 @@ def verify_payment_FE(request):
         user = request.user
 
         # Define time window (last 3 minutes)
-        time_threshold = now() - timedelta(minutes=3)
+        time_threshold = timezone.now() - timedelta(minutes=3)
 
         # Filter transactions for the user created in the last 3 minutes
         tnx = (
@@ -217,7 +216,7 @@ def verify_payment_FE(request):
             'ntype':"PAYMENT_STATUS",
             'business': tnx.buisness.name,  
             'business_id': tnx.buisness.id,  
-            "timestamp": now().isoformat(),  
+            "timestamp": timezone.now().isoformat(),  
             "type": "send_notification",
             "extras":{"invoice":tnx.invoice.url , "status":tnx.status}
         })
@@ -229,6 +228,7 @@ def verify_payment_FE(request):
    
 
 from ..models import Plans 
+from django.utils import timezone
 
 def addplantobuisness(order_id):
     
