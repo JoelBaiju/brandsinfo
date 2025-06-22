@@ -163,7 +163,7 @@ def payment_callback(request):
     #         return HttpResponseBadRequest("Error processing callback")
 
     # return HttpResponseBadRequest("Invalid request method")
-
+    return Response('')
    
    
    
