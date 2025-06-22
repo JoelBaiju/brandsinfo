@@ -45,8 +45,10 @@ def notify_user(data,extras=None):
             "extras":extras
         }
     )
-    
-    return {"sent": True}
+
+
+
+    return {"sent": True , "data":data }
 
 
 
