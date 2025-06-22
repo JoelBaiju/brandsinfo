@@ -13,13 +13,12 @@ import subprocess
 from celery import shared_task
 from django.conf import settings
 from .models import Buisness_Videos  # adjust import as needed
-
+from .Reviews.reviewer import check_and_schedule_reviews
 
 
 @shared_task(bind=True, name="usershome.Reviews.reviewer.check_and_schedule_reviews")
-def check_and_schedule_reviews():
-    print("heojhohgf")
-
+def schedule_reviews():
+    check_and_schedule_reviews()
 
 
 
