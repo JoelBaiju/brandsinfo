@@ -190,7 +190,40 @@ def send_otp_email(firstname,otp,toemail):
     
     
     
-    
+
+
+def send_review_notification_email(
+    business_name,
+    business_description,
+    review_type,
+    rating,
+    review,
+    eg_review
+):
+    subject = f'📝 New Review Generated for {business_name}'
+
+    html_message = render_to_string('review_generated_admin.html', {
+        'business_name': business_name,
+        'business_description': business_description,
+        'review_type': review_type,
+        'rating': rating,
+        'review': review,
+        'eg_review': eg_review
+    })
+
+    plain_message = strip_tags(html_message)
+
+    email = EmailMultiAlternatives(
+        subject,
+        plain_message,
+        'brandsinfoguide@gmail.com',  # Replace with your sender email
+        ['brandsinfoguide@gmail.com']
+    )
+    email.attach_alternative(html_message, 'text/html')
+    email.send()
+
+        
+
     
     
     

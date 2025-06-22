@@ -142,11 +142,7 @@ def generate_metadata_for_CC(category , city):
 
 
 
-
-
-def generate_metadata_for_SB(city,general_category,buisness_name,descriptive_category,description):
-
-        
+def generate_metadata_for_SB(city, general_category, buisness_name, descriptive_category, description):
     prompt = f"""
     Generate high-quality **SEO metadata** for a business in **{city}**, optimized for **search engine ranking and user engagement**.
 
@@ -171,15 +167,45 @@ def generate_metadata_for_SB(city,general_category,buisness_name,descriptive_cat
     - Use **geo-targeted keywords** for local SEO.  
     - Ensure a **comma-separated format** with no unnecessary words.  
 
+
+    Based on the business name, category, and description, determine the most likely **target gender audience** for this business.
+
+    ⚠️ Only respond with one of the following **exact lowercase values**:
+    - "male"
+    - "female"
+    - "unisex"
+
     ### **Output Format (Strict JSON):**  
     ```json
     {{
         "meta_title": "<Generated Meta Title>",
         "meta_description": "<Generated Meta Description>",
         "meta_keywords": "<Comma-separated keywords>"
+        "target_gender": "gender"
     }}
+    ```
     """
+
     return generate_metadata(prompt)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

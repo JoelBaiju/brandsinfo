@@ -9,6 +9,9 @@ from .Views.streaming_views import VideoUploadView
 from .Views.payment_view import puchase_plan , pcreds
 
 from communications.draft4sms import senddd
+from usershome.Ai.review_generator import GenerateDummyReviews
+from usershome.Reviews.review_models import getEgReviews
+
 urlpatterns = [
     
 # ========================== Add buisness urls
@@ -123,7 +126,9 @@ urlpatterns = [
     
 
 # =============================
-    path('send/' , senddd )
+    path('send/' , senddd ),
+    path('review/',GenerateDummyReviews.as_view() ),
+    path('eg_review/',getEgReviews.as_view())
     
     
     

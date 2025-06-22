@@ -16,8 +16,24 @@ from .e_search_documents import *
 from bAdmin.serializers import *
 
 
+MAGENTA = "\033[95m"
+CYAN = "\033[96m"
+YELLOW = "\033[93m"
+GREEN = "\033[92m"
+BLUE = "\033[94m"
+RED = "\033[91m"
+WHITE = "\033[97m"
+RESET = "\033[0m"
 
 
+def print_queryset(label, queryset, color):
+    print(f'\n\n\n{color}{label}{RESET}\n\n\n')
+    for doc in queryset:
+        # If using Django queryset wrapped from Elasticsearch, access `meta.id` for document ID
+        try:
+            print(f"{color}ID: {doc.meta.id}, Source: {doc.to_dict()}{RESET}")
+        except Exception as e:
+            print(f"{color}[Error reading doc: {e}]{RESET}")
 
 
 
@@ -46,6 +62,10 @@ class Pageing_assistant:
 
 @api_view(['GET'])
 def elasticsearch2(request):    
+
+    print(f"\033[96m{["-"  for i in range(0,100)]}\033[0m")
+
+
     query       = request.GET.get('q', '')
     location    = request.GET.get('location', '')
     verified    = request.GET.get('verified' , 'False')
@@ -58,10 +78,14 @@ def elasticsearch2(request):
         future_cc_meta = executor.submit(CC_Check_and_add_metadata , location , query)
         
         search_query = Q("bool", should=[
-            Q("multi_match", query=query, fields=["name", "category" ,"keywords"], fuzziness="AUTO", max_expansions=3, prefix_length=2),
-            Q("multi_match", query=query, fields=["cat_name"], fuzziness="AUTO", max_expansions=3, prefix_length=2)
+            Q("multi_match", query=query, fields=["name", "category" ,"keywords"], fuzziness ="1", max_expansions=3, prefix_length=2,minimum_should_match=2),
+            Q("multi_match", query=query, fields=["cat_name"], max_expansions=3,fuzziness ="1", prefix_length=2 ,minimum_should_match=2)
         ])
         
+        clean_tokens = [word for word in query.split() if len(word) > 3]
+
+        search_query_for_BD = Q("multi_match" , query=" ".join(clean_tokens) , fields=["name","keywords"]  , prefix_length=2 ,minimum_should_match=3)
+
         try:
             city_obj = City.objects.get(city_name=location)
         except City.DoesNotExist:
@@ -70,25 +94,57 @@ def elasticsearch2(request):
     
         products = ProductDocument.search().query(search_query).to_queryset()
         services = ServiceDocument.search().query(search_query).to_queryset()
-        buisnesses_direct = BuisnessDocument.search().query(search_query).to_queryset()
+        buisnesses_direct = BuisnessDocument.search().query(search_query_for_BD)
         bdcats = BDesCatDocument.search().query(search_query).to_queryset()
         bgcats = BGenCatDocument.search().query(search_query).to_queryset()
         
-        
-        
+
         if products.count()!=0:
             executor.submit(update_search_count_products , products)
         if services.count()!=0:
             executor.submit(update_search_count_services , services)
 
+      
+        # Define ANSI color codes
+        MAGENTA = "\033[95m"
+        CYAN = "\033[96m"
+        YELLOW = "\033[93m"
+        GREEN = "\033[92m"
+        BLUE = "\033[94m"
+        RED = "\033[91m"
+        WHITE = "\033[97m"
+        RESET = "\033[0m"
 
+        
+        print_queryset("b_direct", buisnesses_direct, GREEN)
+        buisnesses_direct = buisnesses_direct.to_queryset()
+        
+        
 
-        print('keyword',query)
-        print('products',products)
-        print('services',services)
-        print('b_direct',buisnesses_direct)
-        print('bdcats',bdcats)
-        print('bgcats',bgcats)
+        # Keyword - MAGENTA
+        print(f'\n\n\n{MAGENTA}keyword{RESET}\n\n\n')
+        print(f'{MAGENTA}keyword:{query}{RESET}')
+
+        # Products - CYAN
+        print(f'\n\n\n{CYAN}products{RESET}\n\n\n')
+        print(f'{CYAN}products:{products}{RESET}')
+
+        # Services - YELLOW
+        print(f'\n\n\n{YELLOW}services{RESET}\n\n\n')
+        print(f'{YELLOW}services:{services}{RESET}')
+
+        # b_direct - GREEN
+        print(f'\n\n\n{GREEN}b_direct{RESET}\n\n\n')
+        print(f'{GREEN}b_direct:{buisnesses_direct}{RESET}')
+
+        # bdcats - BLUE
+        print(f'\n\n\n{BLUE}bdcats{RESET}\n\n\n')
+        print(f'{BLUE}bdcats:{bdcats}{RESET}')
+
+        # bgcats - RED
+        print(f'\n\n\n{RED}bgcats{RESET}\n\n\n')
+        print(f'{RED}bgcats:{bgcats}{RESET}')
+
 
         product_buisness_ids = products.values_list('buisness', flat=True).distinct()
         service_buisness_ids = services.values_list('buisness', flat=True).distinct()
@@ -101,8 +157,24 @@ def elasticsearch2(request):
 
 
         buisnesses = Buisnesses.objects.filter(id__in=unique_buisness_ids, city=city_obj)
-        
-        
+        buisnesses_from_buisness_direct = buisnesses_direct.filter(city =city_obj)
+
+
+
+
+        print(f'\n\n\n{CYAN}buisness filtered by city{RESET}\n\n\n')
+        print('buisnesses filtered by city',buisnesses)
+        print(f'\n\n\n{YELLOW}buisness filtered by city{RESET}\n\n\n')
+
+
+        print(f'\n\n\n{CYAN}buisness from buisness direct before filtered by city{RESET}\n\n\n')
+        print('buisnesses from buisness direct before filtered by city',buisnesses_direct)
+        print(f'\n\n\n{YELLOW}buisness from buisness direct before filtered by city{RESET}\n\n\n')
+                
+
+        print(f'\n\n\n{CYAN}buisness from buisness direct filtered by city{RESET}\n\n\n')
+        print('buisnesses from buisness direct filtered by city',buisnesses_from_buisness_direct)
+        print(f'\n\n\n{YELLOW}buisness from buisness direct filtered by city{RESET}\n\n\n')
         
 
         filters = modelsQ()
@@ -127,7 +199,23 @@ def elasticsearch2(request):
             
 
         buisnesses = buisnesses.filter(filters)
-        buisnesses_direct = buisnesses_direct.filter(filters)
+
+        
+        print('\n\n\nbuisness after final filter\n\n\n')
+        print('buisnesses after final filter',buisnesses)
+        print('\n\n\nbuisness after final filter\n\n\n')
+
+
+
+        buisnesses_direct = buisnesses_from_buisness_direct.filter(filters)
+
+
+         
+        print('\n\n\nbuisnesses from buisness direct after final filter\n\n\n')
+        print('buisnesses from buisnesses direct after final filter',buisnesses_direct)
+        print('\n\n\nbuisnesses from buisness direct after final filter\n\n\n')
+
+
         
         if buisnesses_direct.count()!=0:
             executor.submit(update_search_count_buisnesses , buisnesses_direct)

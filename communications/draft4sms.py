@@ -5,48 +5,41 @@ from rest_framework.response import Response
 
 
 
-def send_sms_draft4sms():
-    phone_numbers = ["7559946420"]
-    message = 'helloooo hai testing from berlin '
-    """
-    Sends SMS using Draft4SMS API.
+API_KEY = 'rbdRxHQu02qRCGIU'
+SENDER_ID = 'BRNSIF'  # Must be 6 characters
+BASE_URL = 'https://text.draft4sms.com/vb/apikey.php'
+TEMPLATE_ID = "1107175023088680702"
 
-    Args:
-        message (str): Message content to be sent.
-        phone_numbers (list or str): Single number or list of numbers.
+import requests
+import urllib.parse
 
-    Returns:
-        dict: API response as dictionary.
-    """
-    API_KEY = 'rbdRxHQu02qRCGIU'
-    SENDER_ID = 'BRNSIF'  # Must be 6 characters
-    BASE_URL = 'https://text.draft4sms.com/vb/apikey.php'
-
-    # Ensure numbers are in comma-separated string
-    if isinstance(phone_numbers, list):
-        number_string = ",".join(phone_numbers)
-    else:
-        number_string = phone_numbers
-
-    # URL encode the message
+def send_otp_draft4sms(otp, phone_number):
+   
+    message =  f""" 
+                    Your BrandsInfo OTP is {otp} . 
+                    Valid for 10 mins. Do not share this OTP to anyone. 
+                    If you didn't request this .Contact : support@brandsinfo.in
+                """
     encoded_message = urllib.parse.quote(message)
 
-    # Construct final URL
-    url = f"{BASE_URL}?apikey={API_KEY}&senderid={SENDER_ID}&number={number_string}&message={encoded_message}&format=json"
-    url = f"https://text.draft4sms.com/vb/apikey.php?apikey=rbdRxHQu02qRCGIU&senderid=BRNSIF&templateid=otptemplate1&number=7034761676&message=Hello There"
+    url = (
+        f"https://text.draft4sms.com/vb/apikey.php?"
+        f"apikey={API_KEY}&senderid={SENDER_ID}&number={phone_number}"
+        f"&message={encoded_message}&templateid={TEMPLATE_ID}&format=json"
+    )
+
     try:
         response = requests.get(url)
-        return response.json()
+        print( response.json())
     except requests.RequestException as e:
-        return {'status': 'error', 'message': str(e)}
-
+        print( {'status': 'error', 'message': str(e)})
 
 
 
 
 @api_view(['GET'])
 def senddd(request):
-    print(send_sms_draft4sms())
+    print(send_otp_draft4sms("12345" , "7034761676"))
 
     return Response('fonsofnsf')
 

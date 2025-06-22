@@ -22,7 +22,7 @@ from usershome.Tools_Utils.fast2_sms_service import send_otp
 from ..models import *
 from ..serializers import * 
 from brandsinfo.settings import FIREBASE_API_KEY
-
+from communications.draft4sms import send_otp_draft4sms
 
 
 
@@ -57,10 +57,10 @@ def signup_request_1(request):
         auth.exists=exists
         auth.otp=otp
         auth.save()
-        
+        send_otp_draft4sms(otp , phone)
        
         # send_otp(phone, otp)
-        return Response({'exists': exists,'otp':otp},status=status.HTTP_200_OK)
+        return Response({'exists': exists},status=status.HTTP_200_OK)
 
     except json.JSONDecodeError:
         return Response({'success': False, 'message': 'Invalid JSON format.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -117,92 +117,38 @@ def verify_token(id_token):
     else:
         raise Exception('Token verification failed')
 
-# def verifyotp(request, utype, from_enquiry=False):
-#     try:
-#         data = json.loads(request.body)
-#         phone = data.get('phone')
-#         otp = data.get('otp')
-#         print(otp , phone)
-        
-
-#         if not phone or not otp:
-#             return Response({'message': 'Phone and OTP are required'}, status=status.HTTP_400_BAD_REQUEST)
-
-#         auth = Auth_OTPs.objects.get(phone=phone)
-        
-#         if auth is None:
-#             return Response({'message': 'OTP Expired'}, status=status.HTTP_400_BAD_REQUEST)
-
-#         # print(type(otp))
-#         # print(type(auth.otp))
-#         if str(otp) != str(auth.otp):
-#             return Response({'message': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
-
-#         if auth.exists:
-#             user = get_object_or_404(Extended_User, username=auth.phone)
-#         else:
-#             user = create_new_user(phone, auth, utype)
-
-#         if from_enquiry:
-#             link_user_to_enquiry(auth, user)
-
-#         refresh = RefreshToken.for_user(user)
-#         return Response({
-#             'message': 'OTP Verified',
-#             'exists': auth.exists,
-#             'sessionid': str(refresh.access_token),
-#             'refresh_token': str(refresh)
-#         }, status=status.HTTP_201_CREATED)
-
-#     except json.JSONDecodeError:
-#         return Response({'message': 'Invalid JSON data'}, status=status.HTTP_400_BAD_REQUEST)
-#     except Exception as e:
-#         print('message', str(e))
-#         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-
 def verifyotp(request, utype, from_enquiry=False):
     try:
         data = json.loads(request.body)
         phone = data.get('phone')
-        token = data.get('idToken')
+        otp = data.get('otp')
+        print(otp , phone)
+        
 
-        if not phone :
-            print('phone not in request')
-            return Response({'message': 'Phone and OTP are required'}, status=status.HTTP_400_BAD_REQUEST)
-        if not token :
-            print('phone not in token')
+        if not phone or not otp:
             return Response({'message': 'Phone and OTP are required'}, status=status.HTTP_400_BAD_REQUEST)
 
         auth = Auth_OTPs.objects.get(phone=phone)
         
         if auth is None:
-            print('auth object not found')
-            return Response({'message': 'invalid error'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'message': 'OTP Expired'}, status=status.HTTP_400_BAD_REQUEST)
 
-       
-        if verify_token(token)==False:
-            print('token verification failed')
+        # print(type(otp))
+        # print(type(auth.otp))
+        if str(otp) != str(auth.otp):
             return Response({'message': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
 
         if auth.exists:
             user = get_object_or_404(Extended_User, username=auth.phone)
         else:
-            print('auth not found')
-            try:
-                user = create_new_user(phone, auth, utype)
-            except Exception as e :
-                print(e)
-                print('user creation exeption occured')
+            user = create_new_user(phone, auth, utype)
+
         if from_enquiry:
             link_user_to_enquiry(auth, user)
 
         refresh = RefreshToken.for_user(user)
         return Response({
             'message': 'OTP Verified',
-            'name':user.first_name,
-            'phone':user.mobile_number,
             'exists': auth.exists,
             'sessionid': str(refresh.access_token),
             'refresh_token': str(refresh)
@@ -213,6 +159,60 @@ def verifyotp(request, utype, from_enquiry=False):
     except Exception as e:
         print('message', str(e))
         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+# def verifyotp(request, utype, from_enquiry=False):
+#     try:
+#         data = json.loads(request.body)
+#         phone = data.get('phone')
+#         token = data.get('idToken')
+
+#         if not phone :
+#             print('phone not in request')
+#             return Response({'message': 'Phone and OTP are required'}, status=status.HTTP_400_BAD_REQUEST)
+#         if not token :
+#             print('phone not in token')
+#             return Response({'message': 'Phone and OTP are required'}, status=status.HTTP_400_BAD_REQUEST)
+
+#         auth = Auth_OTPs.objects.get(phone=phone)
+        
+#         if auth is None:
+#             print('auth object not found')
+#             return Response({'message': 'invalid error'}, status=status.HTTP_400_BAD_REQUEST)
+
+       
+#         if verify_token(token)==False:
+#             print('token verification failed')
+#             return Response({'message': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
+
+#         if auth.exists:
+#             user = get_object_or_404(Extended_User, username=auth.phone)
+#         else:
+#             print('auth not found')
+#             try:
+#                 user = create_new_user(phone, auth, utype)
+#             except Exception as e :
+#                 print(e)
+#                 print('user creation exeption occured')
+#         if from_enquiry:
+#             link_user_to_enquiry(auth, user)
+
+#         refresh = RefreshToken.for_user(user)
+#         return Response({
+#             'message': 'OTP Verified',
+#             'name':user.first_name,
+#             'phone':user.mobile_number,
+#             'exists': auth.exists,
+#             'sessionid': str(refresh.access_token),
+#             'refresh_token': str(refresh)
+#         }, status=status.HTTP_201_CREATED)
+
+#     except json.JSONDecodeError:
+#         return Response({'message': 'Invalid JSON data'}, status=status.HTTP_400_BAD_REQUEST)
+#     except Exception as e:
+#         print('message', str(e))
+#         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
@@ -243,6 +243,8 @@ def signup_request_2(request):
         auth = Auth_OTPs.objects.get(phone=phone)
         auth.name = name
         auth.save()
+        # send_otp_draft4sms(otp , phone)
+
         return Response({
                      'message':'Name Saved',
                     } ,status=status.HTTP_200_OK)  
@@ -269,7 +271,8 @@ def resendotp(request):
     auth.otp = otp
     auth.save()
     print(otp)
-                                    
+    send_otp_draft4sms(otp , phone)
+
     return Response({'message':'Otp sent sucessfully'},status=status.HTTP_200_OK)
     
     
@@ -315,7 +318,8 @@ def signup_request_from_enquiry(name,phone,enquiry_id):
         auth.exists=exists
         auth.otp=otp
         auth.save()
-        return Response({'exists': exists,'otp':otp},status=status.HTTP_200_OK)
+        send_otp_draft4sms(otp,phone)
+        return Response({'exists': exists},status=status.HTTP_200_OK)
 
 
     except Exception as e:

@@ -161,12 +161,22 @@ class Buisnesses(models.Model):
     assured                     = models.BooleanField(default=False)    
     rating                      = models.FloatField(default=0)    
     total_no_of_ratings         = models.IntegerField(default=0)
+    target_audience_gender      = models.CharField(max_length=20 , null=True)
 
 
     def __str__(self):
         return self.name
 
 
+from django.utils import timezone
+
+
+
+class BusinessReviewTracker(models.Model):
+    business = models.OneToOneField(Buisnesses, on_delete=models.CASCADE)
+    next_review_date = models.DateField(null=True, blank=True)
+    reviews_added_this_cycle = models.IntegerField(default=0)
+    cycle_start_date = models.DateField(default=timezone.now)
 
 
 
@@ -218,7 +228,7 @@ class BuisnessTracker(models.Model):
 
 
 class Buisness_Descriptive_cats (models.Model):
-    dcat            = models.ForeignKey(Descriptive_cats , on_delete=models.CASCADE)
+    dcat            = models.ForeignKey(Descriptive_cats  , on_delete=models.CASCADE)
     buisness        = models.ForeignKey(Buisnesses , on_delete=models.CASCADE)
     
     def __str__(self):
@@ -301,7 +311,7 @@ class Services (models.Model):
 
 
 class Service_pics(models.Model):
-    image             = models.ImageField(upload_to='Sevices_pics/' , default='')
+    image           = models.ImageField(upload_to='Sevices_pics/' , default='')
     service         = models.ForeignKey(Services , on_delete=models.CASCADE)
  
 
@@ -338,6 +348,9 @@ class Home_Popular_Des_Cats (models.Model):
     # image           = models.ImageField(upload_to='Home_pics/' , default='' , null=True , blank=True )
     name            = models.ForeignKey(Descriptive_cats , on_delete = models.CASCADE)
     title           = models.ForeignKey(Home_Titles , on_delete = models.CASCADE)
+
+    def __str__(self):
+        return self.name.cat_name
 
 class Home_Popular_Product_Cats (models.Model): 
    
@@ -508,7 +521,8 @@ class Enquiries (models.Model):
 
 class Reviews_Ratings(models.Model):
     buisness        = models.ForeignKey(Buisnesses , on_delete=models.CASCADE)
-    user            = models.ForeignKey(Extended_User , on_delete=models.CASCADE)
+    user            = models.ForeignKey(Extended_User , on_delete=models.CASCADE , null= True)
+    user_name       = models.CharField(max_length=100,null= True)
     review          = models.CharField(max_length=500 , null=True , default='')
     rating          = models.IntegerField(default=0 )
     date            = models.DateField(auto_now=True)

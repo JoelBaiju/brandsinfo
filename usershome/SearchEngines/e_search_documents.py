@@ -7,26 +7,20 @@ from ..serializers import *
 from ..Tools_Utils.utils import *
 
 
-# Define Edge NGram Tokenizer and Analyzer
-edge_ngram_tokenizer = tokenizer(
-    "edge_ngram_tokenizer", type="ngram", min_gram=1, max_gram=20, token_chars=["letter", "digit"]
-)
-
-edge_ngram_analyzer = analyzer(
-    "edge_ngram_analyzer",
-    tokenizer="edge_ngram_tokenizer",
-    filter=["lowercase"]
-)
-
-# Define a reusable index settings dictionary
 index_settings = {
     "number_of_shards": 1,
     "number_of_replicas": 0,
     "analysis": {
+        "filter": {
+            "english_stop": {
+                "type":       "stop",
+                "stopwords":  ["_english_"]  # built-in list; you can customize if needed
+            }
+        },
         "tokenizer": {
             "edge_ngram_tokenizer": {
                 "type": "edge_ngram",
-                "min_gram": 1,
+                "min_gram": 2,  # avoid 1-gram to reduce noise
                 "max_gram": 20,
                 "token_chars": ["letter", "digit"]
             }
@@ -35,11 +29,12 @@ index_settings = {
             "edge_ngram_analyzer": {
                 "type": "custom",
                 "tokenizer": "edge_ngram_tokenizer",
-                "filter": ["lowercase"]
+                "filter": ["lowercase", "english_stop"]
             }
         }
     }
 }
+
 
 # Product Document
 @registry.register_document
@@ -83,7 +78,7 @@ class ServiceDocument(Document):
 class BuisnessDocument(Document):
     name = fields.TextField(analyzer="edge_ngram_analyzer", search_analyzer="standard")
     
-    # keywords = fields.ListField(fields.TextField())
+    keywords = fields.ListField(fields.TextField())
 
     class Index:
         name = 'businesses_index'

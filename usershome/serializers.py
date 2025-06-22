@@ -309,7 +309,11 @@ class ServiceMiniSerializer(serializers.ModelSerializer):
         model = Services
         fields = ['id', 'name', 'price' ,'description']
 
-
+class BuisnessKeywordsSerializer(serializers.ModelSerializer):
+    keyword = serializers.StringRelatedField()
+    class Meta:
+        model = Buisness_keywords
+        fields = ['id','keyword']
 
 class BuisnessesSerializerMini(serializers.ModelSerializer):
     image       = serializers.ImageField()        
@@ -323,6 +327,7 @@ class BuisnessesSerializerMini(serializers.ModelSerializer):
     products = ProductMiniSerializer(many=True, read_only=True)
     services = ServiceMiniSerializer(many=True, read_only=True)
     plan = PlansSerializer( read_only=True)
+    keywords = BuisnessKeywordsSerializer(source="buisness_keywords_set" ,many=True , read_only = True)
     class Meta:
         model   = Buisnesses
         fields  = [  
@@ -330,7 +335,7 @@ class BuisnessesSerializerMini(serializers.ModelSerializer):
                     'city','state','no_of_views','user',
                     'score','image','offers','redirect_link','rating',
                     'verified','assured','plan','products','services','building_name','state',
-                    'whatsapp_number'
+                    'whatsapp_number','keywords'
                  ]
     
     

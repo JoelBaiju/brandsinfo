@@ -233,6 +233,8 @@ def Site_Map_Generator_SB(buisness):
     keyword = meta_keywords.split(',')
     keyword = [k.strip() for k in keyword]
     
+
+
     for i in keyword:
         Keyword = Keywords.objects.get_or_create( keyword=i)
         Bkeyword = Buisness_keywords.objects.get_or_create(buisness=buisness, keyword=Keyword[0])
@@ -290,7 +292,9 @@ def Site_Map_Generator_SB_single_Test_api(request):
     meta_keywords = metadata.get("meta_keywords", "")
     keyword = meta_keywords.split(',')
     keyword = [k.strip() for k in keyword]
-    
+    gender = metadata.get("target_gender")
+    print(gender)
+
     for i in keyword:
         Keyword = Keywords.objects.get_or_create( keyword=i)
         Bkeyword = Buisness_keywords.objects.get_or_create(buisness=buisness, keyword=Keyword[0])
@@ -302,7 +306,14 @@ def Site_Map_Generator_SB_single_Test_api(request):
                       'meta_keywords':meta_keywords,
                       'meta_description':meta_description,
                       'response':response_json,
-                      'keyword':keyword,})
+                      'keyword':keyword,
+                      'gender':gender,
+                      'buisness_description':buisness.description,
+                      'buisness_name':buisness.name,
+                    #   'buisness_gencat':Buisness_General_cats.objects.filter(buisness=buisness)[0],
+                      'buisness_dcats':descriptive_category_str,
+                      'buisness_city':buisness.city.city_name
+                      })
 
     
     

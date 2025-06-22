@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      color: #333;
+      background-color: #f7f7f7;
+      padding: 20px;
+    }
+    .container {
+      background-color: #ffffff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 20px;
+    }
+    h2 {
+      margin-top: 0;
+      font-size: 18px;
+      color: #444;
+    }
+    .label {
+      font-weight: bold;
+      display: inline-block;
+      margin-top: 10px;
+    }
+    .value {
+      margin-left: 5px;
+    }
+    blockquote {
+      margin: 10px 0 10px 15px;
+      padding-left: 10px;
+      border-left: 3px solid #ccc;
+      color: #555;
+    }
+    .rating {
+      color: #f39c12;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>📢 New Review Generated</h2>
+
+    <p><span class="label">Business Name:</span><span class="value">{{ business_name }}</span></p>
+    <p><span class="label">Business Description:</span><span class="value">{{ business_description }}</span></p>
+
+    <p><span class="label">Review Type:</span><span class="value">{{ review_type }}</span></p>
+    <p><span class="label">Rating:</span><span class="value rating">{{ rating }}/5</span></p>
+
+    <p><span class="label">Generated Review:</span></p>
+    {% if review %}
+      <blockquote>{{ review }}</blockquote>
+    {% else %}
+      <p class="value">N/A (Rating only)</p>
+    {% endif %}
+
+    <p><span class="label">Example Review:</span></p>
+    {% if eg_review %}
+      <blockquote>{{ eg_review }}</blockquote>
+    {% else %}
+      <p class="value">Not available</p>
+    {% endif %}
+  </div>
+</body>
+</html>

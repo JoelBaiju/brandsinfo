@@ -1,0 +1,106 @@
+{
+  "all_plans": {
+    "Service_based": {
+      "good": [
+        "Amazing",
+        "Efficient",
+        "Excellent",
+        "Fantastic experience",
+        "Friendly",
+        "Good",
+        "Helpful",
+        "I always get quality work done here, highly recommend.",
+        "It was a very good experience, unforgettable.",
+        "Outstanding",
+        "Professional",
+        "Reliable",
+        "Service was superb.",
+        "Super service! Really fast response.",
+        "Superb",
+        "The response was better than expected.",
+        "The service was outstanding—super helpful and efficient.",
+        "Trustworthy",
+        "Very friendly staff.",
+        "Very good",
+        "Your service was excellent, very heartwarming!"
+      ],
+      "medium": [
+        "Acceptable",
+        "Adequate",
+        "Average",
+        "Average, nothing to rave about.",
+        "Experience was fine nothing special, nothing terrible.",
+        "Fair",
+        "Fine",
+        "It was average, but it worked.",
+        "It was okay, pretty average.",
+        "Just average.",
+        "Mediocre",
+        "Nothing special.",
+        "Okay",
+        "Ordinary",
+        "Satisfactory",
+        "Service was okay.",
+        "Works fine, no issues."
+      ],
+      "bad": [
+        "Communication was slow and lackluster.",
+        "Disappointing",
+        "Poor",
+        "Response took too long.",
+        "Terrible",
+        "This time it was average, try better next time.",
+        "Too-slow",
+        "Took too long to respond kastam aayiduchu.",
+        "Unprofessional",
+        "Unreliable"
+      ]
+    },
+    "Product_based": {
+      "good": [
+        "Quality exceeded expectations will come back again.",
+        "Exactly as described, very satisfied.",
+        "Perfect condition, great packaging.",
+        "Value for money, would buy again.",
+        "Top quality products, exceeded my expectations."
+      ],
+      "medium": [
+        "Product was okay, but packaging could be better.",
+        "Average quality, not bad for the price.",
+        "It works, but feels a bit cheap.",
+        "Not too impressive, but not a waste either.",
+        "Product did what it said, but nothing extra."
+      ],
+      "bad": [
+        "Quality wasn’t as described felt disappointed."
+      ]
+    }
+  },
+
+
+
+
+
+  "free_tier": {
+     
+      "medium": [
+        "Can you mention your services and prices?",
+        "Can you provide a WhatsApp for inquiries?",
+        "Can you share more details about your services and pricing?",
+        "Can you specify your working hours in your listing?",
+        "Could you list out all services you offer in detail?",
+        "It would help to know your exact service details.",
+        "List all services in detail.",
+        "Mention your working hours in the profile.",
+        "Share precise and accurate service details.",
+        "Could you please add your exact location so we can find you easily?",
+        "Give WhatsApp number for contact.",
+        "Give the map link for easy location.",
+        "It would be better if you add the exact location of your shop.",
+        "It’d be great if you could include a WhatsApp number for quick contact.",
+        "Please share your WhatsApp number for fast communication.",
+        "Please upload a map for easier navigation."
+      ]
+    
+  }
+}

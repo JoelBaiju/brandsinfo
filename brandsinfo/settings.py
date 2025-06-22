@@ -221,20 +221,21 @@ ASGI_APPLICATION = "brandsinfo.asgi.application"
 # dev
 
 GEMINI_API_KEYS=[
-                 'AIzaSyDwPLJew4URfzgMdQ43BEG-A7ldVs83_2w',    #gemini key in careindia
-                'AIzaSyA5FqJy6E9Oypk0rp4FRezaFwvs7cd9dPc',    #icare key in icareindia
+                    'AIzaSyDwPLJew4URfzgMdQ43BEG-A7ldVs83_2w',    #gemini key in careindia
+                    'AIzaSyA5FqJy6E9Oypk0rp4FRezaFwvs7cd9dPc',    #icare key in icareindia
 
-                 'AIzaSyAFMQMVZhQAsOBfTq36fdsBNnAJ0jl4nmo',    #gemini key in anjali
-                 'AIzaSyATUTGsCNyIH4VW4bTfMRdoyiG--5KHV8o',  #brandsinfo key in anjali
+                    'AIzaSyAFMQMVZhQAsOBfTq36fdsBNnAJ0jl4nmo',    #gemini key in anjali
+                    'AIzaSyATUTGsCNyIH4VW4bTfMRdoyiG--5KHV8o',  #brandsinfo key in anjali
                  
                  
-                 'AIzaSyB2JQaUzhAB6fFlOgFB9DSmp8UAnBWOjvs',  # brandsinfo key in brandsinfo 
+                    'AIzaSyB2JQaUzhAB6fFlOgFB9DSmp8UAnBWOjvs',  # brandsinfo key in brandsinfo 
                 
             
-                 'AIzaSyDbM8NSNv49EX63BqC1alukSm0eS_8rtJ0', #gemini key in fightclub                
-                'AIzaSyDmKDJSC2i7b_OST495c9HDnNIyJ4DPgGQ' #brandsinfo key in fightclub
+                    'AIzaSyDbM8NSNv49EX63BqC1alukSm0eS_8rtJ0', #gemini key in fightclub                
+                    'AIzaSyDmKDJSC2i7b_OST495c9HDnNIyJ4DPgGQ' #brandsinfo key in fightclub
                 ]
 
+SARVAM_API_KEY="sk_11n2zhzc_QxnqQNpwtrVf4Xy56hYBnY0r"
 
 
 
@@ -343,6 +344,10 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'analysis.tasks.record_daily_count',
         'schedule': crontab(hour=0,minute=0)
     },
+    'schedule-auto-reviews': {
+        'task': 'usershome.Reviews.reviewer.check_and_schedule_reviews',
+         'schedule': crontab(minute='*/5') 
+    },
 }
 
 
@@ -357,3 +362,14 @@ PHONEPE_REDIRECT_URL = "https://yourdomain.com/payment/callback/"
 
 ffmpeg_path = r'C:\Users\91703\ffmpeg\ffmpeg-2025-03-31-git-35c091f4b7-essentials_build\bin\ffmpeg.exe'
 os.environ['PATH'] = ffmpeg_path + ';' + os.environ['PATH']
+
+
+
+
+
+AUTO_REVIEW = True
+RATING_DISTRIBUTION = {
+    "tier_1": [3, 4],  # Lean toward 3.5 avg
+    "tier_2": [3, 5],  # Lean toward 4.0 avg
+    "tier_3": [4, 5],  # Lean toward 4.5 avg
+}

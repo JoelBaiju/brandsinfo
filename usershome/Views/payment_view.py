@@ -41,8 +41,9 @@ def initiate_payment_view(request):
                     status=rest_framework_status.HTTP_400_BAD_REQUEST
                 )
 
-
-            response = phonepe_initiate_payment(int(plan_variant.price))  
+            amount = plan_variant.price
+            amount = 2
+            response = phonepe_initiate_payment(int(amount))  
             if response['success']:
                 print(f"Redirect user to:")
                 status = check_payment_status(request,response['order_id'])

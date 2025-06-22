@@ -570,6 +570,7 @@ class Enquiries_View(generics.ListCreateAPIView):
         bid = data.get('bid')
         message = data.get('message')
         mobile_number = data.get('mobile_number')
+        print(mobile_number )
         name = data.get('name')
 
         if not bid:
