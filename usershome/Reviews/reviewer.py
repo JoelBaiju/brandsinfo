@@ -14,8 +14,7 @@ from brandsinfo.settings import AUTO_REVIEW
 from..models import BusinessReviewTracker
 from ..Ai.review_generator import prime_review_generator
 
-
-@shared_task
+@shared_task(bind=True, name="usershome.Reviews.reviewer.check_and_schedule_reviews")
 def check_and_schedule_reviews():
 
     print("auto review scheduler task called")
