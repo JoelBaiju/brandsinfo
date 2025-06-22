@@ -150,7 +150,7 @@ def payment_callback(request):
 
                     print("Payment status updated and business plan added successfully")
 
-                
+
                 return JsonResponse({"status": "success"})
 
             except PhonePeTransaction.DoesNotExist:
@@ -167,8 +167,63 @@ def payment_callback(request):
    
    
    
-   
-   
+from ..models import Extended_User,PhonePeTransaction
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def verify_payment_FE(request):
+    try:
+        # Get the current user
+        user = request.user
+
+        # Define time window (last 3 minutes)
+        time_threshold = now() - timedelta(minutes=3)
+
+        # Filter transactions for the user created in the last 3 minutes
+        tnx = (
+            PhonePeTransaction.objects
+            .filter(user=user, created_at__gte=time_threshold)
+            .order_by('-created_at')
+            .first()
+        )
+
+        if not tnx:
+            return Response({"error": "No recent payment found"}, status=404)
+
+        plan = tnx.plan
+        if tnx.status == 'COMPLETED':
+            title = "Payment Completed"
+            message = ( 
+                f"Your payment for plan {plan.plan_name} has been processed successfully! "
+                "Thank you for your purchase."
+            )
+        elif tnx.status == 'FAILED':
+            title = "Payment Failed"
+            message = (
+                f"Your payment for plan {plan.plan_name} has failed."
+                "Please try again or contact support."
+            )
+        elif tnx.status == 'PENDING':       
+            title = "Payment Pending"
+            message = (
+                f"Your payment for plan {plan.plan_name} is pending. "
+                "Please check your payment method for confirmation."
+            )
+        return Response({
+            
+            'message': message,
+            'title': title,
+            'ntype':"PAYMENT_STATUS",
+            'business': tnx.buisness.name,  
+            'business_id': tnx.buisness.id,  
+            "timestamp": now().isoformat(),  
+            "type": "send_notification",
+            "extras":{"invoice":tnx.invoice , "status":tnx.status}
+        })
+
+    except Exception as e:
+        return Response({"error": "Something went wrong", "details": str(e)}, status=500)
    
    
    
@@ -207,6 +262,8 @@ def addplantobuisness(order_id):
 
     except PhonePeTransaction.DoesNotExist:
         return False
+
+
 
 
 
