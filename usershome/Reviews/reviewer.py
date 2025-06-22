@@ -44,6 +44,8 @@ def check_and_schedule_reviews(*args, **kwargs):
             tracker.cycle_start_date = today
 
         if tracker.reviews_added_this_cycle >= max_reviews_per_14_days:
+            print("inside  limit per14 check")
+
             continue
         print("looping through it and crossed the limit per14 check")
         # If today's the day to add review(s)
