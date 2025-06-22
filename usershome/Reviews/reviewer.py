@@ -34,8 +34,8 @@ def check_and_schedule_reviews(*args, **kwargs):
         # Define plan thresholds
         max_reviews_per_14_days = {
             'Default Plan': random.randint(4, 5),
-            'tier_2': random.randint(5, 10),
-            'tier_3': random.randint(10, 15),
+            'Tier 2': random.randint(5, 10),
+            'Tier 3': random.randint(10, 15),
         }.get(plan, 0)
 
         # Reset cycle if needed
@@ -57,10 +57,10 @@ def check_and_schedule_reviews(*args, **kwargs):
 
             for _ in range(count):
                 print('inside the second loop')
-                # delay = random.randint(0, 86400)  # seconds in 24 hrs
-                delay = random.randint(0, 400)  # seconds in 24 hrs
-                # add_single_review.apply_async(args=[biz.id], countdown=delay)
-                add_single_review.apply_async(args=[biz.id])
+                delay = random.randint(0, 86400)  # seconds in 24 hrs
+                # delay = random.randint(0, 400)  # seconds in 24 hrs
+                add_single_review.apply_async(args=[biz.id], countdown=delay)
+                # add_single_review.apply_async(args=[biz.id])
 
             # Update tracker
             tracker.reviews_added_this_cycle += count
@@ -86,19 +86,19 @@ def add_single_review(biz_id):
     from ..Tools_Utils.utils import send_review_notification_email
     print("add single review task called ")
     def weighted_rating(tier):
-        if tier == 'tier_3':
+        if tier == 'Tier 3':
             return random.choices([2, 3, 4, 5], weights=[10, 50, 30, 10])[0]  # avg ~3.5
-        elif tier == 'tier_2':
+        elif tier == 'Tier 2':
             return random.choices([3, 4, 5], weights=[20, 50, 30])[0]         # avg ~4
-        elif tier == 'tier_1':
+        elif tier == 'Default Plan':
             return random.choices([4, 5], weights=[40, 60])[0]               # avg ~4.5
         return 4
 
     def should_include_text(tier):
         chances = {
-            "tier_1": 0.4,
-            "tier_2": 0.5,
-            "tier_3": 0.6,
+            "Default Plan": 0.4,
+            "Tier 2": 0.5,
+            "Tier 3": 0.6,
         }
         return random.random() < chances.get(tier, 0.5)
 
