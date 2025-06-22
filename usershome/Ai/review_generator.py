@@ -256,7 +256,7 @@ def prime_review_generator(bid , r_type , plan):
     
     try:
         reviews_data =         generate_reviews_based_on_buisness(id,eg_review)
-        return reviews_data["reviews"]["reviews"],
+        return reviews_data["reviews"]["reviews"]
             
     except:
         return ''
