@@ -25,6 +25,7 @@ def check_and_schedule_reviews(*args, **kwargs):
     trackers = BusinessReviewTracker.objects.select_related('business')
 
     for tracker in trackers:
+        print("inside loop trackersss")
         biz = tracker.business
         plan = biz.plan
         now = timezone.now()
