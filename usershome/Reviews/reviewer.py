@@ -20,6 +20,7 @@ def check_and_schedule_reviews(*args, **kwargs):
 
     if not AUTO_REVIEW:
         return
+    print('auto reviews scheduling')
     today = timezone.now().date()
     trackers = BusinessReviewTracker.objects.select_related('business')
 
@@ -56,6 +57,7 @@ def check_and_schedule_reviews(*args, **kwargs):
             tracker.reviews_added_this_cycle += count
             tracker.next_review_date = today + timedelta(days=random.randint(1, 4))
             tracker.save()
+    print("review_ scheduling completed")
 
 
 
@@ -73,7 +75,7 @@ def add_single_review(biz_id):
     from django.utils import timezone
     import random
     from ..Tools_Utils.utils import send_review_notification_email
-
+    print("add single review task called ")
     def weighted_rating(tier):
         if tier == 'tier_3':
             return random.choices([2, 3, 4, 5], weights=[10, 50, 30, 10])[0]  # avg ~3.5
