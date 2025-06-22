@@ -129,7 +129,7 @@ urlpatterns = [
     path('send/' , senddd ),
     path('review/',GenerateDummyReviews.as_view() ),
     path('eg_review/',getEgReviews.as_view()),
-    
+    path('kicker_review/', views.KickstartBusinessReviewTracker.as_view())    
     
     
     

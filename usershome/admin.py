@@ -114,3 +114,6 @@ admin.site.register(PhonePeTransaction , TransactionsAdmin)
 class BuisnessPicsAdmin(admin.ModelAdmin):
     list_display = ['id','buisness']
 admin.site.register(Buisness_pics,BuisnessPicsAdmin)
+
+
+admin.site.register(BusinessReviewTracker)

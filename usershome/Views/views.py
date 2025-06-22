@@ -1092,3 +1092,40 @@ def get_buisnesses_with_no_plan(request):
     serialized_buisness = BuisnessesSerializerMini(buisnesses, many=True)
     
     return Response(serialized_buisness.data, status=status.HTTP_200_OK)
+
+
+
+
+
+
+
+
+
+
+
+
+
+class KickstartBusinessReviewTracker(APIView):
+    
+
+    def get(self, request):
+        created_count = 0
+
+        businesses = Buisnesses.objects.all()
+
+        for biz in businesses:
+            if not hasattr(biz, 'businessreviewtracker'):
+                BusinessReviewTracker.objects.create(
+                    business=biz,
+                    cycle_start_date=timezone.now().date()
+                )
+                created_count += 1
+
+        return Response(
+            {
+                "message": f"Tracker creation complete.",
+                "trackers_created": created_count,
+                "total_businesses": businesses.count()
+            },
+            status=status.HTTP_201_CREATED
+        )
