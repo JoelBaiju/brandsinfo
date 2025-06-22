@@ -143,7 +143,7 @@ def payment_callback(request):
                     txn.amount = payment_details.get('amount')
 
                 txn.save()
-                # print('plan added :',addplantobuisness(merchant_order_id))
+                print('plan added :',addplantobuisness(merchant_order_id))
 
                 print("Control leaving from payment allbak to payment_status_update")
                 if payment_status_update(merchant_order_id):

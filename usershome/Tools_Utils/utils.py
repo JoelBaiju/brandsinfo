@@ -217,7 +217,7 @@ def send_review_notification_email(
         subject,
         plain_message,
         'brandsinfoguide@gmail.com',  # Replace with your sender email
-        ['brandsinfoguide@gmail.com']
+        ['brandsinfo.test@gmail.com']
     )
     email.attach_alternative(html_message, 'text/html')
     email.send()

@@ -61,25 +61,31 @@ def notify_user_to_all(request):
 
 
 
-
 class Notifications_View(generics.ListAPIView):
     serializer_class = NotificationsSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Notification.objects.filter(user=self.request.user).order_by('-timestamp')
+        # This evaluates the queryset to a list of objects
+        notifications = list(Notification.objects.filter(user=self.request.user).order_by('-timestamp'))
+        return notifications
 
-    def get(self, request):
-        queryset = self.get_queryset()
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()  # list of notifications (evaluated)
         page = self.paginate_queryset(queryset)
+
         if page is not None:
             serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
+            response = self.get_paginated_response(serializer.data)
+        else:
+            serializer = self.get_serializer(queryset, many=True)
+            response = Response(serializer.data)
 
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
-    
-    
+        # Now update notifications as read after response is ready
+        Notification.objects.filter(id__in=[n.id for n in queryset], is_read=False).update(is_read=True)
+
+        return response
+
     
     
     
