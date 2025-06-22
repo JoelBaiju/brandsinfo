@@ -33,7 +33,7 @@ def check_and_schedule_reviews(*args, **kwargs):
 
         # Define plan thresholds
         max_reviews_per_14_days = {
-            'tier_1': random.randint(4, 5),
+            'Default Plan': random.randint(4, 5),
             'tier_2': random.randint(5, 10),
             'tier_3': random.randint(10, 15),
         }.get(plan, 0)
