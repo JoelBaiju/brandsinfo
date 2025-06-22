@@ -1,7 +1,6 @@
 
 
 from celery import shared_task
-from celery import shared_task
 from django.utils import timezone
 from communications.ws_notifications import plan_expired ,payment_reminder
 from datetime import timedelta

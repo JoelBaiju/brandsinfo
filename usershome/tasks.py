@@ -16,6 +16,9 @@ from .models import Buisness_Videos  # adjust import as needed
 
 
 
+@shared_task(bind=True, name="usershome.Reviews.reviewer.check_and_schedule_reviews")
+def check_and_schedule_reviews():
+    print("heojhohgf")
 
 
 
