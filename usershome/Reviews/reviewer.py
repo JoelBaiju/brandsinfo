@@ -28,7 +28,7 @@ def check_and_schedule_reviews(*args, **kwargs):
         
         print("inside loop trackersss")
         biz = tracker.business
-        plan = biz.plan
+        plan = biz.plan.plan_name
         now = timezone.now()
 
         # Define plan thresholds
@@ -44,6 +44,7 @@ def check_and_schedule_reviews(*args, **kwargs):
             tracker.cycle_start_date = today
 
         if tracker.reviews_added_this_cycle >= max_reviews_per_14_days:
+            print("plan" ,plan)
             print("inside  limit per14 check")
             print("racker.reviews_added_this_cycle",tracker.reviews_added_this_cycle)
             print("max_reviews_per_14_days",max_reviews_per_14_days)
