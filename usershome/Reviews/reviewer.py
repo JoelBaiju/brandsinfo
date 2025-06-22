@@ -17,6 +17,9 @@ from ..Ai.review_generator import prime_review_generator
 
 @shared_task
 def check_and_schedule_reviews():
+
+    print("auto review scheduler task called")
+
     if not AUTO_REVIEW:
         return
     today = timezone.now().date()
