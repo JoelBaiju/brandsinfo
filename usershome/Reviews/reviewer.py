@@ -45,12 +45,14 @@ def check_and_schedule_reviews(*args, **kwargs):
 
         if tracker.reviews_added_this_cycle >= max_reviews_per_14_days:
             continue
-
+        print("looping through it and crossed the limit per14 check")
         # If today's the day to add review(s)
         if tracker.next_review_date is None or today >= tracker.next_review_date:
+            print("passed the final check")
             count = random.randint(1, 3)  # how many reviews to generate today
 
             for _ in range(count):
+                print('inside the second loop')
                 # delay = random.randint(0, 86400)  # seconds in 24 hrs
                 delay = random.randint(0, 400)  # seconds in 24 hrs
                 # add_single_review.apply_async(args=[biz.id], countdown=delay)
