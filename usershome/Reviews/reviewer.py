@@ -23,8 +23,9 @@ def check_and_schedule_reviews(*args, **kwargs):
     print('auto reviews scheduling')
     today = timezone.now().date()
     trackers = BusinessReviewTracker.objects.select_related('business')
-
+    print(trackers)
     for tracker in trackers:
+        
         print("inside loop trackersss")
         biz = tracker.business
         plan = biz.plan
