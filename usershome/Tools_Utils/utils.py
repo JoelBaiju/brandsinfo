@@ -198,7 +198,7 @@ def send_review_notification_email(
     review_type,
     rating,
     review,
-    eg_review
+    eg_review=None
 ):
     subject = f'📝 New Review Generated for {business_name}'
 
