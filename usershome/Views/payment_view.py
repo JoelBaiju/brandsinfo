@@ -107,62 +107,62 @@ def payment_callback(request):
     print("GET Params:", dict(request.GET))
     print("Body:", request.body.decode('utf-8'))
 
-    if request.method == "POST":
-        try:
-            callback_data = json.loads(request.body.decode('utf-8'))
-            print("Callback Data:", callback_data)
+    # if request.method == "POST":
+    #     try:
+    #         callback_data = json.loads(request.body.decode('utf-8'))
+    #         print("Callback Data:", callback_data)
 
-            # if callback_data.get('type') != 'CHECKOUT_ORDER_COMPLETED':
-            #     print("Not a checkout order completed event")
-            #     return JsonResponse({"status": "ignored", "reason": "Not an order completion event"}, status=200)
+    #         # if callback_data.get('type') != 'CHECKOUT_ORDER_COMPLETED':
+    #         #     print("Not a checkout order completed event")
+    #         #     return JsonResponse({"status": "ignored", "reason": "Not an order completion event"}, status=200)
 
-            payload = callback_data.get('payload', {})
-            order_id = payload.get('orderId')
-            merchant_order_id = payload.get('merchantOrderId')
-            state = payload.get('state')
+    #         payload = callback_data.get('payload', {})
+    #         order_id = payload.get('orderId')
+    #         merchant_order_id = payload.get('merchantOrderId')
+    #         state = payload.get('state')
 
-            if not merchant_order_id:
-                print('no merchant order id')
-                return HttpResponseBadRequest("Missing merchantOrderId in payload")
+    #         if not merchant_order_id:
+    #             print('no merchant order id')
+    #             return HttpResponseBadRequest("Missing merchantOrderId in payload")
             
-            # if state != "COMPLETED":
-            #     return JsonResponse({"status": "ignored", "reason": f"Payment state is '{state}' not 'COMPLETED'"}, status=200)
+    #         # if state != "COMPLETED":
+    #         #     return JsonResponse({"status": "ignored", "reason": f"Payment state is '{state}' not 'COMPLETED'"}, status=200)
 
-            print("merchant_order_id:", merchant_order_id)
-            print("order_id:", order_id)
+    #         print("merchant_order_id:", merchant_order_id)
+    #         print("order_id:", order_id)
 
-            try:
-                txn = PhonePeTransaction.objects.get(order_id=merchant_order_id)
-                txn.status = state
-                txn.phonepe_order_id = order_id
+    #         try:
+    #             txn = PhonePeTransaction.objects.get(order_id=merchant_order_id)
+    #             txn.status = state
+    #             txn.phonepe_order_id = order_id
 
-                payment_details = payload.get('paymentDetails', [{}])[0]
-                if payment_details:
-                    txn.transaction_id = payment_details.get('transactionId')
-                    txn.payment_mode = payment_details.get('paymentMode')
-                    txn.amount = payment_details.get('amount')
+    #             payment_details = payload.get('paymentDetails', [{}])[0]
+    #             if payment_details:
+    #                 txn.transaction_id = payment_details.get('transactionId')
+    #                 txn.payment_mode = payment_details.get('paymentMode')
+    #                 txn.amount = payment_details.get('amount')
 
-                txn.save()
-                print('plan added :',addplantobuisness(merchant_order_id))
+    #             txn.save()
+    #             print('plan added :',addplantobuisness(merchant_order_id))
 
-                print("Control leaving from payment allbak to payment_status_update")
-                payment_status_update(merchant_order_id)
+    #             print("Control leaving from payment allbak to payment_status_update")
+    #             payment_status_update(merchant_order_id)
 
-                print("Payment status updated and business plan added successfully")
+    #             print("Payment status updated and business plan added successfully")
 
-                return JsonResponse({"status": "success"})
+    #             return JsonResponse({"status": "success"})
 
-            except PhonePeTransaction.DoesNotExist:
-                print(f"Transaction not found for order_id: {merchant_order_id}")
-                return HttpResponseBadRequest("Transaction not found")
+    #         except PhonePeTransaction.DoesNotExist:
+    #             print(f"Transaction not found for order_id: {merchant_order_id}")
+    #             return HttpResponseBadRequest("Transaction not found")
 
-        except json.JSONDecodeError:
-            return HttpResponseBadRequest("Invalid JSON in callback body")
-        except Exception as e:
-            print("Callback Processing Error:", str(e))
-            return HttpResponseBadRequest("Error processing callback")
+    #     except json.JSONDecodeError:
+    #         return HttpResponseBadRequest("Invalid JSON in callback body")
+    #     except Exception as e:
+    #         print("Callback Processing Error:", str(e))
+    #         return HttpResponseBadRequest("Error processing callback")
 
-    return HttpResponseBadRequest("Invalid request method")
+    # return HttpResponseBadRequest("Invalid request method")
 
    
    
