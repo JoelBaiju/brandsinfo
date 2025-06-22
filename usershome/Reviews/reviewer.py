@@ -48,7 +48,8 @@ def check_and_schedule_reviews():
             count = random.randint(1, 3)  # how many reviews to generate today
 
             for _ in range(count):
-                delay = random.randint(0, 86400)  # seconds in 24 hrs
+                # delay = random.randint(0, 86400)  # seconds in 24 hrs
+                delay = random.randint(0, 400)  # seconds in 24 hrs
                 add_single_review.apply_async(args=[biz.id], countdown=delay)
 
             # Update tracker
