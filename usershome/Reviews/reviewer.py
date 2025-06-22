@@ -114,7 +114,7 @@ def add_single_review(biz_id):
 
 
     # Select a user or fake user
-    from ..Tools_Utils.review_name_picker import get_random_name
+    from .review_name_picker import get_random_name
     user_name = user_name = get_random_name(biz.target_audience_gender)
 
 

@@ -9,10 +9,12 @@ def load_name_lists():
     global MALE_NAMES, FEMALE_NAMES
 
     if not MALE_NAMES:  # Load once
-        base_path = os.path.join(os.path.dirname(__file__), '../static/names')
-        with open(os.path.join(base_path, 'male_names.txt'), 'r') as f:
+        base_path = os.path.dirname(os.path.abspath(__file__))  # Same directory as this script
+
+        with open(os.path.join(base_path, 'male_names.txt'), 'r', encoding='utf-8') as f:
             MALE_NAMES = [line.strip() for line in f if line.strip()]
-        with open(os.path.join(base_path, 'female_names.txt'), 'r') as f:
+
+        with open(os.path.join(base_path, 'female_names.txt'), 'r', encoding='utf-8') as f:
             FEMALE_NAMES = [line.strip() for line in f if line.strip()]
 
 def get_random_name(gender: str) -> str:

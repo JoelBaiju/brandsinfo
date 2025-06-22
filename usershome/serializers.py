@@ -59,9 +59,7 @@ class ReviewRatingSerializer(serializers.ModelSerializer):
     buisness = serializers.PrimaryKeyRelatedField(
     queryset=Buisnesses.objects.all(),
     )
-    user = serializers.PrimaryKeyRelatedField(
-    queryset=Extended_User.objects.all()    
-    )   
+    user = serializers.SerializerMethodField() 
     name = serializers.StringRelatedField(source='user.first_name', read_only=True)
     image = ReviewPicsSerializer(source='review_pics_set', many=True, read_only=True)
 
@@ -69,9 +67,10 @@ class ReviewRatingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reviews_Ratings
         fields = ['id', 'rating', 'review', 'buisness', 'date', 'time', 'user' , 'name','image']
+    
+    def get_user(self):
+            return self.user_name
         
-    
-    
     def create(self, validated_data):
         images_data = validated_data.pop('images', [])
         review = Reviews_Ratings.objects.create(**validated_data)   

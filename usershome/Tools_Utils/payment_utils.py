@@ -14,7 +14,7 @@ def generate_invoice_pdf(order_id):
     context = {
         'username': txn.user.first_name,
         'business_name': txn.buisness.name,
-        'plan_name': txn.plan.plan_name,
+        'plan_name': txn.plan.verbouse_name,
         'start_date': txn.created_at,
         'expiry_date': txn.expire_at,
         'duration_days': txn.plan_variant.duration,
