@@ -146,10 +146,11 @@ def payment_callback(request):
                 # print('plan added :',addplantobuisness(merchant_order_id))
 
                 print("Control leaving from payment allbak to payment_status_update")
-                payment_status_update(merchant_order_id)
+                if payment_status_update(merchant_order_id):
 
-                print("Payment status updated and business plan added successfully")
+                    print("Payment status updated and business plan added successfully")
 
+                
                 return JsonResponse({"status": "success"})
 
             except PhonePeTransaction.DoesNotExist:

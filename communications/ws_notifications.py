@@ -122,7 +122,7 @@ def payment_status_update(order_id,):
             f"Your payment for plan {plan.plan_name} is pending. "
             "Please check your payment method for confirmation."
         )
-    
+    print("just before creating notification method")
     noti = Notification.objects.create(    
         user=buisness.user,
         message=message,
@@ -139,7 +139,7 @@ def payment_status_update(order_id,):
         'buisness_id': buisness.id,  
         'user': buisness.user.username,
     }
-
+    print("passing control to prime notfication sender")
     notify_user.delay(data=data , extras = {'invoice' : generate_invoice_pdf(tnx.order_id),'status':tnx.status})
     return True
 
