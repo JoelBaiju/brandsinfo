@@ -46,4 +46,6 @@ def generate_invoice_pdf(order_id):
     txn.invoice.save(file_name, File(result))
     txn.save()
 
+    print("invoice_generated")
+
     return txn.invoice.url  
