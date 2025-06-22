@@ -42,7 +42,7 @@ def initiate_payment_view(request):
                 )
 
             amount = plan_variant.price
-            amount = 2
+            amount = 1
             response = phonepe_initiate_payment(int(amount))  
             if response['success']:
                 print(f"Redirect user to:")
