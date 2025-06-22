@@ -17,7 +17,7 @@ from .Reviews.reviewer import check_and_schedule_reviews
 
 
 @shared_task(bind=True, name="usershome.Reviews.reviewer.check_and_schedule_reviews")
-def schedule_reviews():
+def schedule_reviews(*args, **kwargs):
     check_and_schedule_reviews()
 
 

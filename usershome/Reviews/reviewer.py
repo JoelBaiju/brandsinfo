@@ -14,7 +14,7 @@ from..models import BusinessReviewTracker
 from ..Ai.review_generator import prime_review_generator
 
 
-def check_and_schedule_reviews():
+def check_and_schedule_reviews(*args, **kwargs):
 
     print("auto review scheduler task called")
 
