@@ -87,7 +87,7 @@ def add_single_review(biz_id):
     print("add single review task called ")
     def weighted_rating(tier):
         if tier == 'Default Plan':
-            return random.choices([2, 3, 4], weights=[10, 50, 30, 10])[0]  # avg ~3.5
+            return random.choices([2, 3, 4], weights=[10, 50, 40])[0]  # avg ~3.5
         elif tier == 'Tier 2':
             return random.choices([3, 4, 5], weights=[20, 50, 30])[0]         # avg ~4
         elif tier == 'Tier 3':
@@ -121,7 +121,7 @@ def add_single_review(biz_id):
     if rating>4:
         r_type = 'good'
 
-
+    review = ""
     if include_text:
         review = prime_review_generator(biz.id,r_type , plan )
 
