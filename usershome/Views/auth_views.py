@@ -24,7 +24,7 @@ from ..serializers import *
 from brandsinfo.settings import FIREBASE_API_KEY
 from communications.draft4sms import send_otp_draft4sms
 
-
+from brandsinfo.settings import AUTH_BYPASS_NUMBER ,AUTH_BYPASS_OTP
 
 
 
@@ -43,12 +43,14 @@ def signup_request_1(request):
         if not phone:
             return Response({'message': 'Phone number is required.'}, status=status.HTTP_400_BAD_REQUEST)
         
+            
         # Check if user already exists
         exists = Extended_User.objects.filter(username=phone).exists()
         
         # Generate OTP
         otp = generate_random_otp()
-        
+        if phone == AUTH_BYPASS_NUMBER :
+            otp = AUTH_BYPASS_OTP
         # Store OTP and phone number in cache with timeout (10 minutes)
         try:
             auth=Auth_OTPs.objects.get(phone=phone)

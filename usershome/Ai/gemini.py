@@ -33,7 +33,7 @@ def generate_metadata(prompt):
             print( 'api key ' ,api_key)
             
 
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}"
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
             
             payload = {"contents": [{"parts": [{"text": prompt}]}]}
             headers = {
@@ -140,60 +140,54 @@ def generate_metadata_for_CC(category , city):
 
 
 
-
-
 def generate_metadata_for_SB(city, general_category, buisness_name, descriptive_category, description):
     prompt = f"""
-    Generate high-quality **SEO metadata** for a business in **{city}**, optimized for **search engine ranking and user engagement**.
+    Generate **SEO metadata** for a business in **{city}**, focusing on **precise keyword targeting** and **local relevance**.
 
-    ### **Business Information:**  
-    - **Business Name:** {buisness_name}  
-    - **Category:** {general_category} ({descriptive_category})  
-    - **Description:** {description}  
+    ### **Business Information:**
+    - **Business Name:** {buisness_name}
+    - **Category:** {general_category} ({descriptive_category})
+    - **Description:** {description}
 
-    ### **SEO Metadata Guidelines (Follow Strictly):**  
-    #### **Meta Title (≤ 60 characters)**  
-    - Must include **business name, category, and city**.  
-    - Use **power words** for clickability.  
-    - Prioritize **high-impact keywords**.  
+    ### **SEO Metadata Guidelines (Strict):**
 
-    #### **Meta Description (≤ 160 characters)**  
-    - Clearly summarize key services.  
-    - Naturally include **primary keywords**.  
-    - Use action-oriented language for engagement.  
+    #### ✅ Meta Title (≤ 60 characters)
+    - Include **business name, service type, and city**.
+    - Use strong, high-click-through-rate terms.
+    - Avoid generic or repeated words.
 
-    #### **Meta Keywords  (≤ 360 characters)**  
-    - Include **highly relevant, high-search-volume terms**.  
-    - Use **geo-targeted keywords** for local SEO.  
-    - Ensure a **comma-separated format** with no unnecessary words.  
+    #### ✅ Meta Description (≤ 160 characters)
+    - Briefly describe what the business offers.
+    - Highlight **key value propositions and location**.
+    - Use a friendly, action-driven tone.
 
+    #### ✅ Meta Keywords (≤ 360 characters, comma-separated)
+    - Include only **search-relevant keywords** related to:
+      - The **services or products** offered
+      - The **industry**
+    - ❌ Do NOT include:
+      - Generic place names (like “India”, “Tamil Nadu”)
+      - Business names or owner names
+      - Broad keywords like “finance”, “store”, “company”, “best”, “top”, etc.
+    - ✅ Focus on **search intent** (e.g., "car repair", "gold loans", "wedding photography").
+    - ✅ Use only keywords that a user would type to find this service.
 
-    Based on the business name, category, and description, determine the most likely **target gender audience** for this business.
+    ### Target Audience
+    Based on the above, return the likely **target gender**.
 
-    ⚠️ Only respond with one of the following **exact lowercase values**:
-    - "male"
-    - "female"
-    - "unisex"
+    ⚠️ Only respond with one of these: `"male"`, `"female"`, `"unisex"`
 
-    ### **Output Format (Strict JSON):**  
+    ### 📦 Output Format (JSON only):
     ```json
     {{
-        "meta_title": "<Generated Meta Title>",
-        "meta_description": "<Generated Meta Description>",
-        "meta_keywords": "<Comma-separated keywords>"
+        "meta_title": "<Optimized Meta Title>",
+        "meta_description": "<Optimized Meta Description>",
+        "meta_keywords": "<Comma-separated clean keywords>",
         "target_gender": "gender"
     }}
     ```
     """
-
     return generate_metadata(prompt)
-
-
-
-
-
-
-
 
 
 
