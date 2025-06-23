@@ -83,8 +83,8 @@ def elasticsearch2(request):
         # ])
         
         search_query = Q("bool", should=[
-            Q("multi_match", query=query, fields=["name", "category" ,"keywords"], fuzziness="2", max_expansions=3, prefix_length=2), 
-            Q("multi_match", query=query, fields=["cat_name"], fuzziness="2", max_expansions=3, prefix_length=2)
+            Q("multi_match", query=query, fields=["name", "category" ,"keywords"], fuzziness="2", max_expansions=3, prefix_length=2,minimum_should_match = 2), 
+            Q("multi_match", query=query, fields=["cat_name"], fuzziness="2", max_expansions=3, prefix_length=2 ,minimum_should_match=2)
         ])
         clean_tokens = [word for word in query.split() if len(word) > 3]
 

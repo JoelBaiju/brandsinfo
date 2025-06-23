@@ -4,6 +4,7 @@ from .Views import views
 from .Views import auth_views
 from .Views import sitemap_view
 from .Views import ps_views
+from .Ai import cohere
 from .SearchEngines.e_searcher import *
 from .Views.streaming_views import VideoUploadView
 from .Views.payment_view import puchase_plan , pcreds
@@ -112,6 +113,7 @@ urlpatterns = [
     path('alpha/sitemap_generator_allatonce_SB/', sitemap_view.Site_Map_Generator_ALLATONCE_SB),
     path('alpha/sitemap_generator_allatonce_CC/', sitemap_view.Site_Map_Generator_ALLATONCE_CC),
     path('alpha/sgs_test/', sitemap_view.Site_Map_Generator_SB_single_Test_api),
+    path('alpha/sgs_test/cohere/', cohere.Site_Map_Generator_SB_single_Test_api),
     
         
     

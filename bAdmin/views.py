@@ -621,18 +621,18 @@ class AddLocalities(APIView):
         data = request.data  # [{"CITY": 1, "LOCAITY": "LOCALITY1"}, ...]
         created = []
         errors = []
-        city = data.get("CITY")
+        
         localities = data.get("LOCAITY")
+        city_id = data.get("CITY")
+        city = City.objects.get(id=city_id)
 
         for locality in localities:
             try:
-                city_id = city
                 locality_name = locality
 
                 if not city_id or not locality_name:
                     raise ValueError("Missing CITY or LOCAITY")
 
-                city = City.objects.get(id=city_id)
                 locality, is_created = Locality.objects.get_or_create(
                     city=city,
                     locality_name=locality_name.strip()
