@@ -29,5 +29,12 @@ urlpatterns = [
 
     path('add_cities/', views.AddCities.as_view(), name='add_cities'),
     path('add_localities/', views.AddLocalities.as_view(), name='add_localities'),
+    path('edit_city/<int:id>/', views.EditCityAPIView.as_view()),
+    path('delete_city/<int:id>/', views.DeleteCityAPIView.as_view()),
+    
+    path('edit_locality/<int:id>/', views.EditLocalityAPIView.as_view()),
+    path('delete_locality/<int:id>/', views.DeleteLocalityAPIView.as_view()),
 
 ]
+
+

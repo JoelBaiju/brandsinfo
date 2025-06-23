@@ -583,6 +583,7 @@ from .serializers import CitySerializer, LocalitySerializer
 
 class AddCities(APIView):
     pagination_class = CustomPagination
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         city_list = request.data  # ["CITY1", "CITY2", ...]
@@ -614,6 +615,7 @@ class AddCities(APIView):
 
 class AddLocalities(APIView):
     pagination_class = CustomPagination
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         data = request.data  # [{"CITY": 1, "LOCAITY": "LOCALITY1"}, ...]
@@ -665,3 +667,38 @@ class AddLocalities(APIView):
         paginated_response.data["total_locality_count"] = total_locality_count
 
         return paginated_response
+
+
+
+
+from rest_framework.generics import UpdateAPIView, DestroyAPIView
+
+
+# --- Cities ---
+
+class EditCityAPIView(UpdateAPIView):
+    queryset = City.objects.all()
+    serializer_class = CitySerializer
+    lookup_field = 'id'
+    permission_classes = [IsAuthenticated]
+
+
+class DeleteCityAPIView(DestroyAPIView):
+    queryset = City.objects.all()
+    lookup_field = 'id'
+    permission_classes = [IsAuthenticated]
+
+
+# --- Localities ---
+
+class EditLocalityAPIView(UpdateAPIView):
+    queryset = Locality.objects.all()
+    serializer_class = LocalitySerializer
+    lookup_field = 'id'
+    permission_classes = [IsAuthenticated]
+
+
+class DeleteLocalityAPIView(DestroyAPIView):
+    queryset = Locality.objects.all()
+    lookup_field = 'id'
+    permission_classes = [IsAuthenticated]
