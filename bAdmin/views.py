@@ -57,7 +57,7 @@ def Add_plan (request):
 from django.db.models import Count
 
 
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 @api_view(['GET'])
 def admin_dashboard_view(request):
     # if  request.user.is_superuser:
@@ -340,6 +340,7 @@ class EditProductSubcats(generics.UpdateAPIView):
             
             
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def get_dcat_with_id_single(request):
     id = request.GET.get('id')
     if not id:
@@ -356,6 +357,7 @@ def get_dcat_with_id_single(request):
 
             
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def get_gcat_with_id_single(request):
     id = request.GET.get('id')
     if not id:
@@ -427,6 +429,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def add_buisness_from_admin(request):
     if not request.user.is_superuser:
         return Response(
@@ -561,3 +564,96 @@ class get_buisnesses(generics.ListAPIView):
         return response
 
 
+
+
+
+
+
+
+
+
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from usershome.models import City, Locality
+from .serializers import CitySerializer, LocalitySerializer
+
+
+class AddCities(APIView):
+    pagination_class = CustomPagination
+
+    def post(self, request):
+        city_list = request.data  # ["CITY1", "CITY2", ...]
+        created = []
+
+        for city_name in city_list:
+            city, is_created = City.objects.get_or_create(city_name=city_name.strip())
+            if is_created:
+                created.append(city)
+
+        serializer = CitySerializer(created, many=True)
+        return Response({"added_cities": serializer.data}, status=status.HTTP_201_CREATED)
+
+    def get(self, request):
+        cities = City.objects.all()
+        paginator = self.pagination_class()
+        paginated_qs = paginator.paginate_queryset(cities, request)
+        serializer = CitySerializer(paginated_qs, many=True)
+
+        total_city_count = cities.count()
+        total_locality_count = Locality.objects.count()
+
+        paginated_response = paginator.get_paginated_response(serializer.data)
+        paginated_response.data["total_city_count"] = total_city_count
+        paginated_response.data["total_locality_count"] = total_locality_count
+
+        return paginated_response
+
+
+class AddLocalities(APIView):
+    pagination_class = CustomPagination
+
+    def post(self, request):
+        data = request.data  # [{"CITY": 1, "LOCAITY": "LOCALITY1"}, ...]
+        created = []
+        errors = []
+
+        for item in data:
+            try:
+                city_id = item.get("CITY")
+                locality_name = item.get("LOCAITY")
+
+                if not city_id or not locality_name:
+                    raise ValueError("Missing CITY or LOCAITY")
+
+                city = City.objects.get(id=city_id)
+                locality, is_created = Locality.objects.get_or_create(
+                    city=city,
+                    locality_name=locality_name.strip()
+                )
+                if is_created:
+                    created.append(locality)
+            except Exception as e:
+                errors.append({"data": item, "error": str(e)})
+
+        serializer = LocalitySerializer(created, many=True)
+        return Response({
+            "added_localities": serializer.data,
+            "errors": errors
+        }, status=status.HTTP_201_CREATED)
+
+
+    def get(self, request):
+        city_id = request.query_params.get('cid')       
+
+        if city_id:
+            localities = Locality.objects.select_related('city').filter(city__id=city_id)
+        else:
+            localities = Locality.objects.select_related('city').all()
+
+        paginator = self.pagination_class()
+        paginated_qs = paginator.paginate_queryset(localities, request)
+        serializer = LocalitySerializer(paginated_qs, many=True)
+        return paginator.get_paginated_response(serializer.data)

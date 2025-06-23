@@ -152,10 +152,13 @@ class BuisnessesView(generics.ListAPIView):
             business.plan = plan
             business.save()
             print(business.city)
+            buisness_review_tracker = BusinessReviewTracker.objects.create(business=business)
+
             return Response(
                 self.serializer_class(business).data,
                 status=status.HTTP_201_CREATED
             )
+
         print(serializer.errors)
         return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
    
@@ -1093,12 +1096,6 @@ def get_buisnesses_with_no_plan(request):
     serialized_buisness = BuisnessesSerializerMini(buisnesses, many=True)
     
     return Response(serialized_buisness.data, status=status.HTTP_200_OK)
-
-
-
-
-
-
 
 
 

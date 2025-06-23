@@ -123,7 +123,6 @@ urlpatterns = [
 
     path('pcreds/',pcreds, name='pcreds'),
     
-    
 
 # =============================
     path('send/' , senddd ),

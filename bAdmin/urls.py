@@ -27,4 +27,7 @@ urlpatterns = [
     path('get_users/',views.get_users.as_view()),
     path('get_buisnesses/',views.get_buisnesses.as_view()),
 
+    path('add_cities/', views.AddCities.as_view(), name='add_cities'),
+    path('add_localities/', views.AddLocalities.as_view(), name='add_localities'),
+
 ]

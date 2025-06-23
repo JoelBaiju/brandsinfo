@@ -83,8 +83,8 @@ def elasticsearch2(request):
         # ])
         
         search_query = Q("bool", should=[
-            Q("multi_match", query=query, fields=["name", "category" ,"keywords"], fuzziness ="AUTO", max_expansions=3, prefix_length=2),
-            Q("multi_match", query=query, fields=["cat_name"], max_expansions=3,fuzziness ="AUTO", prefix_length=2)
+            Q("multi_match", query=query, fields=["name", "category" ,"keywords"], fuzziness="2", max_expansions=3, prefix_length=2), 
+            Q("multi_match", query=query, fields=["cat_name"], fuzziness="2", max_expansions=3, prefix_length=2)
         ])
         clean_tokens = [word for word in query.split() if len(word) > 3]
 
@@ -98,7 +98,7 @@ def elasticsearch2(request):
     
         products = ProductDocument.search().query(search_query).to_queryset()
         services = ServiceDocument.search().query(search_query).to_queryset()
-        buisnesses_direct = BuisnessDocument.search().query(search_query_for_BD)
+        buisnesses_direct = BuisnessDocument.search().query(search_query)
         bdcats = BDesCatDocument.search().query(search_query).to_queryset()
         bgcats = BGenCatDocument.search().query(search_query).to_queryset()
         

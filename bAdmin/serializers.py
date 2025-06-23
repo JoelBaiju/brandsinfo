@@ -87,3 +87,27 @@ class BuisnessesAdminlistSerializer(serializers.ModelSerializer):
         return obj.locality.locality_name if obj.locality else None
 
 
+
+
+
+from rest_framework import serializers
+from usershome.models import City, Locality
+
+class CitySerializer(serializers.ModelSerializer):
+    total_localities = serializers.SerializerMethodField()
+    class Meta:
+        model = City
+        fields = ['id', 'city_name', 'maped' , "total_localities"]
+
+    def get_total_localities(self , obj):
+        return Locality.objects.filter(city = obj).count()
+
+class LocalitySerializer(serializers.ModelSerializer):
+    city = CitySerializer(read_only=True)
+    city_id = serializers.PrimaryKeyRelatedField(
+        queryset=City.objects.all(), source='city', write_only=True
+    )
+
+    class Meta:
+        model = Locality
+        fields = ['id', 'locality_name', 'city', 'city_id']
