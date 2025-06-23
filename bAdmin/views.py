@@ -656,4 +656,12 @@ class AddLocalities(APIView):
         paginator = self.pagination_class()
         paginated_qs = paginator.paginate_queryset(localities, request)
         serializer = LocalitySerializer(paginated_qs, many=True)
-        return paginator.get_paginated_response(serializer.data)
+
+        total_city_count = City.objects.count()
+        total_locality_count = Locality.objects.count()
+
+        paginated_response = paginator.get_paginated_response(serializer.data)
+        paginated_response.data["total_city_count"] = total_city_count
+        paginated_response.data["total_locality_count"] = total_locality_count
+
+        return paginated_response
