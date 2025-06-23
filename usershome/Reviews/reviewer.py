@@ -57,10 +57,10 @@ def check_and_schedule_reviews(*args, **kwargs):
 
             for _ in range(count):
                 print('inside the second loop')
-                delay = random.randint(0, 86400)  # seconds in 24 hrs
-                # delay = random.randint(0, 400)  # seconds in 24 hrs
-                add_single_review.apply_async(args=[biz.id], countdown=delay)
-                # add_single_review.apply_async(args=[biz.id])
+                # delay = random.randint(0, 86400)  # seconds in 24 hrs
+                delay = random.randint(0, 400)  # seconds in 24 hrs
+                # add_single_review.apply_async(args=[biz.id], countdown=delay)
+                add_single_review.apply_async(args=[biz.id])
 
             # Update tracker
             tracker.reviews_added_this_cycle += count
