@@ -66,7 +66,7 @@ class ReviewRatingSerializer(serializers.ModelSerializer):
         
     class Meta:
         model = Reviews_Ratings
-        fields = ['id', 'rating', 'review', 'buisness', 'date', 'time', 'user' , 'name','image']
+        fields = ['id', 'rating', 'review', 'buisness', 'date', 'time', 'user_name' , 'name','image']
     
     def get_user(self,obj):
             return obj.user_name
