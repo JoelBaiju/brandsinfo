@@ -651,6 +651,7 @@ class Reviews_Ratings_View(generics.ListCreateAPIView):
         print(request.data)
         
         review_obj = Reviews_Ratings.objects.create(buisness=buisness, rating=rating, review=review , user=User)
+        review_obj.user_name = User.first_name+User.last_name
         
         images = request.FILES.getlist('images[]')  
         for image in images:
