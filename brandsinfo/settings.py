@@ -246,7 +246,8 @@ FIREBASE_API_KEY = 'AIzaSyBF52Ah0ERtBRalBWwAOgEMPUhjKrlpVvo'
 
 
 
-DEV = False
+DEV = True
+# DEV = False
     
 
 
@@ -346,8 +347,8 @@ CELERY_BEAT_SCHEDULE = {
     },
     'schedule-auto-reviews': {
         'task': 'usershome.Reviews.reviewer.check_and_schedule_reviews',
-        #  'schedule': crontab(hour=0,minute=0) 
         'schedule': crontab(minute='*/5') 
+        #  'schedule': crontab(hour=0,minute=0) 
 
     },
 }
