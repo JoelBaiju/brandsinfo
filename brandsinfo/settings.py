@@ -347,12 +347,12 @@ CELERY_BEAT_SCHEDULE = {
     },
     'schedule-auto-reviews': {
         'task': 'usershome.Reviews.reviewer.check_and_schedule_reviews',
-        'schedule': crontab(minute='*/5') 
-        #  'schedule': crontab(hour=0,minute=0) 
+        'schedule': crontab(hour=0,minute=0) 
 
     },
 }
 
+        # 'schedule': crontab(minute='*/5') 
 
 
 PHONEPE_MERCHANT_ID = "TEST_M22HLXACRTTPK_25040"
