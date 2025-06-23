@@ -141,49 +141,58 @@ def generate_reviews(description, category, eg_review):
     variation_token = f"v{random.randint(10000, 99999)}"
 
     prompt = f"""
-    You are an intelligent review generator that creates short, natural, and realistic customer reviews for business listings.
+    You are a smart, multilingual review generator that writes short, natural, and realistic customer reviews for business listings.
 
     ### BUSINESS DETAILS:
     - Category: {category}
     - Description: {description}
-    - Sample Review (Inspiration Only): {eg_review}
+    - Sample Review (for tone only): {eg_review}
 
-    ### IMPORTANT INSTRUCTION:
+    ### INSTRUCTIONS:
 
-    First, analyze whether the business belongs to a sensitive or experience-restricted industry.
-    These include:
+    1. Understand the business description even if it's in a regional language (e.g., Tamil, Malayalam, etc.), but:
+    - **ALWAYS** write the final review in **English only**.
+    - Do **not** use any non-English words or phrases in the review.
 
-    - Real estate, property dealing, land sales
+    2. Check if the business belongs to a **sensitive or experience-restricted industry**:
+    - Real estate, land/property sales
     - Hospitals, clinics, doctors, therapists
-    - Law firms, legal advice, lawyers
-    - Financial services, banks, loans, insurance, investments
+    - Legal services, law firms, lawyers
+    - Financial services: banks, loans, insurance, investments
     - Mental health, psychiatry, or counseling
 
-    If the business falls under any of these categories:
+    If it **is sensitive**:
+    - DO NOT mention usage, satisfaction, or outcomes.
+    - DO NOT use any words or phrases from the description.
+    - DO NOT describe any interaction or service received.
+    - RETURN only a **very vague and generic English comment**.
 
-    - DO NOT generate a detailed or personalized review.
-    - DO NOT suggest that the reviewer used or completed the service.
-    - DO NOT describe any outcome, result, or satisfaction (e.g., “they delivered”, “treatment helped”, “plot handed over”).
-    - INSTEAD: Return a **very vague, generic comment** :
-    - Do NOT reuse words or phrases from description.
-    - DO NOT mention experience, results, timing, or process.ch
-        
-    If the business is **not sensitive**:
+    3. If the business is **not sensitive**:
+    - You may use tone/sentiment from the sample review.
+    - Keep it natural and short.
+    - Blend in the vibe of the description if it helps — but **never copy phrases**.
+    - Review must **sound like a real person’s comment**, not AI-generated.
 
-    - You may generate a short review that blends the tone and sentiment of the sample review with the business description.
-    - But still follow all general rules below — do not fake experiences or outcomes.
+    ### STRICT RULES (DO NOT BREAK):
+    - The review must be **realistic**, **natural**, and in **English only**.
+    - The review must be **under 50 characters**.
+    - DO NOT mention:
+    - Locations
+    - Prices
+    - Time durations
+    - Results or benefits
+    - That the customer completed or used the service
+    - DO NOT fabricate experiences or outcomes.
+    - DO NOT repeat phrases from the business description.
 
-    ### RULES (STRICT — DO NOT VIOLATE):
-    1. The review must be **under 50 characters**.
-    2. The review must **sound realistic and natural**.
-    3. DO NOT mention locations, prices, time durations, results, or any imaginary outcome.
-    4. NEVER say the customer completed a transaction or got results.
-    5. Output must be valid JSON in this exact format:
+    ### OUTPUT FORMAT:
+    Output must be a valid JSON in **this exact format**:
 
     ```json
     {{
     "reviews": "..."
-    }}"""
+    }}
+    """
     for attempt in range(5):
         try:
             response = co.chat(

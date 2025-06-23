@@ -77,14 +77,18 @@ def elasticsearch2(request):
     with concurrent.futures.ThreadPoolExecutor() as executor:
         future_cc_meta = executor.submit(CC_Check_and_add_metadata , location , query)
         
-        search_query = Q("bool", should=[
-            Q("multi_match", query=query, fields=["name", "category" ,"keywords"], fuzziness ="1", max_expansions=3, prefix_length=2,minimum_should_match=2),
-            Q("multi_match", query=query, fields=["cat_name"], max_expansions=3,fuzziness ="1", prefix_length=2 ,minimum_should_match=2)
-        ])
+        # search_query = Q("bool", should=[
+        #     Q("multi_match", query=query, fields=["name", "category" ,"keywords"], fuzziness ="1", max_expansions=3, prefix_length=2,minimum_should_match=2),
+        #     Q("multi_match", query=query, fields=["cat_name"], max_expansions=3,fuzziness ="1", prefix_length=2 ,minimum_should_match=2)
+        # ])
         
+        search_query = Q("bool", should=[
+            Q("multi_match", query=query, fields=["name", "category" ,"keywords"], fuzziness ="AUTO", max_expansions=3, prefix_length=2),
+            Q("multi_match", query=query, fields=["cat_name"], max_expansions=3,fuzziness ="AUTO", prefix_length=2)
+        ])
         clean_tokens = [word for word in query.split() if len(word) > 3]
 
-        search_query_for_BD = Q("multi_match" , query=" ".join(clean_tokens) , fields=["name","keywords"]  , prefix_length=2 ,minimum_should_match=3)
+        search_query_for_BD = Q("multi_match" , query=" ".join(clean_tokens) , fields=["name","keywords"]  , prefix_length=3 ,minimum_should_match=2)
 
         try:
             city_obj = City.objects.get(city_name=location)
@@ -122,28 +126,28 @@ def elasticsearch2(request):
         
 
         # Keyword - MAGENTA
-        # print(f'\n\n\n{MAGENTA}keyword{RESET}\n\n\n')
-        # print(f'{MAGENTA}keyword:{query}{RESET}')
+        print(f'\n\n\n{MAGENTA}keyword{RESET}\n\n\n')
+        print(f'{MAGENTA}keyword:{query}{RESET}')
 
-        # # Products - CYAN
-        # print(f'\n\n\n{CYAN}products{RESET}\n\n\n')
-        # print(f'{CYAN}products:{products}{RESET}')
+        # Products - CYAN
+        print(f'\n\n\n{CYAN}products{RESET}\n\n\n')
+        print(f'{CYAN}products:{products}{RESET}')
 
-        # # Services - YELLOW
-        # print(f'\n\n\n{YELLOW}services{RESET}\n\n\n')
-        # print(f'{YELLOW}services:{services}{RESET}')
+        # Services - YELLOW
+        print(f'\n\n\n{YELLOW}services{RESET}\n\n\n')
+        print(f'{YELLOW}services:{services}{RESET}')
 
-        # # b_direct - GREEN
-        # print(f'\n\n\n{GREEN}b_direct{RESET}\n\n\n')
-        # print(f'{GREEN}b_direct:{buisnesses_direct}{RESET}')
+        # b_direct - GREEN
+        print(f'\n\n\n{GREEN}b_direct{RESET}\n\n\n')
+        print(f'{GREEN}b_direct:{buisnesses_direct}{RESET}')
 
-        # # bdcats - BLUE
-        # print(f'\n\n\n{BLUE}bdcats{RESET}\n\n\n')
-        # print(f'{BLUE}bdcats:{bdcats}{RESET}')
+        # bdcats - BLUE
+        print(f'\n\n\n{BLUE}bdcats{RESET}\n\n\n')
+        print(f'{BLUE}bdcats:{bdcats}{RESET}')
 
-        # # bgcats - RED
-        # print(f'\n\n\n{RED}bgcats{RESET}\n\n\n')
-        # print(f'{RED}bgcats:{bgcats}{RESET}')
+        # bgcats - RED
+        print(f'\n\n\n{RED}bgcats{RESET}\n\n\n')
+        print(f'{RED}bgcats:{bgcats}{RESET}')
 
 
         product_buisness_ids = products.values_list('buisness', flat=True).distinct()
@@ -162,19 +166,19 @@ def elasticsearch2(request):
 
 
 
-        # print(f'\n\n\n{CYAN}buisness filtered by city{RESET}\n\n\n')
-        # print('buisnesses filtered by city',buisnesses)
-        # print(f'\n\n\n{YELLOW}buisness filtered by city{RESET}\n\n\n')
+        print(f'\n\n\n{CYAN}buisness filtered by city{RESET}\n\n\n')
+        print('buisnesses filtered by city',buisnesses)
+        print(f'\n\n\n{YELLOW}buisness filtered by city{RESET}\n\n\n')
 
 
-        # print(f'\n\n\n{CYAN}buisness from buisness direct before filtered by city{RESET}\n\n\n')
-        # print('buisnesses from buisness direct before filtered by city',buisnesses_direct)
-        # print(f'\n\n\n{YELLOW}buisness from buisness direct before filtered by city{RESET}\n\n\n')
+        print(f'\n\n\n{CYAN}buisness from buisness direct before filtered by city{RESET}\n\n\n')
+        print('buisnesses from buisness direct before filtered by city',buisnesses_direct)
+        print(f'\n\n\n{YELLOW}buisness from buisness direct before filtered by city{RESET}\n\n\n')
                 
 
-        # print(f'\n\n\n{CYAN}buisness from buisness direct filtered by city{RESET}\n\n\n')
-        # print('buisnesses from buisness direct filtered by city',buisnesses_from_buisness_direct)
-        # print(f'\n\n\n{YELLOW}buisness from buisness direct filtered by city{RESET}\n\n\n')
+        print(f'\n\n\n{CYAN}buisness from buisness direct filtered by city{RESET}\n\n\n')
+        print('buisnesses from buisness direct filtered by city',buisnesses_from_buisness_direct)
+        print(f'\n\n\n{YELLOW}buisness from buisness direct filtered by city{RESET}\n\n\n')
         
 
         filters = modelsQ()
@@ -201,9 +205,9 @@ def elasticsearch2(request):
         buisnesses = buisnesses.filter(filters)
 
         
-        # print('\n\n\nbuisness after final filter\n\n\n')
-        # print('buisnesses after final filter',buisnesses)
-        # print('\n\n\nbuisness after final filter\n\n\n')
+        print('\n\n\nbuisness after final filter\n\n\n')
+        print('buisnesses after final filter',buisnesses)
+        print('\n\n\nbuisness after final filter\n\n\n')
 
 
 
@@ -217,16 +221,17 @@ def elasticsearch2(request):
 
 
         
-        if buisnesses_direct.count()!=0:
-            executor.submit(update_search_count_buisnesses , buisnesses_direct)
-            combined_queryset = buisnesses_direct          
-        else:
-            executor.submit(update_search_count_buisnesses , buisnesses)
-            combined_queryset = buisnesses
-            # executor.submit(update_search_count_buisnesses , buisnesses_direct)
+        # if buisnesses_direct.count()!=0:
+        #     executor.submit(update_search_count_buisnesses , buisnesses_direct)
+        #     combined_queryset = buisnesses_direct          
+        # else:
+        #     executor.submit(update_search_count_buisnesses , buisnesses)
+        #     combined_queryset = buisnesses
+        #     # executor.submit(update_search_count_buisnesses , buisnesses_direct)
 
         
-        # combined_queryset = list(chain(buisnesses_direct, buisnesses))       i dont wanted to combine them if data in buisenesses_direct is not empty then i will use it only
+        combined_queryset = list(chain(buisnesses_direct, buisnesses))       #i dont wanted to combine them if data in buisenesses_direct is not empty then i will use it only
+        executor.submit(update_search_count_buisnesses , combined_queryset)
         
         
         unique_combined_queryset = list(set(combined_queryset)) 
