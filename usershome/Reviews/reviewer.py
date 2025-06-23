@@ -86,11 +86,11 @@ def add_single_review(biz_id):
     from ..Tools_Utils.utils import send_review_notification_email
     print("add single review task called ")
     def weighted_rating(tier):
-        if tier == 'Tier 3':
-            return random.choices([2, 3, 4, 5], weights=[10, 50, 30, 10])[0]  # avg ~3.5
+        if tier == 'Default Plan':
+            return random.choices([2, 3, 4], weights=[10, 50, 30, 10])[0]  # avg ~3.5
         elif tier == 'Tier 2':
             return random.choices([3, 4, 5], weights=[20, 50, 30])[0]         # avg ~4
-        elif tier == 'Default Plan':
+        elif tier == 'Tier 3':
             return random.choices([4, 5], weights=[40, 60])[0]               # avg ~4.5
         return 4
 
