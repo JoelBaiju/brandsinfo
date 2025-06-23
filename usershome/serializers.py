@@ -68,8 +68,8 @@ class ReviewRatingSerializer(serializers.ModelSerializer):
         model = Reviews_Ratings
         fields = ['id', 'rating', 'review', 'buisness', 'date', 'time', 'user' , 'name','image']
     
-    def get_user(self):
-            return self.user_name
+    def get_user(self,obj):
+            return obj.user_name
         
     def create(self, validated_data):
         images_data = validated_data.pop('images', [])
