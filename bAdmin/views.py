@@ -621,11 +621,13 @@ class AddLocalities(APIView):
         data = request.data  # [{"CITY": 1, "LOCAITY": "LOCALITY1"}, ...]
         created = []
         errors = []
+        city = data.get("CITY")
+        localities = data.get("LOCAITY")
 
-        for item in data:
+        for locality in localities:
             try:
-                city_id = item.get("CITY")
-                locality_name = item.get("LOCAITY")
+                city_id = city
+                locality_name = locality
 
                 if not city_id or not locality_name:
                     raise ValueError("Missing CITY or LOCAITY")
@@ -638,7 +640,7 @@ class AddLocalities(APIView):
                 if is_created:
                     created.append(locality)
             except Exception as e:
-                errors.append({"data": item, "error": str(e)})
+                errors.append({"data": locality, "error": str(e)})
 
         serializer = LocalitySerializer(created, many=True)
         return Response({
