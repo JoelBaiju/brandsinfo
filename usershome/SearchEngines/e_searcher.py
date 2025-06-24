@@ -58,11 +58,6 @@ client = SarvamAI(
 )
 
 
-COHERE_API_KEY = "yOEglpyAXjyljpPkCXdK6dQjf7aBsoxMEUWUYLWp"  # Replace with your actual key
-
-co = cohere.Client(api_key=COHERE_API_KEY)
-
-
 
     # Your task:
     # - Return only the indexes of groups that are **highly relevant** to the **semantic intent** of the user’s query.
@@ -277,7 +272,7 @@ class Pageing_assistant:
 
 
 
-# from .search_resulst_cacher import get_cached_search_response,cache_search_response
+from .search_resulst_cacher import get_cached_search_response,cache_search_response
 
 
 
@@ -306,9 +301,10 @@ def elasticsearch2(request):
     }
 
 
-    # cached = get_cached_search_response(query, location,filters_dict)
-    # if cached:
-    #     return cached
+    cached = get_cached_search_response(query, location,filters_dict)
+    if cached:
+        print('data from cache')
+        return cached
 
     # 2. Run metadata fetch in parallel
     with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -390,7 +386,7 @@ def elasticsearch2(request):
         response.data['metadata'] = future_meta.result()
 
         # 8. Cache the response
-        # cache_search_response(query, location,filters_dict, response.data)
+        cache_search_response(query, location,filters_dict, response.data)
 
         return response
 
