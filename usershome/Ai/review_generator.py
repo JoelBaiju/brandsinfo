@@ -2,7 +2,7 @@
 
 
 import random
-from brandsinfo.settings import GEMINI_API_KEYS,SARVAM_API_KEY
+from brandsinfo.settings import GEMINI_API_KEYS,SARVAM_API_KEY,COHERE_API_KEYS
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -130,9 +130,11 @@ import random
 
 import cohere
 
-COHERE_API_KEY = "yOEglpyAXjyljpPkCXdK6dQjf7aBsoxMEUWUYLWp"  # Replace with your actual key
 
-co = cohere.Client(api_key=COHERE_API_KEY)
+
+api_key_cycle = itertools.cycle(COHERE_API_KEYS)
+
+co = cohere.Client(api_key=next(api_key_cycle))
 
 
 

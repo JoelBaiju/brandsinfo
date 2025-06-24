@@ -235,6 +235,17 @@ GEMINI_API_KEYS=[
                     'AIzaSyDmKDJSC2i7b_OST495c9HDnNIyJ4DPgGQ' #brandsinfo key in fightclub
                 ]
 
+
+COHERE_API_KEYS=[
+                    'qY786lt1yZbf5XwvJHv8wiNwJ2zydJRBnsa5SfZ1',  #brandsinfo.test@gmail.com
+
+                    'lOm2YckbpL1KoXZ1x5rqtixgtIOK4Ysx863YEPM0' ,  #nikhilrakeshh@gmail.com 
+
+                    'QyUeM7WyVCa1AaFyLek1O4GL70kz4OKk0Rj7jeQp' , #nikhilappu112@gmail.com 
+
+                    'AO1euOkpjFl09wnJR4UqgzSXdbmIaAJj2SiRMXbX'  , #srngoldanddiamonds@gmail.com 
+]
+
 SARVAM_API_KEY="sk_11n2zhzc_QxnqQNpwtrVf4Xy56hYBnY0r"
 
 

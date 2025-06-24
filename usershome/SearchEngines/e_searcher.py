@@ -14,6 +14,19 @@ from ..Views.sitemap_view import CC_Check_and_add_metadata
 from ..Tools_Utils.utils import *
 from .e_search_documents import *
 from bAdmin.serializers import *
+import itertools
+from brandsinfo.settings import COHERE_API_KEYS
+
+
+from sarvamai import SarvamAI
+from brandsinfo.settings import SARVAM_API_KEY
+import ast
+import cohere
+
+
+api_key_cycle = itertools.cycle(COHERE_API_KEYS)
+
+co = cohere.Client(api_key=next(api_key_cycle))
 
 
 MAGENTA = "\033[95m"
@@ -38,12 +51,6 @@ def print_queryset(label, queryset, color):
 
 
 
-
-
-from sarvamai import SarvamAI
-from brandsinfo.settings import SARVAM_API_KEY
-import ast
-import cohere
 
 
 client = SarvamAI(
@@ -270,7 +277,7 @@ class Pageing_assistant:
 
 
 
-from .search_resulst_cacher import get_cached_search_response,cache_search_response
+# from .search_resulst_cacher import get_cached_search_response,cache_search_response
 
 
 
@@ -299,10 +306,9 @@ def elasticsearch2(request):
     }
 
 
-    # 1. Try to fetch from cache first
-    cached = get_cached_search_response(query, location,filters_dict)
-    if cached:
-        return cached
+    # cached = get_cached_search_response(query, location,filters_dict)
+    # if cached:
+    #     return cached
 
     # 2. Run metadata fetch in parallel
     with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -384,7 +390,7 @@ def elasticsearch2(request):
         response.data['metadata'] = future_meta.result()
 
         # 8. Cache the response
-        cache_search_response(query, location,filters_dict, response.data)
+        # cache_search_response(query, location,filters_dict, response.data)
 
         return response
 
