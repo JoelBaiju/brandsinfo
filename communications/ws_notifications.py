@@ -107,7 +107,7 @@ def payment_status_update(order_id,):
 
     print(buisness)
     plan = tnx.plan
-    if tnx.status == 'COMPLETED':
+    if tnx.status == 'SUCCESS':
         title = "Payment Completed"
         send_plan_purchased_draft4sms(buisness.user.first_name , plan.verbouse_name , buisness.plan_expiry_date , buisness.user.username)
         message = ( 

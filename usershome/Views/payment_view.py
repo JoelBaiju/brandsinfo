@@ -197,7 +197,7 @@ def verify_payment_FE(request):
             return Response({"error": "No recent payment found"}, status=404)
 
         plan = tnx.plan
-        if tnx.status == 'COMPLETED':
+        if tnx.status == 'SUCCESS':
             title = "Payment Completed"
             message = ( 
                 f"Your payment for plan {plan.verbouse_name} has been processed successfully! "
