@@ -127,22 +127,9 @@ import random
 
 
 
-
-import cohere
-
-
-
-api_key_cycle = itertools.cycle(COHERE_API_KEYS)
-
-co = cohere.Client(api_key=next(api_key_cycle))
-
-
-
-def generate_reviews(description, category, eg_review):
-    # Add a variation token to promote diverse generations
-    variation_token = f"v{random.randint(10000, 99999)}"
-
-    prompt = f"""
+def build_review_generation_prompt(description , eg_review, category, tone="positive", language="en"):
+    return f"""
+  
     You are a smart, multilingual review generator that writes short, natural, and realistic customer reviews for business listings.
 
     ### BUSINESS DETAILS:
@@ -152,64 +139,72 @@ def generate_reviews(description, category, eg_review):
 
     ### INSTRUCTIONS:
 
-    1. Understand the business description even if it's in a regional language (e.g., Tamil, Malayalam, etc.), but:
-    - **ALWAYS** write the final review in **English only**.
-    - Do **not** use any non-English words or phrases in the review.
+    1. Understand the business description even if it's in a regional language (e.g., Tamil, Malayalam, etc.).
+    - **ALWAYS** write the final review in **English only**
+    - Do **not** use any non-English words or phrases
 
     2. Check if the business belongs to a **sensitive or experience-restricted industry**:
-    - Real estate, land/property sales
-    - Hospitals, clinics, doctors, therapists
-    - Legal services, law firms, lawyers
-    - Financial services: banks, loans, insurance, investments
-    - Mental health, psychiatry, or counseling
-
-    If it **is sensitive**:
-    - DO NOT mention usage, satisfaction, or outcomes.
-    - DO NOT use any words or phrases from the description.
-    - DO NOT describe any interaction or service received.
-    - RETURN only a **very vague and generic English comment**.
+    - Real estate, property, hospitals, clinics, doctors
+    - Legal services, finance, insurance, psychiatry, mental health
+    - If yes:
+        - **Do NOT** mention usage, satisfaction, or outcomes
+        - **Do NOT** copy or refer to phrases in the description
+        - **Do NOT** describe any interaction
+        - Write a **very vague, generic English comment** instead
 
     3. If the business is **not sensitive**:
-    - You may use tone/sentiment from the sample review.
-    - Keep it natural and short.
-    - Blend in the vibe of the description if it helps — but **never copy phrases**.
-    - Review must **sound like a real person’s comment**, not AI-generated.
+    - You may borrow tone or vibe from the sample review
+    - Write short, natural-sounding sentences
+    - **Never copy any phrase** from the description
+    - Review must **sound like a real person’s quick comment**
 
-    ### STRICT RULES (DO NOT BREAK):
-    - The review must be **realistic**, **natural**, and in **English only**.
-    - The review must be **under 50 characters**.
-    - DO NOT mention:
-    - Locations
-    - Prices
-    - Time durations
-    - Results or benefits
-    - That the customer completed or used the service
-    - DO NOT fabricate experiences or outcomes.
-    - DO NOT repeat phrases from the business description.
+    ### STRICT RULES (MUST FOLLOW):
+    - The review must be **under 50 characters**
+    - The review must be **realistic**, **natural**, and in **English only**
+    - **DO NOT mention**:
+    - Locations, prices, or time
+    - Results, benefits, or outcomes
+    - Any completed interaction or usage
+    - **DO NOT fabricate** any experiences or specific results
+    - **DO NOT repeat phrases** from the business description
+    - When in doubt, default to **safe and vague wording**
 
     ### OUTPUT FORMAT:
-    Output must be a valid JSON in **this exact format**:
-
+    Respond in the following **exact JSON format**:
     ```json
     {{
     "reviews": "..."
     }}
+    
     """
-    for attempt in range(5):
+
+
+
+
+
+
+
+import cohere
+api_key_cycle = itertools.cycle(COHERE_API_KEYS)
+co = cohere.Client(api_key=next(api_key_cycle))
+
+
+def generate_reviews_with_cohere(prompt):
+    print("Generating reviews with Cohere...")
+    for attempt in range(3):
         try:
             response = co.chat(
-                model="command-a-03-2025",  # Better than nightly
+                model="command-r-plus",
                 message=prompt,
-                temperature=0.9,
-                max_tokens=100,
+                temperature=0.7,
+                max_tokens=500,
             )
-
             raw_text = response.text.strip()
 
             json_start = raw_text.find("{")
             json_end = raw_text.rfind("}")
             if json_start == -1 or json_end == -1:
-                raise ValueError("Invalid JSON format in Cohere response.")
+                raise ValueError("Invalid JSON format from Cohere.")
 
             json_text = raw_text[json_start:json_end + 1]
             review_data = json.loads(json_text)
@@ -221,11 +216,163 @@ def generate_reviews(description, category, eg_review):
                 "prompt": prompt
             }
 
-        except (json.JSONDecodeError, ValueError, KeyError) as e:
-            print(f"[Attempt {attempt + 1}] Cohere response error: {e}")
+        except Exception as e:
+            print(f"[Attempt {attempt + 1}] Cohere review generation failed:", e)
+            time.sleep(0.5)
+    raise ValueError("Cohere failed to generate reviews after multiple attempts.")
+
+
+
+
+import openai
+# Safely load the API key from environment variables
+openai.api_key = settings.OPENAI_API_KEY
+
+def generate_reviews_with_gpt(prompt):
+    print("Generating reviews with GPT-3.5...")
+    for attempt in range(3):
+        try:
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are a review generator AI."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.7,
+                max_tokens=500
+            )
+            raw_text = response.choices[0].message.content.strip()
+
+            json_start = raw_text.find("{")
+            json_end = raw_text.rfind("}")
+            if json_start == -1 or json_end == -1:
+                raise ValueError("Invalid JSON format from GPT.")
+
+            json_text = raw_text[json_start:json_end + 1]
+            review_data = json.loads(json_text)
+
+            return {
+                "reviews": review_data,
+                "raw_output": raw_text,
+                "api_response": str(response),
+                "prompt": prompt
+            }
+
+        except Exception as e:
+            print(f"[Attempt {attempt + 1}] GPT review generation failed:", e)
             time.sleep(0.5)
 
-    raise ValueError("Cohere failed to generate a valid review after multiple attempts.")
+    raise ValueError("GPT failed to generate reviews after multiple attempts.")
+
+
+
+def generate_reviews(description, eg_review, category, tone="positive", language="en"):
+    prompt = build_review_generation_prompt(description, eg_review, category, tone, language)
+
+    ai_priority = settings.REVIEW_AI_PRIORITY
+    
+    for provider in ai_priority:
+        try:
+            if provider == "gpt":
+                return generate_reviews_with_gpt(prompt)
+            elif provider == "cohere":
+                return generate_reviews_with_cohere(prompt)
+           
+        except Exception as e:
+            print(f"{provider.upper()} failed during review generation: {e}")
+            continue
+
+    raise ValueError("All AI providers failed to generate review.")
+
+
+# def generate_reviews(description, category, eg_review):
+#     # Add a variation token to promote diverse generations
+#     variation_token = f"v{random.randint(10000, 99999)}"
+
+#     prompt = f"""
+#     You are a smart, multilingual review generator that writes short, natural, and realistic customer reviews for business listings.
+
+#     ### BUSINESS DETAILS:
+#     - Category: {category}
+#     - Description: {description}
+#     - Sample Review (for tone only): {eg_review}
+
+#     ### INSTRUCTIONS:
+
+#     1. Understand the business description even if it's in a regional language (e.g., Tamil, Malayalam, etc.), but:
+#     - **ALWAYS** write the final review in **English only**.
+#     - Do **not** use any non-English words or phrases in the review.
+
+#     2. Check if the business belongs to a **sensitive or experience-restricted industry**:
+#     - Real estate, land/property sales
+#     - Hospitals, clinics, doctors, therapists
+#     - Legal services, law firms, lawyers
+#     - Financial services: banks, loans, insurance, investments
+#     - Mental health, psychiatry, or counseling
+
+#     If it **is sensitive**:
+#     - DO NOT mention usage, satisfaction, or outcomes.
+#     - DO NOT use any words or phrases from the description.
+#     - DO NOT describe any interaction or service received.
+#     - RETURN only a **very vague and generic English comment**.
+
+#     3. If the business is **not sensitive**:
+#     - You may use tone/sentiment from the sample review.
+#     - Keep it natural and short.
+#     - Blend in the vibe of the description if it helps — but **never copy phrases**.
+#     - Review must **sound like a real person’s comment**, not AI-generated.
+
+#     ### STRICT RULES (DO NOT BREAK):
+#     - The review must be **realistic**, **natural**, and in **English only**.
+#     - The review must be **under 50 characters**.
+#     - DO NOT mention:
+#     - Locations
+#     - Prices
+#     - Time durations
+#     - Results or benefits
+#     - That the customer completed or used the service
+#     - DO NOT fabricate experiences or outcomes.
+#     - DO NOT repeat phrases from the business description.
+
+#     ### OUTPUT FORMAT:
+#     Output must be a valid JSON in **this exact format**:
+
+#     ```json
+#     {{
+#     "reviews": "..."
+#     }}
+#     """
+#     for attempt in range(5):
+#         try:
+#             response = co.chat(
+#                 model="command-a-03-2025",  # Better than nightly
+#                 message=prompt,
+#                 temperature=0.9,
+#                 max_tokens=100,
+#             )
+
+#             raw_text = response.text.strip()
+
+#             json_start = raw_text.find("{")
+#             json_end = raw_text.rfind("}")
+#             if json_start == -1 or json_end == -1:
+#                 raise ValueError("Invalid JSON format in Cohere response.")
+
+#             json_text = raw_text[json_start:json_end + 1]
+#             review_data = json.loads(json_text)
+
+#             return {
+#                 "reviews": review_data,
+#                 "raw_output": raw_text,
+#                 "api_response": str(response),
+#                 "prompt": prompt
+#             }
+
+#         except (json.JSONDecodeError, ValueError, KeyError) as e:
+#             print(f"[Attempt {attempt + 1}] Cohere response error: {e}")
+#             time.sleep(0.5)
+
+#     raise ValueError("Cohere failed to generate a valid review after multiple attempts.")
 
 
 

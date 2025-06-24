@@ -254,7 +254,7 @@ SARVAM_API_KEY="sk_11n2zhzc_QxnqQNpwtrVf4Xy56hYBnY0r"
 FIREBASE_API_KEY = 'AIzaSyBF52Ah0ERtBRalBWwAOgEMPUhjKrlpVvo'
 
 
-
+OPENAI_API_KEY = "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"
 
 
 # DEV = True
@@ -388,6 +388,29 @@ RATING_DISTRIBUTION = {
     "tier_3": [4, 5],  # Lean toward 4.5 avg
 }
 
+
+
+FILTER_AI_PRIORITY = [
+    "gpt",        # Fallback
+    "cohere",     # Highest priority
+    "sarvam"      # Final fallback
+]
+
+
+# settings.py
+
+AI_METADATA_PRIORITY = [
+    "gemini",
+    "cohere",
+    "sarvam"
+]
+
+
+REVIEW_AI_PRIORITY = [
+    "gpt",     # First priority
+    "cohere",  # Fallback
+    # "sarvam" # Add if needed later
+]
 
 
 

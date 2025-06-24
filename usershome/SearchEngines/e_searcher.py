@@ -16,8 +16,8 @@ from .e_search_documents import *
 from bAdmin.serializers import *
 import itertools
 from brandsinfo.settings import COHERE_API_KEYS
-
-
+import json
+import time
 from sarvamai import SarvamAI
 from brandsinfo.settings import SARVAM_API_KEY
 import ast
@@ -58,111 +58,181 @@ client = SarvamAI(
 )
 
 
+def build_filter_prompt(matched_phrases, query):
+    return f"""
+    You are an intelligent filtering AI.
 
-    # Your task:
-    # - Return only the indexes of groups that are **highly relevant** to the **semantic intent** of the user’s query.
-    # - Exclude matches that are only **partially related**, **contextually different**, or belong to **different domains**.
-    # - Retain only results that directly and clearly relate to the **core meaning** and **domain context** of the query.
-    # - Avoid matches that only share similar words but do not fulfill the same **intent** as the query.
+    The user searched for: "{query}"
 
-import json
-import time
+    You are given a list of matched phrase groups. Each group contains phrases (strings) that matched the query.
+
+    Each group represents related keywords or labels associated with a product, service, or business.
+
+    ### Your Task:
+    Identify and select the groups (by index) that are **genuinely relevant** to the user's search intent.
+
+    ### Guidelines:
+    - ✅ Always include groups where **any phrase exactly matches the query** (e.g., if phrase is "Lifestyle" and query is "Lifestyle").
+    - ✅ Include groups where:
+    - The phrases are **closely related**, contextually or semantically.
+    - The group includes the query phrase in a meaningful or descriptive context.
+    - The group contains synonyms or typical user-search variations.
+    - Do not remove groups **just because their phrase text is identical** (e.g., multiple groups with "Realestate").
+    - Each group may refer to a **different business, product, or category** — so identical phrases **must all be preserved** if they match the query.
+    - ✅ If multiple groups contain the exact phrase as the query, **include all such groups** — even if they look similar.
+
+
+    - ❌ Exclude groups that:
+    - Mention the query term but refer to **unrelated industries**.
+    - Are vague, too broad, or only match due to generic structural terms.
+    - Contain terms that are structurally similar but semantically unrelated.
+
+
+
+    ### Matched Phrase Groups:
+    {json.dumps(matched_phrases, indent=2)}
+
+    ### Output Format:
+    Return only a valid **JSON list of indexes**, like:
+    ```json
+    [0, 2, 4]
+
+        Do not add any explanation. Do not wrap the output in quotes.
+        """.strip()
+
+
+
+
+
 
 def call_cohere_filter_api(matched_phrases, query):
-    prompt = f"""
-        You are an intelligent filtering AI.
-
-        The user has searched for: "{query}"
-
-        You are given a list of matched phrase groups. Each group contains phrases (strings) that matched with the query. Your task is to:
-
-        - Return a list of indexes (0-based) of groups that are **truly related** to the query’s meaning and real-world intent.
-        - Reject groups that:
-        - Share generic structure (e.g., 'service', 'consultant') but belong to unrelated domains.
-        - Have keyword overlap but serve different real-world needs.
-
-        Here are the matched phrase groups:
-        {json.dumps(matched_phrases, indent=2)}
-
-        Only output a valid JSON list like: [0, 2, 4]
-        Do not explain. Just return the list.
-        """
+    prompt = build_filter_prompt(matched_phrases, query)
 
     for attempt in range(3):
         try:
             response = co.chat(
                 model="command-a-03-2025",
                 message=prompt,
-                temperature=0.3,  # low temp = precise selection
+                temperature=0.3,
                 max_tokens=100,
             )
 
-            raw_output = response.text.strip()
-            print("Cohere raw output:", raw_output)
+            raw = response.text.strip()
+            print("Cohere raw output:", raw)
 
-            json_start = raw_output.find("[")
-            json_end = raw_output.rfind("]")
+            json_start = raw.find("[")
+            json_end = raw.rfind("]")
             if json_start == -1 or json_end == -1:
-                raise ValueError("Missing brackets for list in response.")
+                raise ValueError("Missing brackets in output.")
 
-            json_text = raw_output[json_start:json_end + 1]
-            parsed_indexes = json.loads(json_text)
+            parsed = json.loads(raw[json_start:json_end + 1])
 
-            if not isinstance(parsed_indexes, list) or not all(isinstance(i, int) for i in parsed_indexes):
-                raise ValueError("Returned value is not a list of integers.")
+            if not isinstance(parsed, list) or not all(isinstance(i, int) for i in parsed):
+                raise ValueError("Expected list of integers.")
 
-            return parsed_indexes
+            return parsed
 
         except Exception as e:
-            print(f"[Attempt {attempt + 1}] Error calling Cohere filter:", e)
+            print(f"[Attempt {attempt + 1}] Cohere error:", e)
             time.sleep(0.5)
 
     return []
 
 
 
+
 def call_sarvam_filter_api(matched_phrases, query):
-    prompt = f"""
-        You are an intelligent filter tasked with identifying groups that are semantically aligned with the user's search query.
+    prompt = build_filter_prompt(matched_phrases, query)
 
-        Given:
-        - A list of result groups, each with:
-            - doc_type
-            - id
-            - matched_text: list of snippets that matched the query
-        - The user's search query: "{query}"
-
-        Your task:
-        - Return only the indexes of groups where the **matched_text belongs to the same semantic domain and real-world context** as the query.
-        - Reject groups that:
-            - Share generic structure or words (like "consultant", "service", etc.) but differ in **topic/domain**.
-            - Match partially but belong to **unrelated areas of application or user intent**.
-
-        Here are the matched texts:  
-        {matched_phrases}
-
-        Respond with a list of integer indexes only.
-        """
     try:
-        response = client.chat.completions(
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You're a helpful assistant."},
                 {"role": "user", "content": prompt}
-            ]
+            ],
+            temperature=0.3,
+            max_tokens=100
         )
 
-        return ast.literal_eval(response.choices[0].message.content)
+        content = response.choices[0].message.content.strip()
+        return ast.literal_eval(content)
 
     except Exception as e:
-        print("Error communicating with Sarvam AI:", e)
+        print("Sarvam AI error:", e)
+        return []
+
+
+
+from brandsinfo.settings import OPENAI_API_KEY
+from openai import OpenAI
+import json
+
+client = OpenAI(api_key=OPENAI_API_KEY)
+def call_gpt_filter_api(matched_phrases, query, model="gpt-3.5-turbo"):
+    prompt = build_filter_prompt(matched_phrases, query)
+    print("🧠 Sending GPT filter request...")
+    print("Query:", query)
+    print("Matched Phrases (trimmed):", matched_phrases[:2], "...")  # Show first 2 groups
+    print("Prompt Preview:\n", prompt[:400], "...\n")  # Show first 400 chars
+
+    try:
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": "You're a helpful assistant."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.3,
+            max_tokens=100
+        )
+
+        content = response.choices[0].message.content.strip()
+        print("🧾 GPT Filter Response:", content)
+        return json.loads(content)
+
+    except Exception as e:
+        print(f"❌ GPT ({model}) filtering failed:", e)
         return []
 
 
 
 
+from django.conf import settings
+def call_filter_ai_controller(matched_phrases, query):
+    priorities = getattr(settings, "FILTER_AI_PRIORITY", [])
+
+    print("🧭 AI Filter Fallback Order:", priorities)
+
+    for model_key in priorities:
+        try:
+            print(f"🔍 Attempting filtering with: {model_key}")
+
+            if model_key == "cohere":
+                result = call_cohere_filter_api(matched_phrases, query)
+            elif model_key == "gpt":
+                result = call_gpt_filter_api(matched_phrases, query, model="gpt-3.5-turbo")
+            elif model_key == "sarvam":
+                result = call_sarvam_filter_api(matched_phrases, query)
+            else:
+                print(f"⚠️ Unknown AI model key in priority list: {model_key}")
+                continue
+
+            print(f"✅ Success from {model_key}: {result}")
+            return result
+
+        except Exception as e:
+            print(f"❌ {model_key} filter failed:", str(e))
+
+    print("🚨 All AI filtering attempts failed. Returning empty result.")
+    return []
+
 
 
 def retrieve_es_matches(query):
+    print("🔎 Starting ES match retrieval...")
+    print("🔍 Query received:", query)
+
     search_query = Q("bool", should=[
         Q("multi_match", query=query, fields=["name", "category", "keywords"], fuzziness="AUTO", prefix_length=1, minimum_should_match="1<75%"),
         Q("multi_match", query=query, fields=["cat_name"], fuzziness="AUTO", prefix_length=1, minimum_should_match="1<75%")
@@ -170,6 +240,7 @@ def retrieve_es_matches(query):
 
     def extract_matches(hits, doc_type):
         results = []
+        print(f"📄 Processing {len(hits)} hits for {doc_type}")
         for hit in hits:
             matched_fields = getattr(hit.meta, "highlight", {})
             matched_terms = []
@@ -177,6 +248,8 @@ def retrieve_es_matches(query):
                 for fragment in fragments:
                     cleaned = fragment.replace("<em>", "").replace("</em>", "")
                     matched_terms.append(cleaned)
+            if matched_terms:
+                print(f"✅ {doc_type} [ID {hit.meta.id}] matched: {matched_terms}")
             results.append({
                 "doc_type": doc_type,
                 "id": hit.meta.id,
@@ -190,7 +263,9 @@ def retrieve_es_matches(query):
     bdcats_hits = BDesCatDocument.search().query(search_query).highlight_options(pre_tags="<em>", post_tags="</em>").highlight("cat_name").execute()
     bgcats_hits = BGenCatDocument.search().query(search_query).highlight_options(pre_tags="<em>", post_tags="</em>").highlight("cat_name").execute()
 
-    return (
+    print("📦 Aggregating extracted match data...")
+
+    all_results = (
         extract_matches(product_hits, "products") +
         extract_matches(service_hits, "services") +
         extract_matches(business_hits, "businesses") +
@@ -198,7 +273,8 @@ def retrieve_es_matches(query):
         extract_matches(bgcats_hits, "bgcats")
     )
 
-
+    print(f"🎯 Total matched groups returned: {len(all_results)}")
+    return all_results
 
 
 def filter_matches_with_ai(all_matches, query):
@@ -208,15 +284,19 @@ def filter_matches_with_ai(all_matches, query):
     matched_phrases = extract_matched_phrases(all_matches)
     trimmed = [group[:5] for group in matched_phrases[:50]]
 
+    print(f"🧮 Extracted {len(matched_phrases)} match groups. Trimmed to {len(trimmed)} groups (max 5 terms each).")
+
     try:
-        ai_response = call_cohere_filter_api(
+        ai_response = call_filter_ai_controller(
             matched_phrases=json.dumps(trimmed, ensure_ascii=False),
             query=query
         )
+        print("🎯 AI Filtered Indexes Returned:", ai_response)
         return ai_response
     except Exception as e:
-        print("AI Filtering failed:", e)
+        print("❌ AI filtering failed:", e)
         return []
+
 
 
 
@@ -312,9 +392,11 @@ def elasticsearch2(request):
 
         # 3. Retrieve ES matches
         all_matches = retrieve_es_matches(query)
+        print("print all matches ",all_matches)
 
         # 4. Filter with AI
         filtered_indexes = filter_matches_with_ai(all_matches, query)
+        print("firltered matched" , filtered_indexes)
 
         # 5. Extract final matched objects
         filtered_objects = get_filtered_objects_from_indexes(all_matches, filtered_indexes)

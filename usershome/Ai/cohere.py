@@ -13,52 +13,54 @@ co = cohere.Client(api_key=COHERE_API_KEY)
 
 def generate_metadata_for_SB(city, general_category, buisness_name, descriptive_category, description):
 
-    prompt=f"""
-    Generate **SEO metadata** for a business in **{city}**, focusing on **precise keyword targeting** and **local relevance**.
+    prompt = f"""
+    You are an expert SEO assistant trained to generate clean, non-generic metadata for business listings.
 
-    ### **Business Information:**
-    - **Business Name:** {buisness_name}
-    - **Category:** {general_category} ({descriptive_category})
-    - **Description:** {description}
+    ### BUSINESS DETAILS:
+    - Business Name: {buisness_name}
+    - Category: {general_category} ({descriptive_category})
+    - City: {city}
+    - Description: {description}
 
-    ### **SEO Metadata Guidelines (Strict):**
+    ### STRICT INSTRUCTIONS:
 
-    #### ✅ Meta Title (≤ 60 characters)
-    - Include **business name, service type, and city**.
-    - Use strong, high-click-through-rate terms.
-    - Avoid generic or repeated words.
+    #### ✅ Meta Title (max 60 characters):
+    - Include **service type** and **city**.
+    - You may include part of the business name if helpful — not mandatory.
+    - No repetition of words or filler text.
+    - Must look natural and **click-worthy**.
 
-    #### ✅ Meta Description (≤ 160 characters)
-    - Briefly describe what the business offers.
-    - Highlight **key value propositions and location**.
-    - Use a friendly, action-driven tone.
+    #### ✅ Meta Description (max 160 characters):
+    - Brief, clear description of what the business offers.
+    - Emphasize location or service strengths.
+    - Friendly, actionable tone — avoid fluff.
 
-    #### ✅ Meta Keywords (≤ 360 characters, comma-separated)
-    - Include only **search-relevant keywords** related to:
-      - The **services or products** offered
-      - The **industry**
-    - ❌ Do NOT include:
-      - Generic place names (like “India”, “Tamil Nadu”)
-      - Business names or owner names
-      - Broad keywords like “finance”, “store”, “company”, “best”, “top”, etc.
-    - ✅ Focus on **search intent** (e.g., "car repair", "gold loans", "wedding photography").
-    - ✅ Use only keywords that a user would type to find this service.
+    #### ✅ Meta Keywords (max 8; min 5):
+    - ONLY include **specific search-intent keywords** users might type.
+    - Must be strictly relevant to what the business offers.
+    - ❌ DO NOT include:
+    - Business name
+    - City, state, or country names
+    - Generic category words like "service", "company", "store", "best", "top", etc.
+    - ✅ Do include:
+    - Real search phrases like “AC repair”, “divorce lawyer”, “Tamil translator”
+    - Separate by commas, **no repetition allowed**.
 
-    ### Target Audience
-    Based on the above, return the likely **target gender**.
+    #### 🎯 Target Gender:
+    - Based on the description and offerings, infer the likely target audience gender.
+    - Return one of: `"male"`, `"female"`, `"unisex"`
 
-    ⚠️ Only respond with one of these: `"male"`, `"female"`, `"unisex"`
-
-    ### 📦 Output Format (JSON only):
+    ### ✅ JSON Output Only:
+    Return only valid JSON in this format:
     ```json
     {{
-        "meta_title": "<Optimized Meta Title>",
-        "meta_description": "<Optimized Meta Description>",
-        "meta_keywords": "<Comma-separated clean keywords>",
-        "target_gender": "gender"
+    "meta_title": "<title>",
+    "meta_description": "<description>",
+    "meta_keywords": "<keyword1, keyword2, ...>",
+    "target_gender": "unisex"
     }}
-    ```
     """
+    
     for attempt in range(5):
         try:
             response = co.chat(
