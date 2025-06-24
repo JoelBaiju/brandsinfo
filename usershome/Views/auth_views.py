@@ -59,7 +59,8 @@ def signup_request_1(request):
         auth.exists=exists
         auth.otp=otp
         auth.save()
-        send_otp_draft4sms(otp , phone)
+        if not phone == AUTH_BYPASS_NUMBER:
+            send_otp_draft4sms(otp , phone)
        
         # send_otp(phone, otp)
         return Response({'exists': exists},status=status.HTTP_200_OK)
