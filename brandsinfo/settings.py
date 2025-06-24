@@ -246,8 +246,8 @@ FIREBASE_API_KEY = 'AIzaSyBF52Ah0ERtBRalBWwAOgEMPUhjKrlpVvo'
 
 
 
-# DEV = True
-DEV = False
+DEV = True
+# DEV = False
     
 
 
@@ -382,3 +382,5 @@ RATING_DISTRIBUTION = {
 
 AUTH_BYPASS_NUMBER = "8891268078"
 AUTH_BYPASS_OTP = "254869"
+
+

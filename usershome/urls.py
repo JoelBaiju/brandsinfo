@@ -89,6 +89,11 @@ urlpatterns = [
     path('suggestions_gcats/', keyword_suggestions_for_gcats),
     path('tracktime/',views.tracker_addtime),
 
+    path('suggestions_cities/'      , keyword_suggestions_for_cities),
+    path('suggestions_localities/'  , keyword_suggestions_for_localities),
+    path('search_cities/'           , search_cities),
+    path('search_localities/'       , search_localities),
+
     path('home/',views.HomeView),   
     
     path('groups/', views.Create_Group_View.as_view(), name='create-group'), 
@@ -113,7 +118,7 @@ urlpatterns = [
     path('alpha/sitemap_generator_allatonce_SB/', sitemap_view.Site_Map_Generator_ALLATONCE_SB),
     path('alpha/sitemap_generator_allatonce_CC/', sitemap_view.Site_Map_Generator_ALLATONCE_CC),
     path('alpha/sgs_test/', sitemap_view.Site_Map_Generator_SB_single_Test_api),
-    path('alpha/sgs_test/cohere/', cohere.Site_Map_Generator_SB_single_Test_api),
+    # path('alpha/sgs_test/cohere/', cohere.Site_Map_Generator_SB_single_Test_api),
     
         
     

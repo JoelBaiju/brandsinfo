@@ -78,8 +78,9 @@ class ServiceDocument(Document):
 class BuisnessDocument(Document):
     name = fields.TextField(analyzer="edge_ngram_analyzer", search_analyzer="standard")
     
-    keywords = fields.ListField(fields.TextField())
-
+    keywords = fields.ListField(
+        fields.TextField(analyzer="edge_ngram_analyzer", search_analyzer="standard")
+    )
     class Index:
         name = 'businesses_index'
         settings = index_settings
@@ -202,3 +203,41 @@ class UsersDocument(Document):
 
     class Django:
         model = Extended_User
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# City Document
+@registry.register_document
+class CityDocument(Document):
+    city_name = fields.TextField(analyzer="edge_ngram_analyzer", search_analyzer="standard")
+
+    class Index:
+        name = 'cities_index'
+        settings = index_settings
+
+    class Django:
+        model = City
+
+
+# Locality Document
+@registry.register_document
+class LocalityDocument(Document):
+    locality_name = fields.TextField(analyzer="edge_ngram_analyzer", search_analyzer="standard")
+
+    class Index:
+        name = 'localities_index'
+        settings = index_settings
+
+    class Django:
+        model = Locality
