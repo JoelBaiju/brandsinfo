@@ -140,6 +140,7 @@ def payment_callback(request):
                     txn.transaction_id = payment_details.get('transactionId')
                     txn.payment_mode = payment_details.get('paymentMode')
                     txn.amount = payment_details.get('amount')
+                    txn.status = payment_details.get('state')
 
                     
 
