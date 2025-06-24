@@ -263,7 +263,7 @@ def addplantobuisness(order_id):
         buisness.save()
         txn.save()
 
-        send_plan_purchased_draft4sms(buisness.user.first_name , plan.plan_name , buisness.plan_expiry_date , buisness.user.phone_number)
+        send_plan_purchased_draft4sms(buisness.user.first_name , plan.plan_name , buisness.plan_expiry_date , buisness.user.username)
 
         return True
 
