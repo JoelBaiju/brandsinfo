@@ -87,6 +87,9 @@ def send_buisness_registered_draft4sms(name , phone_number):
 
 
 def send_plan_purchased_draft4sms(name,plan,expiry , phone_number):
+    print("sms plan purchased ")
+    print('phone',phone_number)
+
     TEMPLATE_ID="1107175050829654296"
    
     message = f""" 

@@ -242,7 +242,7 @@ def addplantobuisness(order_id):
     
     try:
         txn = PhonePeTransaction.objects.get(order_id=order_id)
-        if txn.status != 'COMPLETED':
+        if txn.status != 'SUCCESS':
             return False
         buisness=Buisnesses.objects.get(id=txn.buisness.id)
         
