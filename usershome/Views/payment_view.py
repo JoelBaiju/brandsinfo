@@ -229,6 +229,7 @@ def verify_payment_FE(request):
 
 from ..models import Plans 
 from django.utils import timezone
+from communications.draft4sms import send_plan_purchased_draft4sms
 
 def addplantobuisness(order_id):
     
@@ -257,6 +258,8 @@ def addplantobuisness(order_id):
             buisness.verified = True
         buisness.save()
         txn.save()
+
+        send_plan_purchased_draft4sms(buisness.user.first_name , plan.plan_name , buisness.plan_expiry_date , buisness.user.phone_number)
 
         return True
 

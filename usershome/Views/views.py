@@ -37,7 +37,7 @@ from ..SearchEngines.searcher import find_closest
 from brandsinfo.settings import BACKEND_BASE_URL_FOR_SM_SECURE
 from . import auth_views
 from usershome.Tools_Utils.utils import *
-
+from communications.draft4sms import *
 
 
 
@@ -153,7 +153,7 @@ class BuisnessesView(generics.ListAPIView):
             business.save()
             print(business.city)
             buisness_review_tracker = BusinessReviewTracker.objects.create(business=business)
-
+            send_buisness_registered_draft4sms(user.first_name , user.mobile_number)
             return Response(
                 self.serializer_class(business).data,
                 status=status.HTTP_201_CREATED

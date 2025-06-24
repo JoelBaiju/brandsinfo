@@ -22,7 +22,7 @@ from usershome.Tools_Utils.fast2_sms_service import send_otp
 from ..models import *
 from ..serializers import * 
 from brandsinfo.settings import FIREBASE_API_KEY
-from communications.draft4sms import send_otp_draft4sms
+from communications.draft4sms import *
 
 from brandsinfo.settings import AUTH_BYPASS_NUMBER ,AUTH_BYPASS_OTP
 
@@ -107,17 +107,17 @@ import requests
 import json
 
 
-def verify_token(id_token):
-    url = f'https://identitytoolkit.googleapis.com/v1/accounts:lookup?key={FIREBASE_API_KEY}'
+# def verify_token(id_token):
+#     url = f'https://identitytoolkit.googleapis.com/v1/accounts:lookup?key={FIREBASE_API_KEY}'
     
-    headers = {'Content-Type': 'application/json'}
-    data = json.dumps({'idToken': id_token})
+#     headers = {'Content-Type': 'application/json'}
+#     data = json.dumps({'idToken': id_token})
     
-    response = requests.post(url, headers=headers, data=data)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        raise Exception('Token verification failed')
+#     response = requests.post(url, headers=headers, data=data)
+#     if response.status_code == 200:
+#         return response.json()
+#     else:
+#         raise Exception('Token verification failed')
 
 def verifyotp(request, utype, from_enquiry=False):
     try:
@@ -241,11 +241,13 @@ def signup_request_2(request):
     data=json.loads(request.body)
     phone=data.get('phone')
     name=data.get('name')
+    
     try:
         auth = Auth_OTPs.objects.get(phone=phone)
         auth.name = name
         auth.save()
         # send_otp_draft4sms(otp , phone)
+        send_welcome_draft4sms(name , phone)
 
         return Response({
                      'message':'Name Saved',
