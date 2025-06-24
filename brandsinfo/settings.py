@@ -214,39 +214,22 @@ INSTALLED_APPS += ['channels']
 ASGI_APPLICATION = "brandsinfo.asgi.application"
 
 
+from decouple import config
 
 
 
+
+PHONEPE_CLIENT_ID = config('client_id'),
+PHONEPE_CLIENT_SECRET=config('client_secret'),
 
 # dev
-
-GEMINI_API_KEYS=[
-                    'AIzaSyDwPLJew4URfzgMdQ43BEG-A7ldVs83_2w',    #gemini key in careindia
-                    'AIzaSyA5FqJy6E9Oypk0rp4FRezaFwvs7cd9dPc',    #icare key in icareindia
-
-                    'AIzaSyAFMQMVZhQAsOBfTq36fdsBNnAJ0jl4nmo',    #gemini key in anjali
-                    'AIzaSyATUTGsCNyIH4VW4bTfMRdoyiG--5KHV8o',  #brandsinfo key in anjali
-                 
-                 
-                    'AIzaSyB2JQaUzhAB6fFlOgFB9DSmp8UAnBWOjvs',  # brandsinfo key in brandsinfo 
-                
-            
-                    'AIzaSyDbM8NSNv49EX63BqC1alukSm0eS_8rtJ0', #gemini key in fightclub                
-                    'AIzaSyDmKDJSC2i7b_OST495c9HDnNIyJ4DPgGQ' #brandsinfo key in fightclub
-                ]
+GEMINI_API_KEYS = config('GEMINI_API_KEYS').split(',')
+COHERE_API_KEYS = config('COHERE_API_KEYS').split(',')
 
 
-COHERE_API_KEYS=[
-                    'qY786lt1yZbf5XwvJHv8wiNwJ2zydJRBnsa5SfZ1',  #brandsinfo.test@gmail.com
 
-                    'lOm2YckbpL1KoXZ1x5rqtixgtIOK4Ysx863YEPM0' ,  #nikhilrakeshh@gmail.com 
 
-                    'QyUeM7WyVCa1AaFyLek1O4GL70kz4OKk0Rj7jeQp' , #nikhilappu112@gmail.com 
-
-                    'AO1euOkpjFl09wnJR4UqgzSXdbmIaAJj2SiRMXbX'  , #srngoldanddiamonds@gmail.com 
-]
-
-SARVAM_API_KEY="sk_11n2zhzc_QxnqQNpwtrVf4Xy56hYBnY0r"
+SARVAM_API_KEY=config('SAVAM_API_KEY')
 
 
 
@@ -254,7 +237,7 @@ SARVAM_API_KEY="sk_11n2zhzc_QxnqQNpwtrVf4Xy56hYBnY0r"
 FIREBASE_API_KEY = 'AIzaSyBF52Ah0ERtBRalBWwAOgEMPUhjKrlpVvo'
 
 
-OPENAI_API_KEY = "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"
+OPENAI_API_KEY = config('OPENAI_API_KEY')
 
 
 # DEV = True
@@ -411,10 +394,5 @@ REVIEW_AI_PRIORITY = [
     "cohere",  # Fallback
     # "sarvam" # Add if needed later
 ]
-
-
-
-AUTH_BYPASS_NUMBER = "8891268078"
-AUTH_BYPASS_OTP = "254869"
 
 
