@@ -109,19 +109,19 @@ def payment_status_update(order_id,):
     if tnx.status == 'COMPLETED':
         title = "Payment Completed"
         message = ( 
-            f"Your payment for plan {plan.plan_name} has been processed successfully! "
+            f"Your payment for plan {plan.verbouse_name} has been processed successfully! "
             "Thank you for your purchase."
         )
     elif tnx.status == 'FAILED':
         title = "Payment Failed"
         message = (
-            f"Your payment for plan {plan.plan_name} has failed."
+            f"Your payment for plan {plan.verbouse_name} has failed."
             "Please try again or contact support."
         )
     elif tnx.status == 'PENDING':       
         title = "Payment Pending"
         message = (
-            f"Your payment for plan {plan.plan_name} is pending. "
+            f"Your payment for plan {plan.verbouse_name} is pending. "
             "Please check your payment method for confirmation."
         )
     print("just before creating notification method")
@@ -140,6 +140,7 @@ def payment_status_update(order_id,):
         'buisness_name': buisness.name,  
         'buisness_id': buisness.id,  
         'user': buisness.user.username,
+        "plan_name":plan.verbouse_name
     }
     print("passing control to prime notfication sender")
     notify_user.delay(data=data , extras = {'invoice' : generate_invoice_pdf(tnx.order_id),'status':tnx.status})

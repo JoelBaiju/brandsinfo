@@ -222,6 +222,7 @@ def verify_payment_FE(request):
             'business_id': tnx.buisness.id,  
             "timestamp": timezone.now().isoformat(),  
             "type": "send_notification",
+            "plan_name":plan.verbouse_name,
             "extras":{"invoice":tnx.invoice.url , "status":tnx.status}
         })
 
