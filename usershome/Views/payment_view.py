@@ -134,7 +134,8 @@ def payment_callback(request):
 
             try:
                 txn = PhonePeTransaction.objects.get(order_id=merchant_order_id)
-                txn.status = state
+                if txn.status== "COMPLETED":
+                    txn.status = "SUCCESS"
                 txn.phonepe_order_id = order_id
 
 
@@ -143,7 +144,8 @@ def payment_callback(request):
                     txn.transaction_id = payment_details.get('transactionId')
                     txn.payment_mode = payment_details.get('paymentMode')
                     txn.amount = payment_details.get('amount')
-                    txn.status = payment_details.get('state')
+                    if  payment_details.get('state') =="COMPLETED":
+                        txn.status = "SUCCESS"
                 txn.save()
                 print('plan added :',addplantobuisness(merchant_order_id))
 
