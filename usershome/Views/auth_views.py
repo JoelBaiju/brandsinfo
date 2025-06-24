@@ -144,6 +144,7 @@ def verifyotp(request, utype, from_enquiry=False):
             user = get_object_or_404(Extended_User, username=auth.phone)
         else:
             user = create_new_user(phone, auth, utype)
+            send_welcome_draft4sms(auth.name , phone)
 
         if from_enquiry:
             link_user_to_enquiry(auth, user)
@@ -247,7 +248,6 @@ def signup_request_2(request):
         auth.name = name
         auth.save()
         # send_otp_draft4sms(otp , phone)
-        send_welcome_draft4sms(name , phone)
 
         return Response({
                      'message':'Name Saved',
