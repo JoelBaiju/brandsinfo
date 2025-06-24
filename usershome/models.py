@@ -639,3 +639,13 @@ class PhonePeTransaction(models.Model):
     def mark_as_refunded(self, partial=False):
         self.status = self.TransactionStatus.PARTIALLY_REFUNDED if partial else self.TransactionStatus.REFUNDED
         self.save(update_fields=['status', 'updated_at'])
+
+
+
+
+
+class AutoReviewSchedulerLog(models.Model):
+    date = models.DateField(unique=True)
+
+    def __str__(self):
+        return str(self.date)

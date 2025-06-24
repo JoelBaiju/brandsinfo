@@ -12,6 +12,8 @@ import random
 from brandsinfo.settings import AUTO_REVIEW
 from..models import BusinessReviewTracker
 from ..Ai.review_generator import prime_review_generator
+from django.utils import timezone
+from ..models import AutoReviewSchedulerLog  # import the model
 
 
 def check_and_schedule_reviews(*args, **kwargs):
@@ -20,6 +22,11 @@ def check_and_schedule_reviews(*args, **kwargs):
 
     if not AUTO_REVIEW:
         return
+    today = timezone.now().date()
+    if AutoReviewSchedulerLog.objects.filter(date=today).exists():
+        print(f"Scheduler already ran on {today}, skipping.")
+        return
+
     print('auto reviews scheduling')
     today = timezone.now().date()
     trackers = BusinessReviewTracker.objects.select_related('business')
@@ -67,6 +74,8 @@ def check_and_schedule_reviews(*args, **kwargs):
             tracker.next_review_date = today + timedelta(days=random.randint(1, 4))
             tracker.save()
     print("review_ scheduling completed")
+    AutoReviewSchedulerLog.objects.create(date=today)
+
 
 
 
