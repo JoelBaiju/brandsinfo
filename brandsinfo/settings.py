@@ -229,7 +229,7 @@ COHERE_API_KEYS = config('COHERE_API_KEYS').split(',')
 
 
 
-SARVAM_API_KEY=config('SAVAM_API_KEY')
+SARVAM_API_KEY=config('SARVAM_API_KEY')
 
 
 
