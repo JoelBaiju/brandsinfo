@@ -119,6 +119,8 @@ def payment_callback(request):
             order_id = payload.get('orderId')
             merchant_order_id = payload.get('merchantOrderId')
             state = payload.get('state')
+            print("Top-level payment status:", state)
+
 
             if not merchant_order_id:
                 print('no merchant order id')
@@ -135,15 +137,13 @@ def payment_callback(request):
                 txn.status = state
                 txn.phonepe_order_id = order_id
 
+
                 payment_details = payload.get('paymentDetails', [{}])[0]
                 if payment_details:
                     txn.transaction_id = payment_details.get('transactionId')
                     txn.payment_mode = payment_details.get('paymentMode')
                     txn.amount = payment_details.get('amount')
                     txn.status = payment_details.get('state')
-
-                    
-
                 txn.save()
                 print('plan added :',addplantobuisness(merchant_order_id))
 
@@ -264,7 +264,6 @@ def addplantobuisness(order_id):
         buisness.save()
         txn.save()
 
-        send_plan_purchased_draft4sms(buisness.user.first_name , plan.verbouse_name , buisness.plan_expiry_date , buisness.user.username)
 
         return True
 
