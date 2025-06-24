@@ -198,19 +198,19 @@ def verify_payment_FE(request):
         if tnx.status == 'COMPLETED':
             title = "Payment Completed"
             message = ( 
-                f"Your payment for plan {plan.plan_name} has been processed successfully! "
+                f"Your payment for plan {plan.verbouse_name} has been processed successfully! "
                 "Thank you for your purchase."
             )
         elif tnx.status == 'FAILED':
             title = "Payment Failed"
             message = (
-                f"Your payment for plan {plan.plan_name} has failed."
+                f"Your payment for plan {plan.verbouse_name} has failed."
                 "Please try again or contact support."
             )
         elif tnx.status == 'PENDING':       
             title = "Payment Pending"
             message = (
-                f"Your payment for plan {plan.plan_name} is pending. "
+                f"Your payment for plan {plan.verbouse_name} is pending. "
                 "Please check your payment method for confirmation."
             )
         return Response({
@@ -263,7 +263,7 @@ def addplantobuisness(order_id):
         buisness.save()
         txn.save()
 
-        send_plan_purchased_draft4sms(buisness.user.first_name , plan.plan_name , buisness.plan_expiry_date , buisness.user.username)
+        send_plan_purchased_draft4sms(buisness.user.first_name , plan.verbouse_name , buisness.plan_expiry_date , buisness.user.username)
 
         return True
 
