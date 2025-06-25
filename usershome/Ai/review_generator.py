@@ -224,15 +224,18 @@ def generate_reviews_with_cohere(prompt):
 
 
 
-import openai
+from openai import OpenAI
 # Safely load the API key from environment variables
-openai.api_key = settings.OPENAI_API_KEY
+
+
+
+client = OpenAI(api_key=settings.OPENAI_API_KEY)
 
 def generate_reviews_with_gpt(prompt):
     print("Generating reviews with GPT-3.5...")
     for attempt in range(3):
         try:
-            response = openai.ChatCompletion.create(
+            response =  client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": "You are a review generator AI."},
