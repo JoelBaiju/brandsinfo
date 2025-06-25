@@ -385,14 +385,14 @@ FILTER_AI_PRIORITY = [
 # settings.py
 
 AI_METADATA_PRIORITY = [
-    "gemini",
+    # "gemini",
     "cohere",
     "sarvam"
 ]
 
 
 REVIEW_AI_PRIORITY = [
-    "gpt",         # First priority
+    # "gpt",         # First priority
     "cohere"  # Fallback
     # "sarvam" # Add if needed later
 ]
