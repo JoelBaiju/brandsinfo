@@ -40,12 +40,14 @@ def send_otp_draft4sms(otp, phone_number):
 
 
 def send_welcome_draft4sms(name , phone_number):
-    TEMPLATE_ID="1107175050843766707"
+    TEMPLATE_ID="1107175084612413777"
    
     message = f""" 
-                    Hi {name}, welcome to BrandsInfo!
-                    List your first business now and grow faster. 
-                    Get started at https://brandsinfo.in Help: support@brandsinfo.in 
+                    Hi {name}, welcome to BrandsInfo. 
+                    You can now list your business on our platform. 
+                    Visit https://brandsinfo.in for details. 
+                    For assistance, contact support@brandsinfo.in
+
                 """
     encoded_message = urllib.parse.quote(message)
 
@@ -65,10 +67,11 @@ def send_welcome_draft4sms(name , phone_number):
 
 
 def send_buisness_registered_draft4sms(name , phone_number):
-    TEMPLATE_ID= "1107175050817862087"
+    TEMPLATE_ID= "1107175085187780456"
     message = f""" 
-                    Congrats {name}! Your business is live on BrandsInfo. Boost visibility with a premium package. 
-                    Explore now: www.brandsinfo.in/pricing
+                    Hi {name}, your business is now active on BrandsInfo. 
+                    Visit www.brandsinfo.in/pricing for available options.
+                    For assistance, contact support@brandsinfo.in 
                 """
     encoded_message = urllib.parse.quote(message)
 
@@ -90,11 +93,11 @@ def send_plan_purchased_draft4sms(name,plan,expiry , phone_number):
     print("sms plan purchased ")
     print('phone',phone_number)
 
-    TEMPLATE_ID="1107175050829654296"
+    TEMPLATE_ID="1107175084635114365"
    
     message = f""" 
                     Hi {name}, your {plan} package is active till {expiry}. 
-                    Enjoy better visibility and more leads. Let's grow together -BrandsInfo.
+                    For further updates, stay connected with BrandsInfo. https://brandsinfo.in/ 
                 """
     encoded_message = urllib.parse.quote(message)
 

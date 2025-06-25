@@ -376,8 +376,8 @@ RATING_DISTRIBUTION = {
 
 
 FILTER_AI_PRIORITY = [
-    "gpt",        # Fallback
     "cohere",     # Highest priority
+    "gpt",        # Fallback
     "sarvam"      # Final fallback
 ]
 
