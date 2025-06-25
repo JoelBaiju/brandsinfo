@@ -117,3 +117,5 @@ admin.site.register(Buisness_pics,BuisnessPicsAdmin)
 
 
 admin.site.register(BusinessReviewTracker)
+
+admin.site.register(AutoReviewSchedulerLog)
