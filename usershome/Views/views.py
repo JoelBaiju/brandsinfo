@@ -153,7 +153,7 @@ class BuisnessesView(generics.ListAPIView):
             business.save()
             print(business.city)
             buisness_review_tracker = BusinessReviewTracker.objects.create(business=business)
-            send_buisness_registered_draft4sms(user.first_name , user.mobile_number)
+            send_buisness_registered_draft4sms(business.name , user.mobile_number)
             return Response(
                 self.serializer_class(business).data,
                 status=status.HTTP_201_CREATED
