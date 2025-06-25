@@ -120,8 +120,7 @@ def send_plan_purchased_draft4sms(name,plan,expiry , phone_number):
 def senddd(request):
     print(send_otp_draft4sms("12345" , "7034761676"))
 
-    return Response('fonsofnsf')
-
+    pass
 
 
 
