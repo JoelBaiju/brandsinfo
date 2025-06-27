@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Browser</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            padding: 20px;
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+        .business-card {
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+        }
+        .card-header {
+            font-weight: bold;
+            background-color: #252525;
+            border-bottom: 1px solid #333;
+        }
+        .keyword-item, .category-item {
+            transition: all 0.3s ease;
+            background-color: #252525;
+            border: 1px solid #333;
+            color: #e0e0e0;
+        }
+        .keyword-item:hover, .category-item:hover {
+            background-color: #333;
+        }
+        .pagination {
+            margin-top: 20px;
+        }
+        .business-image {
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        .container {
+            background-color: #121212;
+        }
+        .form-control, .form-control:focus, .form-select {
+            background-color: #252525;
+            color: #e0e0e0;
+            border: 1px solid #444;
+        }
+        .alert-info {
+            background-color: #1a3a4a;
+            border-color: #2a4a5a;
+            color: #c0e0f0;
+        }
+        .list-group-item {
+            background-color: #252525;
+            color: #e0e0e0;
+            border: 1px solid #333;
+        }
+        .page-link {
+            background-color: #252525;
+            color: #e0e0e0;
+            border: 1px solid #444;
+        }
+        .page-item.disabled .page-link {
+            background-color: #1a1a1a;
+            color: #666;
+        }
+        .page-item.active .page-link {
+            background-color: #3a3a3a;
+            border-color: #555;
+        }
+        .btn-outline-danger {
+            color: #ff6b6b;
+            border-color: #ff6b6b;
+        }
+        .btn-outline-danger:hover {
+            background-color: #ff6b6b;
+            color: #121212;
+        }
+        .btn-outline-success {
+            color: #28a745;
+            border-color: #28a745;
+        }
+        .btn-outline-success:hover {
+            background-color: #28a745;
+            color: #121212;
+        }
+        .btn-outline-primary {
+            color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-outline-primary:hover {
+            background-color: #007bff;
+            color: #121212;
+        }
+        .btn-outline-info {
+            color: #17a2b8;
+            border-color: #17a2b8;
+        }
+        .btn-outline-info:hover {
+            background-color: #17a2b8;
+            color: #121212;
+        }
+        .text-muted {
+            color: #777 !important;
+        }
+        .bg-dark {
+            background-color: #1e1e1e !important;
+        }
+        .add-form {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+        }
+        .category-badge {
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        .general-cat {
+            background-color: #4f4f4f;
+        }
+        .descriptive-cat {
+            background-color: #424242;
+        }
+        .browse-mode-btn {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="text-start text-white">BI Buisness Info</h1>
+            {% if search_query %}
+            <a href="{% url 'buisness_browser' %}" class="btn btn-outline-info browse-mode-btn">
+                <i class="fas fa-list"></i> Re-enter Browsing Mode
+            </a>
+            {% endif %}
+        </div>
+        
+        <!-- Search Form -->
+        <div class="row mb-4">
+            <div class="col-md-8 mx-auto">
+                <form method="get" action="" class="input-group">
+                    <input type="text" 
+                           class="form-control" 
+                           name="search" 
+                           placeholder="Search by business name, type or description..." 
+                           value="{{ search_query }}">
+                    <button class="btn btn-info" type="submit">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                    {% if search_query %}
+                    <a href="{{ request.path }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i> Clear
+                    </a>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+
+        <!-- Rest of your template remains the same -->
+        <!-- Search Results Info -->
+        {% if search_query %}
+        <div class="alert alert-info mb-3">
+            Showing results for: <strong>"{{ search_query }}"</strong>
+            {% if page_obj.paginator.count == 0 %}
+            - No businesses found
+            {% else %}
+            - Found {{ page_obj.paginator.count }} business{{ page_obj.paginator.count|pluralize:"es" }}
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <!-- Business Details Card -->
+        {% if current_business %}
+        <div class="card business-card">
+            <div class="card-header text-white">
+                <h2>{{ current_business.name }}</h2>
+                <span class="badge bg-{% if current_business.verified %}success{% else %}secondary{% endif %}">
+                    {% if current_business.verified %}Verified{% else %}Not Verified{% endif %}
+                </span>
+                {% if current_business.assured %}
+                <span class="badge bg-warning text-dark">Assured</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        {% if current_business.image %}
+                        <img src="{{ current_business.image.url }}" alt="{{ current_business.name }}" class="business-image img-fluid w-100 mb-3">
+                        {% else %}
+                        <div class="bg-dark text-center p-5 mb-3" style="border: 1px solid #333;">
+                            <i class="fas fa-image fa-3x text-muted"></i>
+                            <p class="mt-2">No Image</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-8 text-white">
+                        <p><strong>Description:</strong> {{ current_business.description|default:"Not provided" }}</p>
+                        <p><strong>Business Type:</strong> {{ current_business.buisness_type }}</p>
+                        <p><strong>Manager:</strong> {{ current_business.manager_name|default:"Not provided" }}</p>
+                        <p><strong>Location:</strong> 
+                            {{ current_business.building_name|default:"" }} 
+                            {{ current_business.landmark|default:"" }}, 
+                            {{ current_business.locality }}, 
+                            {{ current_business.city|default:"" }}, 
+                            {{ current_business.state }}, 
+                            {{ current_business.pincode }}
+                        </p>
+                        <p><strong>Hours:</strong> 
+                            {% if current_business.opens_at and current_business.closes_at %}
+                            {{ current_business.opens_at|time:"H:i" }} - {{ current_business.closes_at|time:"H:i" }}
+                            {% else %}
+                            Not specified
+                            {% endif %}
+                        </p>
+                        <p><strong>Contact:</strong> 
+                            {{ current_business.incharge_number|default:"Not provided" }} | 
+                            {{ current_business.email|default:"Not provided" }}
+                        </p>
+                        <p><strong>Rating:</strong> 
+                            <span class="text-warning">
+                                {% with ''|center:current_business.rating as range %}
+                                {% for _ in range %}
+                                <i class="fas fa-star"></i>
+                                {% endfor %}
+                                {% endwith %}
+                            </span>
+                            ({{ current_business.total_no_of_ratings }} ratings)
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Keywords Section -->
+        <div class="card business-card">
+            <div class="card-header bg-neutral text-white">
+                <h3>Keywords</h3>
+            </div>
+            <div class="card-body">
+                {% if keywords %}
+                <div class="list-group mb-3">
+                    {% for keyword in keywords %}
+                    <div class="list-group-item keyword-item d-flex justify-content-between align-items-center">
+                        <span>{{ keyword.keyword.keyword }}</span>
+                        <form method="post" class="mb-0">
+                            {% csrf_token %}
+                            <input type="hidden" name="keyword_id" value="{{ keyword.id }}">
+                            <button type="submit" name="delete_keyword" class="btn btn-sm btn-outline-danger">
+                                <i class="fas fa-trash-alt"></i> Delete
+                            </button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-info mb-3">No keywords associated with this business.</div>
+                {% endif %}
+                
+                <!-- Add Keyword Form -->
+                <div class="add-form">
+                    <form method="post" class="form-inline">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <input type="text" 
+                                   class="form-control" 
+                                   name="new_keyword" 
+                                   placeholder="Add new keyword" 
+                                   required>
+                            <button type="submit" name="add_keyword" class="btn btn-outline-success">
+                                <i class="fas fa-plus"></i> Add
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- General Categories Section -->
+        <div class="card business-card">
+            <div class="card-header bg-neutral text-white">
+                <h3>General Categories</h3>
+            </div>
+            <div class="card-body">
+                {% if general_categories %}
+                <div class="d-flex flex-wrap mb-3">
+                    {% for cat in general_categories %}
+                    <div class="category-badge general-cat badge p-2 d-flex align-items-center">
+                        {{ cat.gcat.cat_name }}
+                        <form method="post" class="ms-2 mb-0">
+                            {% csrf_token %}
+                            <input type="hidden" name="general_cat_id" value="{{ cat.gcat.id }}">
+                            <button type="submit" name="delete_general_cat" class="btn btn-sm btn-outline-danger p-0 border-0">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-info mb-3">No general categories assigned.</div>
+                {% endif %}
+                
+                <!-- Add General Category Form -->
+                <div class="add-form">
+                    <form method="post" class="form-inline">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <select class="form-select" name="general_cat_id" required>
+                                <option value="" selected disabled>Select general category</option>
+                                {% for cat in all_general_cats %}
+                                <option value="{{ cat.id }}">{{ cat.cat_name }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" name="add_general_cat" class="btn btn-outline-success">
+                                <i class="fas fa-plus"></i> Add
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Descriptive Categories Section -->
+        <div class="card business-card">
+            <div class="card-header bg-neutral text-white">
+                <h3>Descriptive Categories</h3>
+            </div>
+            <div class="card-body">
+                {% if descriptive_categories %}
+                <div class="d-flex flex-wrap mb-3">
+                    {% for cat in descriptive_categories %}
+                    <div class="category-badge descriptive-cat badge p-2 d-flex align-items-center">
+                        {{ cat.dcat.cat_name }}
+                        <form method="post" class="ms-2 mb-0">
+                            {% csrf_token %}
+                            <input type="hidden" name="descriptive_cat_id" value="{{ cat.dcat.id }}">
+                            <button type="submit" name="delete_descriptive_cat" class="btn btn-sm btn-outline-danger p-0 border-0">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-info mb-3">No descriptive categories assigned.</div>
+                {% endif %}
+                
+                <!-- Add Descriptive Category Form -->
+                <div class="add-form">
+                    <form method="post" class="form-inline">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <select class="form-select" name="descriptive_cat_id" required>
+                                <option value="" selected disabled>Select descriptive category</option>
+                                {% for cat in all_descriptive_cats %}
+                                <option value="{{ cat.id }}">{{ cat.cat_name }} ({{ cat.general_cat.cat_name }})</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" name="add_descriptive_cat" class="btn btn-outline-success">
+                                <i class="fas fa-plus"></i> Add
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info text-center">No businesses found in the database.</div>
+        {% endif %}
+        
+        <!-- Pagination Controls -->
+        <nav aria-label="Business navigation">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1">
+                        <i class="fas fa-angle-double-left"></i> First
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                        <i class="fas fa-angle-left"></i> Previous
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">
+                        <i class="fas fa-angle-double-left"></i> First
+                    </span>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link">
+                        <i class="fas fa-angle-left"></i> Previous
+                    </span>
+                </li>
+                {% endif %}
+                
+                <li class="page-item active">
+                    <span class="page-link">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </span>
+                </li>
+                
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                        Next <i class="fas fa-angle-right"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">
+                        Last <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">
+                        Next <i class="fas fa-angle-right"></i>
+                    </span>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link">
+                        Last <i class="fas fa-angle-double-right"></i>
+                    </span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

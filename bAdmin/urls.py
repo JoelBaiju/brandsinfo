@@ -36,6 +36,15 @@ urlpatterns = [
     path('edit_locality/<int:id>/'  , views.EditLocalityAPIView.as_view()),
     path('delete_locality/<int:id>/', views.DeleteLocalityAPIView.as_view()),
 
+    path('add-plan-to-business/', views.add_plan_to_buisness, name='add_plan_to_buisness'),
+    path('tune_buisness/', views.business_tune_api, name='business_api'),
+
+
+    path('buisness_browser/', views.browse_businesses,name='buisness_browser'),
+    path('buisness_search/', views.business_search_view, name='business_search'),
+
+
+
 ]
 
 

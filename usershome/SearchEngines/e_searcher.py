@@ -352,7 +352,7 @@ class Pageing_assistant:
 
 
 
-from .search_resulst_cacher import get_cached_search_response,cache_search_response
+# from .search_resulst_cacher import get_cached_search_response,cache_search_response
 
 
 
@@ -364,113 +364,113 @@ from django.db.models import Q as modelsQ, F
 from django.utils.timezone import localtime
 import concurrent.futures
 
-@api_view(['GET'])
-def elasticsearch2(request):
-    query = request.GET.get('q', '')
-    location = request.GET.get('location', '')
-    verified = request.GET.get('verified', 'False')
-    assured = request.GET.get('assured', 'False')
-    rated_high = request.GET.get('rated_high', 'False')
-    open_now = request.GET.get('open_now', 'False')
+# @api_view(['GET'])
+# def elasticsearch2(request):
+#     query = request.GET.get('q', '')
+#     location = request.GET.get('location', '')
+#     verified = request.GET.get('verified', 'False')
+#     assured = request.GET.get('assured', 'False')
+#     rated_high = request.GET.get('rated_high', 'False')
+#     open_now = request.GET.get('open_now', 'False')
 
-    filters_dict = {
-        "assured": assured,
-        "verified": verified,
-        "rated_high": rated_high,
-        "open_now": open_now
-    }
+#     filters_dict = {
+#         "assured": assured,
+#         "verified": verified,
+#         "rated_high": rated_high,
+#         "open_now": open_now
+#     }
 
 
-    cached = get_cached_search_response(query, location,filters_dict)
-    if cached:
-        print('data from cache')
-        return cached
+#     # cached = get_cached_search_response(query, location,filters_dict)
+#     # if cached:
+#     #     print('data from cache')
+#     #     return cached
 
-    # 2. Run metadata fetch in parallel
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        future_meta = executor.submit(CC_Check_and_add_metadata, location, query)
+#     # 2. Run metadata fetch in parallel
+#     with concurrent.futures.ThreadPoolExecutor() as executor:
+#         future_meta = executor.submit(CC_Check_and_add_metadata, location, query)
 
-        # 3. Retrieve ES matches
-        all_matches = retrieve_es_matches(query)
-        print("print all matches ",all_matches)
+#         # 3. Retrieve ES matches
+#         all_matches = retrieve_es_matches(query)
+#         print("print all matches ",all_matches)
 
-        # 4. Filter with AI
-        filtered_indexes = filter_matches_with_ai(all_matches, query)
-        print("firltered matched" , filtered_indexes)
+#         # 4. Filter with AI
+#         filtered_indexes = filter_matches_with_ai(all_matches, query)
+#         print("firltered matched" , filtered_indexes)
 
-        # 5. Extract final matched objects
-        filtered_objects = get_filtered_objects_from_indexes(all_matches, filtered_indexes)
+#         # 5. Extract final matched objects
+#         filtered_objects = get_filtered_objects_from_indexes(all_matches, filtered_indexes)
 
-        # 6. Fetch business location object
-        try:
-            city_obj = City.objects.get(city_name=location)
-        except City.DoesNotExist:
-            return Response(f'Sorry, we don’t have results for {location}')
+#         # 6. Fetch business location object
+#         try:
+#             city_obj = City.objects.get(city_name=location)
+#         except City.DoesNotExist:
+#             return Response(f'Sorry, we don’t have results for {location}')
 
-        # 7. Gather and filter businesses
-        products = filtered_objects['products']
-        services = filtered_objects['services']
-        buisnesses_direct = filtered_objects['businesses'].filter(city=city_obj)
-        bdcats = filtered_objects['bdcats']
-        bgcats = filtered_objects['bgcats']
+#         # 7. Gather and filter businesses
+#         products = filtered_objects['products']
+#         services = filtered_objects['services']
+#         buisnesses_direct = filtered_objects['businesses'].filter(city=city_obj)
+#         bdcats = filtered_objects['bdcats']
+#         bgcats = filtered_objects['bgcats']
 
-        # Update search count
-        if products.exists():
-            executor.submit(update_search_count_products, products)
-        if services.exists():
-            executor.submit(update_search_count_services, services)
+#         # Update search count
+#         if products.exists():
+#             executor.submit(update_search_count_products, products)
+#         if services.exists():
+#             executor.submit(update_search_count_services, services)
 
-        product_buisness_ids = products.values_list('buisness', flat=True).distinct()
-        service_buisness_ids = services.values_list('buisness', flat=True).distinct()
-        bdcats_buisness_ids = bdcats.values_list('buisness', flat=True).distinct()
-        bgcats_buisness_ids = bgcats.values_list('buisness', flat=True).distinct()
+#         product_buisness_ids = products.values_list('buisness', flat=True).distinct()
+#         service_buisness_ids = services.values_list('buisness', flat=True).distinct()
+#         bdcats_buisness_ids = bdcats.values_list('buisness', flat=True).distinct()
+#         bgcats_buisness_ids = bgcats.values_list('buisness', flat=True).distinct()
 
-        unique_buisness_ids = set(chain(
-            product_buisness_ids,
-            service_buisness_ids,
-            bdcats_buisness_ids,
-            bgcats_buisness_ids
-        ))
+#         unique_buisness_ids = set(chain(
+#             product_buisness_ids,
+#             service_buisness_ids,
+#             bdcats_buisness_ids,
+#             bgcats_buisness_ids
+#         ))
 
-        buisnesses = Buisnesses.objects.filter(id__in=unique_buisness_ids, city=city_obj)
+#         buisnesses = Buisnesses.objects.filter(id__in=unique_buisness_ids, city=city_obj)
 
-        # Apply filters
-        filters = modelsQ()
-        if assured == 'True':
-            filters &= modelsQ(assured=True)
-        if verified == 'True':
-            filters &= modelsQ(verified=True)
-        if open_now == 'True':
-            now = localtime()
-            filters &= (
-                modelsQ(opens_at__lte=now, closes_at__gte=now) |
-                modelsQ(opens_at__gt=F('closes_at'), opens_at__lte=now) |
-                modelsQ(opens_at__gt=F('closes_at'), closes_at__gte=now)
-            )
+#         # Apply filters
+#         filters = modelsQ()
+#         if assured == 'True':
+#             filters &= modelsQ(assured=True)
+#         if verified == 'True':
+#             filters &= modelsQ(verified=True)
+#         if open_now == 'True':
+#             now = localtime()
+#             filters &= (
+#                 modelsQ(opens_at__lte=now, closes_at__gte=now) |
+#                 modelsQ(opens_at__gt=F('closes_at'), opens_at__lte=now) |
+#                 modelsQ(opens_at__gt=F('closes_at'), closes_at__gte=now)
+#             )
 
-        buisnesses = buisnesses.filter(filters)
-        buisnesses_direct = buisnesses_direct.filter(filters)
+#         buisnesses = buisnesses.filter(filters)
+#         buisnesses_direct = buisnesses_direct.filter(filters)
 
-        # Merge and sort
-        combined_queryset = list(chain(buisnesses_direct, buisnesses))
-        executor.submit(update_search_count_buisnesses, combined_queryset)
+#         # Merge and sort
+#         combined_queryset = list(chain(buisnesses_direct, buisnesses))
+#         executor.submit(update_search_count_buisnesses, combined_queryset)
 
-        unique_combined_queryset = list(set(combined_queryset))
-        unique_combined_queryset = sorted(
-            unique_combined_queryset,
-            key=lambda x: (x.search_priority, x.rating if rated_high == 'True' else 0),
-            reverse=True
-        )
+#         unique_combined_queryset = list(set(combined_queryset))
+#         unique_combined_queryset = sorted(
+#             unique_combined_queryset,
+#             key=lambda x: (x.search_priority, x.rating if rated_high == 'True' else 0),
+#             reverse=True
+#         )
 
-        # Pagination + metadata
-        pageing_assistant = Pageing_assistant(unique_combined_queryset, BuisnessesSerializerMini)
-        response = pageing_assistant.get_page(request)
-        response.data['metadata'] = future_meta.result()
+#         # Pagination + metadata
+#         pageing_assistant = Pageing_assistant(unique_combined_queryset, BuisnessesSerializerMini)
+#         response = pageing_assistant.get_page(request)
+#         response.data['metadata'] = future_meta.result()
 
-        # 8. Cache the response
-        cache_search_response(query, location,filters_dict, response.data)
+#         # 8. Cache the response
+#         # cache_search_response(query, location,filters_dict, response.data)
 
-        return response
+#         return response
 
 
 
@@ -888,6 +888,24 @@ def elasticsearch2(request):
 
 
 
+def extract_matches(hits, doc_type):
+    results = []
+    print(f"📄 Processing {len(hits)} hits for {doc_type}")
+    for hit in hits:
+        matched_fields = getattr(hit.meta, "highlight", {})
+        matched_terms = []
+        for field, fragments in matched_fields.items():
+            for fragment in fragments:
+                cleaned = fragment.replace("<em>", "").replace("</em>", "")
+                matched_terms.append(cleaned)
+        if matched_terms:
+            print(f"✅ {doc_type} [ID {hit.meta.id}] matched: {matched_terms}")
+        results.append({
+            "doc_type": doc_type,
+            "id": hit.meta.id,
+            "matched_text": matched_terms
+        })
+    return results
 
 
 
@@ -911,19 +929,22 @@ def elasticsearch2(request):
 #         future_cc_meta = executor.submit(CC_Check_and_add_metadata , location , query)
         
 #         # search_query = Q("bool", should=[
-#         #     Q("multi_match", query=query, fields=["name", "category" ,"keywords"], fuzziness ="1", max_expansions=3, prefix_length=2,minimum_should_match=2),
-#         #     Q("multi_match", query=query, fields=["cat_name"], max_expansions=3,fuzziness ="1", prefix_length=2 ,minimum_should_match=2)
+#         #     Q("multi_match", query=query, fields=["name", "category" ,"keywords"], fuzziness ="AUTO" ),
+#         #     Q("multi_match", query=query, fields=["cat_name"], fuzziness ="AUTO")
 #         # ])
         
-#         # search_query = Q("bool", should=[
-#         #     Q("multi_match", query=query, fields=["name", "category" ,"keywords"], fuzziness="2", max_expansions=3, prefix_length=2,minimum_should_match = 2), 
-#         #     Q("multi_match", query=query, fields=["cat_name"], fuzziness="2", max_expansions=3, prefix_length=2 ,minimum_should_match=2)
-#         # ])
-
 #         search_query = Q("bool", should=[
-#             Q("multi_match", query=query, fields=["cat_name"], type="phrase", boost=3),  # strong boost if cat_name matches exactly
-#             Q("multi_match", query=query, fields=["name^3", "category^2", "keywords"], fuzziness="1", max_expansions=1, prefix_length=2, minimum_should_match="2<75%")
-#         ], minimum_should_match=1)
+#             Q("multi_match", query=query, fields=["name", "category" ], fuzziness="1", max_expansions=2, prefix_length=2,minimum_should_match="2<75%"), 
+#             Q("multi_match", query=query, fields=["cat_name"], fuzziness="1", max_expansions=1, prefix_length=2 ,minimum_should_match="2<75%")
+#         ])
+#         bdc_q = Q("term", cat_name__raw=query)
+#         search_query_for_BD = Q("multi_match" , query=query , fields=["name","keywords"] ,fuzziness='1',max_expansions = 2 , prefix_length=3 ,minimum_should_match=2)
+
+
+#         # search_query = Q("bool", should=[
+#         #     Q("multi_match", query=query, fields=["cat_name"], type="phrase", boost=3),  # strong boost if cat_name matches exactly
+#         #     Q("multi_match", query=query, fields=["name^3", "category^2", "keywords"], fuzziness="1", max_expansions=1, prefix_length=2, minimum_should_match="2<75%")
+#         # ], minimum_should_match=1)
 
 #         # loose_biz_query = Q("bool", should=[
 #         #     Q("multi_match", query=query, fields=["name"], fuzziness="AUTO", prefix_length=1, boost=2),
@@ -935,60 +956,27 @@ def elasticsearch2(request):
 
 #         should_queries = []
 
-#         # --- Name matching (semi-tight prefix-based with light fuzziness)
-#         should_queries.append(
-#             Q("match_phrase_prefix", name={"query": query, "boost": 3})
-#         )
-#         should_queries.append(
-#             Q("match", name={
-#                 "query": query,
-#                 "operator": "and",
-#                 "fuzziness": "1",
-#                 "prefix_length": 1,
-#                 "boost": 2
-#             })
-#         )
-
-#         # --- Keywords matching (only first word of query compared with beginning of keyword)
-#         if query_tokens:
-#             first_token = query_tokens[0]
-
-#             should_queries.append(
-#                 Q("match_phrase_prefix", keywords={
-#                     "query": first_token,
-#                     "boost": 3
-#                 })
-#             )
-
-#             should_queries.append(
-#                 Q("match", keywords={
-#                     "query": first_token,
-#                     "fuzziness": "1",
-#                     "operator": "and",
-#                     "prefix_length": 1,
-#                     "boost": 2
-#                 })
-#             )
-
-#         # --- Final assembled query
-#         loose_biz_query = Q("bool", should=should_queries, minimum_should_match=1)
-
 
 
 #         clean_tokens = [word for word in query.split() if len(word) > 3]
 
-#         search_query_for_BD = Q("multi_match" , query=" ".join(clean_tokens) , fields=["name","keywords"]  , prefix_length=3 ,minimum_should_match=2)
 
 #         try:
 #             city_obj = City.objects.get(city_name=location)
 #         except City.DoesNotExist:
 #             return Response(f'Sorry, we dont have any results for {location} city')
 
-    
+#         print(extract_matches( ProductDocument.search().query(search_query).highlight_options(pre_tags="<em>", post_tags="</em>").highlight("name", "keywords").execute(),'product'))
+#         print(extract_matches( ServiceDocument.search().query(search_query).highlight_options(pre_tags="<em>", post_tags="</em>").highlight("name", "keywords").execute(),"service"))
+#         print(extract_matches(BuisnessDocument.search().query(search_query).highlight_options(pre_tags="<em>", post_tags="</em>").highlight("name", "keywords").execute(),"buisness_d"))
+#         print(extract_matches(BDesCatDocument.search().query(bdc_q).highlight_options(pre_tags="<em>", post_tags="</em>").highlight("cat_name").execute(),"BD_CAts"))
+#         print(extract_matches(BGenCatDocument.search().query(search_query).highlight_options(pre_tags="<em>", post_tags="</em>").highlight("cat_name").execute(),"bgen_cats"))
+
+       
 #         products = ProductDocument.search().query(search_query).to_queryset()
 #         services = ServiceDocument.search().query(search_query).to_queryset()
-#         buisnesses_direct = BuisnessDocument.search().query(loose_biz_query)
-#         bdcats = BDesCatDocument.search().query(search_query).to_queryset()
+#         buisnesses_direct = BuisnessDocument.search().query(search_query_for_BD)
+#         bdcats = BDesCatDocument.search().query(bdc_q).to_queryset()
 #         bgcats = BGenCatDocument.search().query(search_query).to_queryset()
         
 
@@ -1147,9 +1135,153 @@ def elasticsearch2(request):
 #         return response
 
 
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from elasticsearch_dsl import Q
+from itertools import chain
+import concurrent.futures
+from django.utils.timezone import localtime
+from django.db.models import Q as modelsQ, F
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
+@api_view(['GET'])
+def elasticsearch2(request):    
+    print(f"\033[96m{"-" * 100}\033[0m")
 
+    query = request.GET.get('q', '')
+    location = request.GET.get('location', '')
+    verified = request.GET.get('verified', 'False')
+    assured = request.GET.get('assured', 'False')
+    rated_high = request.GET.get('rated_high', 'False')
+    open_now = request.GET.get('open_now', 'False')
 
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future_cc_meta = executor.submit(CC_Check_and_add_metadata, location, query)
+
+        try:
+            city_obj = City.objects.get(city_name=location)
+        except City.DoesNotExist:
+            return Response(f'Sorry, we don\'t have any results for {location} city')
+
+        strict_query = Q("multi_match", query=query, fields=["name", "keywords"], minimum_should_match="2<70%", fuzziness="1", max_expansions=2, prefix_length=2)
+        strict_results = BuisnessDocument.search().query(strict_query).highlight("name", "keywords").execute()
+        print("\033[92mStrict Match Results:\033[0m", strict_results)
+        strict_ids = {hit.meta.id for hit in strict_results}
+
+        relaxed_query = Q("bool", should=[
+            Q("match_phrase", name=query),
+            Q("multi_match", query=query, fields=["name", "keywords"], minimum_should_match="50%", fuzziness="1", max_expansions=2, prefix_length=2)
+        ])
+        relaxed_results = BuisnessDocument.search().query(relaxed_query).highlight("name", "keywords").execute()
+        print("\033[93mRelaxed Match Results:\033[0m", relaxed_results)
+        relaxed_filtered = [r for r in relaxed_results if r.meta.id not in strict_ids]
+
+        def enrich_with_highlights(results, reason):
+            enriched = {}
+            for r in results:
+                matches = []
+                if hasattr(r.meta, 'highlight'):
+                    matches = list(r.meta.highlight.to_dict().values())
+                    matches = [phrase for sublist in matches for phrase in sublist]
+                enriched[r.meta.id] = {
+                    "matched_phrases": matches,
+                    "reason": reason
+                }
+            return enriched
+
+        strict_enriched = enrich_with_highlights(strict_results, "Exact or near-exact keyword match")
+        relaxed_enriched = enrich_with_highlights(relaxed_filtered, "Partial or related keyword match")
+
+        strict_queryset = BuisnessDocument.search().filter("ids", values=list(strict_enriched.keys())).to_queryset().filter(city=city_obj)
+        relaxed_queryset = BuisnessDocument.search().filter("ids", values=list(relaxed_enriched.keys())).to_queryset().filter(city=city_obj)
+
+        product_query = ProductDocument.search().query(strict_query).to_queryset()
+        print("\033[96mProducts Found:\033[0m", product_query)
+        service_query = ServiceDocument.search().query(strict_query).to_queryset()
+        print("\033[93mServices Found:\033[0m", service_query)
+        bdcats = BDesCatDocument.search().query(Q("term", cat_name__raw=query)).to_queryset()
+        print("\033[94mBD Categories Found:\033[0m", bdcats)
+        bgcats = BGenCatDocument.search().query(strict_query).to_queryset()
+        print("\033[91mBG Categories Found:\033[0m", bgcats)
+
+        if product_query.count() != 0:
+            executor.submit(update_search_count_products, product_query)
+        if service_query.count() != 0:
+            executor.submit(update_search_count_services, service_query)
+
+        product_buisness_ids = product_query.values_list('buisness', flat=True).distinct()
+        service_buisness_ids = service_query.values_list('buisness', flat=True).distinct()
+        bdcats_buisness_ids = bdcats.values_list('buisness', flat=True).distinct()
+        bgcats_buisness_ids = bgcats.values_list('buisness', flat=True).distinct()
+
+        from_other_docs = Buisnesses.objects.filter(
+            id__in=set(chain(product_buisness_ids, service_buisness_ids, bdcats_buisness_ids, bgcats_buisness_ids)),
+            city=city_obj
+        )
+        print("\033[96mFrom Other Docs (Products/Services/Cats):\033[0m", from_other_docs)
+
+        filters = modelsQ()
+        if assured == 'True':
+            print('Applying assured=True filter')
+            filters &= modelsQ(assured=True)
+        if verified == 'True':
+            print('Applying verified=True filter')
+            filters &= modelsQ(verified=True)
+        if open_now == 'True':
+            now = localtime()
+            print('Applying open_now=True filter for time:', now)
+            filters &= (
+                modelsQ(opens_at__lte=now, closes_at__gte=now) |
+                modelsQ(opens_at__gt=F('closes_at'), opens_at__lte=now) |
+                modelsQ(opens_at__gt=F('closes_at'), closes_at__gte=now)
+            )
+
+        strict_queryset = strict_queryset.filter(filters)
+        relaxed_queryset = relaxed_queryset.filter(filters)
+        from_other_docs = from_other_docs.filter(filters)
+
+        print("\033[92mFinal Filtered Strict Matches:\033[0m", strict_queryset)
+        print("\033[93mFinal Filtered Relaxed Matches:\033[0m", relaxed_queryset)
+        print("\033[96mFinal Filtered Others:\033[0m", from_other_docs)
+
+        executor.submit(update_search_count_buisnesses, list(chain(strict_queryset, relaxed_queryset, from_other_docs)))
+
+        def attach_matched_info(queryset, enriched_dict):
+            for obj in queryset:
+                matched_data = enriched_dict.get(str(obj.id), {})
+                obj.matched_info = matched_data
+            return queryset
+
+        strict_queryset = attach_matched_info(strict_queryset, strict_enriched)
+        relaxed_queryset = attach_matched_info(relaxed_queryset, relaxed_enriched)
+
+        if rated_high == 'True':
+            strict_queryset = sorted(strict_queryset, key=lambda x: (x.search_priority, x.rating), reverse=True)
+            relaxed_queryset = sorted(relaxed_queryset, key=lambda x: (x.search_priority, x.rating), reverse=True)
+            from_other_docs = sorted(from_other_docs, key=lambda x: (x.search_priority, x.rating), reverse=True)
+        else:
+            strict_queryset = sorted(strict_queryset, key=lambda x: x.search_priority, reverse=True)
+            relaxed_queryset = sorted(relaxed_queryset, key=lambda x: x.search_priority, reverse=True)
+            from_other_docs = sorted(from_other_docs, key=lambda x: x.search_priority, reverse=True)
+
+        metadata = future_cc_meta.result()
+
+        class ExtendedBuisnessSerializerMini(BuisnessesSerializerMini):
+            def to_representation(self, instance):
+                rep = super().to_representation(instance)
+                if hasattr(instance, 'matched_info'):
+                    rep['matched_info'] = instance.matched_info
+                return rep
+
+        response = Response({
+            "metadata": metadata,
+            "exact_matches": ExtendedBuisnessSerializerMini(strict_queryset, many=True).data,
+            "related_matches": ExtendedBuisnessSerializerMini(relaxed_queryset, many=True).data,
+            "others": ExtendedBuisnessSerializerMini(from_other_docs, many=True).data,
+        })
+
+        return response
 
 
 

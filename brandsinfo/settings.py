@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'usershome.apps.UsershomeConfig',
     'django_celery_beat',
     'analytics',
+    'bAdmin'
 ]
 
 MIDDLEWARE = [

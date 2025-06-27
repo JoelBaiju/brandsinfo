@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Search</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            padding: 20px;
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        *, *::before, *::after {
+            color: #ffffff !important;
+        }
+
+        .search-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .business-card {
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+            transition: transform 0.2s;
+        }
+
+        .business-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+
+        .card-header {
+            font-weight: bold;
+            background-color: #252525;
+            border-bottom: 1px solid #333;
+        }
+
+        .business-image {
+            height: 150px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        .form-control, .form-control:focus {
+            background-color: #252525;
+            color: #e0e0e0;
+            border: 1px solid #444;
+        }
+
+        .filter-badge {
+            cursor: pointer;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+
+        .keyword-badge {
+            background-color: #3a3a3a;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+
+        .match-badge {
+            background-color: #6c757d;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            font-size: 0.8rem;
+        }
+
+        .pagination .page-link {
+            background-color: #252525;
+            color: #e0e0e0;
+            border: 1px solid #444;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #3a3a3a;
+            border-color: #555;
+        }
+
+        .verified-badge {
+            background-color: #28a745;
+        }
+
+        .assured-badge {
+            background-color: #ffc107;
+            color: #212529;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #aaa;
+        }
+        
+        .result-section {
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            border-bottom: 2px solid #444;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .exact-match {
+            border-left: 4px solid #28a745;
+        }
+        
+        .related-match {
+            border-left: 4px solid #fd7e14;
+        }
+        
+        .other-match {
+            border-left: 4px solid #6f42c1;
+        }
+        
+        .match-info {
+            background-color: #2a2a2a;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .matched-phrase {
+            background-color: #3a3a3a;
+            padding: 2px 5px;
+            border-radius: 3px;
+            margin-right: 5px;
+            display: inline-block;
+        }
+        
+        .match-reason {
+            color: #aaa;
+            font-style: italic;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container search-container">
+        <h1 class="text-center mb-4 text-white">Business Search</h1>
+        
+        <!-- Search Form -->
+        <div class="card business-card mb-4">
+            <div class="card-body">
+                <form id="searchForm">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="form-group mb-3">
+                                <label for="searchQuery" class="form-label">Search Term</label>
+                                <input type="text" class="form-control" id="searchQuery" placeholder="Enter business name, type or keywords">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                <label for="searchLocation" class="form-label">Location</label>
+                                <input type="text" class="form-control" id="searchLocation" placeholder="Enter city">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Filters -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <label class="form-label">Filters:</label>
+                            <div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="verifiedFilter">
+                                    <label class="form-check-label" for="verifiedFilter">Verified Only</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="assuredFilter">
+                                    <label class="form-check-label" for="assuredFilter">Assured Only</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="ratedHighFilter">
+                                    <label class="form-check-label" for="ratedHighFilter">Top Rated</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="openNowFilter">
+                                    <label class="form-check-label" for="openNowFilter">Open Now</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Results Container -->
+        <div id="resultsContainer">
+            <div class="no-results">
+                <i class="fas fa-search fa-3x mb-3"></i>
+                <h4>Search for businesses</h4>
+                <p>Enter a search term and location to find businesses</p>
+            </div>
+        </div>
+        
+        <!-- Loading Spinner -->
+        <div id="loadingSpinner" class="loading-spinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Searching...</p>
+        </div>
+    </div>
+
+    <!-- Business Detail Modal -->
+    <div class="modal fade" id="businessModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content bg-dark">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Business Details</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="modalBody">
+                    <!-- Content will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchForm = document.getElementById('searchForm');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const loadingSpinner = document.getElementById("loadingSpinner");
+            const businessModal = new bootstrap.Modal(document.getElementById('businessModal'));
+            
+            // Handle form submission
+            searchForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                performSearch();
+            });
+            
+            // Perform the search
+            function performSearch() {
+                const query = document.getElementById('searchQuery').value.trim();
+                const location = document.getElementById('searchLocation').value.trim();
+                
+                if (!query || !location) {
+                    alert('Please enter both search term and location');
+                    return;
+                }
+                
+                const searchParams = {
+                    q: query,
+                    location: location,
+                    verified: document.getElementById('verifiedFilter').checked ? 'True' : 'False',
+                    assured: document.getElementById('assuredFilter').checked ? 'True' : 'False',
+                    rated_high: document.getElementById('ratedHighFilter').checked ? 'True' : 'False',
+                    open_now: document.getElementById('openNowFilter').checked ? 'True' : 'False'
+                };
+                
+                // Show loading spinner
+                loadingSpinner.style.display = 'block';
+                resultsContainer.innerHTML = '';
+                
+                // Make API request
+                    fetch(`/users/esearch/?${new URLSearchParams(searchParams)}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        loadingSpinner.style.display = 'none';
+                        displayResults(data);
+                    })
+                    .catch(error => {
+                        loadingSpinner.style.display = 'none';
+                        resultsContainer.innerHTML = `
+                            <div class="alert alert-danger">
+                                Error fetching results: ${error.message}
+                            </div>
+                        `;
+                        console.error('Error:', error);
+                    });
+            }
+            
+            // Display search results
+            function displayResults(data) {
+                resultsContainer.innerHTML = '';
+                
+                // Check if we have any results
+                const hasExactMatches = data.exact_matches && data.exact_matches.length > 0;
+                const hasRelatedMatches = data.related_matches && data.related_matches.length > 0;
+                const hasOtherMatches = data.others && data.others.length > 0;
+                
+                if (!hasExactMatches && !hasRelatedMatches && !hasOtherMatches) {
+                    resultsContainer.innerHTML = `
+                        <div class="no-results">
+                            <i class="fas fa-frown fa-3x mb-3"></i>
+                            <h4>No businesses found</h4>
+                            <p>Try adjusting your search criteria</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Display metadata if available
+                if (data.metadata) {
+                    resultsContainer.innerHTML += `
+                        <div class="alert alert-info mb-4">
+                            <strong>Search Metadata:</strong> 
+                            ${data.metadata.query || 'No additional information available'}
+                        </div>
+                    `;
+                }
+                
+                // Display exact matches
+                if (hasExactMatches) {
+                    const section = document.createElement('div');
+                    section.className = 'result-section';
+                    section.innerHTML = `
+                        <h3 class="section-title text-white">
+                            <i class="fas fa-check-circle"></i> Exact Matches (${data.exact_matches.length})
+                        </h3>
+                        <p class="text-white">Businesses that exactly match your search terms</p>
+                    `;
+                    
+                    data.exact_matches.forEach(business => {
+                        section.appendChild(createBusinessCard(business, 'exact-match'));
+                    });
+                    
+                    resultsContainer.appendChild(section);
+                }
+                
+                // Display related matches
+                if (hasRelatedMatches) {
+                    const section = document.createElement('div');
+                    section.className = 'result-section';
+                    section.innerHTML = `
+                        <h3 class="section-title text-white">
+                            <i class="fas fa-star-half-alt"></i> Related Matches (${data.related_matches.length})
+                        </h3>
+                        <p class="text-white">Businesses that partially match your search terms</p>
+                    `;
+                    
+                    data.related_matches.forEach(business => {
+                        section.appendChild(createBusinessCard(business, 'related-match'));
+                    });
+                    
+                    resultsContainer.appendChild(section);
+                }
+                
+                // Display other matches
+                if (hasOtherMatches) {
+                    const section = document.createElement('div');
+                    section.className = 'result-section';
+                    section.innerHTML = `
+                        <h3 class="section-title text-white">
+                            <i class="fas fa-list"></i> Other Relevant Results (${data.others.length})
+                        </h3>
+                        <p class="text-white">Additional businesses that may be relevant</p>
+                    `;
+                    
+                    data.others.forEach(business => {
+                        section.appendChild(createBusinessCard(business, 'other-match'));
+                    });
+                    
+                    resultsContainer.appendChild(section);
+                }
+                
+                // Set up event listeners for detail buttons
+                document.querySelectorAll('.view-details').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const businessId = this.getAttribute('data-id');
+                        showBusinessDetails(businessId);
+                    });
+                });
+            }
+            
+            // Create a business card element
+            function createBusinessCard(business, matchType) {
+                const card = document.createElement('div');
+                card.className = `card business-card ${matchType}`;
+                
+                // Prepare match information if available
+                let matchInfoHtml = '';
+                if (business.matched_info) {
+                    const phrases = business.matched_info.matched_phrases || [];
+                    const reason = business.matched_info.reason || '';
+                    
+                    matchInfoHtml = `
+                        <div class="match-info">
+                            <div>
+                                ${phrases.length > 0 ? 
+                                    `<strong>Matched phrases:</strong> 
+                                    <div class="mt-2">
+                                        ${phrases.map(phrase => `<span class="matched-phrase">${phrase}</span>`).join('')}
+                                    </div>` : ''
+                                }
+                                ${reason ? `<div class="match-reason">${reason}</div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                card.innerHTML = `
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">${business.name}</h3>
+                        <div>
+                            ${business.verified ? '<span class="badge verified-badge">Verified</span>' : ''}
+                            ${business.assured ? '<span class="badge assured-badge">Assured</span>' : ''}
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <img src="${business.image}" alt="${business.name}" class="business-image img-fluid w-100 mb-3">
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Type:</strong> ${business.buisness_type}</p>
+                                <p><strong>Location:</strong> ${business.building_name || ''} ${business.locality}, ${business.city}, ${business.state}</p>
+                                <p><strong>Rating:</strong> ${renderStars(business.rating)} (${business.total_no_of_ratings || 0} ratings)</p>
+                                <div class="mb-2">
+                                    <strong>Keywords:</strong><br>
+                                    ${renderKeywords(business.keywords)}
+                                </div>
+                                ${matchInfoHtml}
+                            </div>
+                            <div class="col-md-3 d-flex flex-column justify-content-between">
+                                <div>
+                                    <p><strong>Views:</strong> ${business.no_of_views || 0}</p>
+                                    <p><strong>Priority:</strong> ${business.search_priority || 0}</p>
+                                </div>
+                                <button class="btn btn-outline-primary view-details" data-id="${business.id}">
+                                    View Details
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return card;
+            }
+            
+            // Show business details in modal
+            function showBusinessDetails(businessId) {
+                const query = document.getElementById('searchQuery').value.trim();
+                const location = document.getElementById('searchLocation').value.trim();
+                
+                fetch(`http://127.0.0.1:8001/users/esearch/?q=${query}&location=${location}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // Combine all results to find the business
+                        const allResults = [...(data.exact_matches || []), ...(data.related_matches || []), ...(data.others || [])];
+                        const business = allResults.find(b => b.id == businessId);
+                        
+                        if (business) {
+                            document.getElementById('modalTitle').textContent = business.name;
+                            
+                            // Prepare match information if available
+                            let matchInfoHtml = '';
+                            if (business.matched_info) {
+                                const phrases = business.matched_info.matched_phrases || [];
+                                const reason = business.matched_info.reason || '';
+                                
+                                matchInfoHtml = `
+                                    <div class="match-info mb-3">
+                                        <h5>Match Information</h5>
+                                        ${phrases.length > 0 ? 
+                                            `<p><strong>Matched phrases:</strong> 
+                                            <div class="mt-2">
+                                                ${phrases.map(phrase => `<span class="matched-phrase">${phrase}</span>`).join('')}
+                                            </div></p>` : ''
+                                        }
+                                        ${reason ? `<p class="match-reason"><strong>Reason:</strong> ${reason}</p>` : ''}
+                                    </div>
+                                `;
+                            }
+                            
+                            document.getElementById('modalBody').innerHTML = `
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <img src="${business.image}" alt="${business.name}" class="img-fluid rounded mb-3">
+                                    </div>
+                                    <div class="col-md-8">
+                                        ${matchInfoHtml}
+                                        <p><strong>Description:</strong> ${business.description || 'Not provided'}</p>
+                                        <p><strong>Type:</strong> ${business.buisness_type}</p>
+                                        <p><strong>Location:</strong> ${business.building_name || ''} ${business.locality}, ${business.city}, ${business.state}</p>
+                                        <p><strong>Contact:</strong> ${business.whatsapp_number || 'Not provided'}</p>
+                                        <p><strong>Rating:</strong> ${renderStars(business.rating)} (${business.total_no_of_ratings || 0} ratings)</p>
+                                        <p><strong>Views:</strong> ${business.no_of_views || 0}</p>
+                                        <p><strong>Priority:</strong> ${business.search_priority || 0}</p>
+                                        
+                                        <h5 class="mt-4">Products</h5>
+                                        ${business.products && business.products.length > 0 ? 
+                                            `<ul>${business.products.map(p => `<li>${p.name}</li>`).join('')}</ul>` : 
+                                            '<p>No products listed</p>'}
+                                            
+                                        <h5 class="mt-4">Services</h5>
+                                        ${business.services && business.services.length > 0 ? 
+                                            `<ul>${business.services.map(s => `<li>${s.name}</li>`).join('')}</ul>` : 
+                                            '<p>No services listed</p>'}
+                                            
+                                        <h5 class="mt-4">Keywords</h5>
+                                        ${renderKeywords(business.keywords)}
+                                    </div>
+                                </div>
+                            `;
+                            businessModal.show();
+                        } else {
+                            document.getElementById('modalBody').innerHTML = `
+                                <div class="alert alert-danger">
+                                    Business details not found
+                                </div>
+                            `;
+                            businessModal.show();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching business details:', error);
+                        document.getElementById('modalBody').innerHTML = `
+                            <div class="alert alert-danger">
+                                Error loading business details
+                            </div>
+                        `;
+                        businessModal.show();
+                    });
+            }
+            
+            // Helper function to render star ratings
+            function renderStars(rating) {
+                if (!rating) return 'Not rated';
+                
+                const fullStars = Math.floor(rating);
+                const hasHalfStar = rating % 1 >= 0.5;
+                let stars = '';
+                
+                for (let i = 0; i < fullStars; i++) {
+                    stars += '<i class="fas fa-star text-warning"></i>';
+                }
+                
+                if (hasHalfStar) {
+                    stars += '<i class="fas fa-star-half-alt text-warning"></i>';
+                }
+                
+                const emptyStars = 5 - Math.ceil(rating);
+                for (let i = 0; i < emptyStars; i++) {
+                    stars += '<i class="far fa-star text-warning"></i>';
+                }
+                
+                return stars;
+            }
+            
+            // Helper function to render keywords
+            function renderKeywords(keywords) {
+                if (!keywords || keywords.length === 0) {
+                    return '<span class="text-muted">No keywords</span>';
+                }
+                return keywords.map(k => 
+                    `<span class="badge keyword-badge">${k.keyword}</span>`
+                ).join(' ');
+            }
+        });
+    </script>
+</body>
+</html>

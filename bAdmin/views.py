@@ -704,3 +704,368 @@ class DeleteLocalityAPIView(DestroyAPIView):
     queryset = Locality.objects.all()
     lookup_field = 'id'
     permission_classes = [IsAuthenticated]
+
+
+
+
+
+
+
+
+
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.core.paginator import Paginator
+from django.db.models import Q
+from usershome.models import Buisnesses, Buisness_keywords, Keywords, General_cats, Descriptive_cats, Buisness_General_cats, Buisness_Descriptive_cats
+
+def browse_businesses(request):
+    search_query = request.GET.get('search', '')
+    
+    # Get all businesses or filtered by search
+    if search_query:
+        businesses = Buisnesses.objects.filter(
+            Q(name__icontains=search_query) |
+            Q(buisness_type__icontains=search_query) |
+            Q(description__icontains=search_query)
+        ).order_by('name')
+        
+        # If exactly one match, redirect to that business
+        if businesses.count() == 1:
+            return redirect(f"{request.path}?page={businesses[0].id}")
+    else:
+        businesses = Buisnesses.objects.all().order_by('name')
+    
+    # Pagination - 1 business per page
+    paginator = Paginator(businesses, 1)
+    page_number = request.GET.get('page')
+    
+    # Handle direct business ID viewing
+    if page_number and page_number.isdigit():
+        try:
+            business = Buisnesses.objects.get(id=int(page_number))
+            businesses = Buisnesses.objects.filter(id=business.id)
+            paginator = Paginator(businesses, 1)
+        except Buisnesses.DoesNotExist:
+            pass
+    
+    page_obj = paginator.get_page(page_number)
+    current_business = page_obj.object_list[0] if page_obj.object_list else None
+    
+    # Get related data for current business
+    keywords = None
+    general_categories = None
+    descriptive_categories = None
+    all_general_cats = General_cats.objects.all()
+    all_descriptive_cats = Descriptive_cats.objects.all()
+    
+    if current_business:
+        keywords = Buisness_keywords.objects.filter(buisness=current_business)
+        general_categories = Buisness_General_cats.objects.filter(buisness=current_business)
+        descriptive_categories = Buisness_Descriptive_cats.objects.filter(buisness=current_business)
+    
+    # Handle all operations
+    if request.method == 'POST':
+        # Delete keyword
+        if 'delete_keyword' in request.POST:
+            keyword_id = request.POST.get('keyword_id')
+            keyword_to_delete = get_object_or_404(Buisness_keywords, id=keyword_id)
+            keyword_to_delete.delete()
+        
+        # Add new keyword
+        elif 'add_keyword' in request.POST:
+            keyword_text = request.POST.get('new_keyword', '').strip()
+            if keyword_text and current_business:
+                keyword, created = Keywords.objects.get_or_create(keyword=keyword_text.lower())
+                Buisness_keywords.objects.get_or_create(keyword=keyword, buisness=current_business)
+        
+        # Add general category
+        elif 'add_general_cat' in request.POST:
+            general_cat_id = request.POST.get('general_cat_id')
+            if general_cat_id and current_business:
+                general_cat = get_object_or_404(General_cats, id=general_cat_id)
+                Buisness_General_cats.objects.get_or_create(gcat=general_cat, buisness=current_business)
+        
+        # Delete general category
+        elif 'delete_general_cat' in request.POST:
+            general_cat_id = request.POST.get('general_cat_id')
+            if general_cat_id and current_business:
+                Buisness_General_cats.objects.filter(
+                    gcat_id=general_cat_id,
+                    buisness=current_business
+                ).delete()
+        
+        # Add descriptive category
+        elif 'add_descriptive_cat' in request.POST:
+            descriptive_cat_id = request.POST.get('descriptive_cat_id')
+            if descriptive_cat_id and current_business:
+                descriptive_cat = get_object_or_404(Descriptive_cats, id=descriptive_cat_id)
+                Buisness_Descriptive_cats.objects.get_or_create(
+                    dcat=descriptive_cat,
+                    buisness=current_business
+                )
+        
+        # Delete descriptive category
+        elif 'delete_descriptive_cat' in request.POST:
+            descriptive_cat_id = request.POST.get('descriptive_cat_id')
+            if descriptive_cat_id and current_business:
+                Buisness_Descriptive_cats.objects.filter(
+                    dcat_id=descriptive_cat_id,
+                    buisness=current_business
+                ).delete()
+        
+        return redirect(request.path + f'?page={page_number}')
+    
+    context = {
+        'page_obj': page_obj,
+        'current_business': current_business,
+        'keywords': keywords,
+        'search_query': search_query,
+        'general_categories': general_categories,
+        'descriptive_categories': descriptive_categories,
+        'all_general_cats': all_general_cats,
+        'all_descriptive_cats': all_descriptive_cats,
+    }
+    
+    return render(request, 'browse_businesses.html', context)
+
+
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+from django.db.models import Q
+import json
+from usershome.serializers import BuisnessesSerializerMini
+
+@api_view(["GET", "POST"])
+def business_tune_api(request):
+    response_data = {'status': 'success', 'data': {}}
+    
+    try:
+        # Handle GET requests (search/fetch)
+        if request.method == 'GET':
+            search_query = request.GET.get('search', '').strip()
+            business_id = request.GET.get('bid', '').strip()
+            
+            # Build query filters
+            filters = Q()
+            if search_query:
+                filters &= (
+                    Q(name__icontains=search_query) |
+                    Q(buisness_type__icontains=search_query) |
+                    Q(description__icontains=search_query)
+                )
+            
+            if business_id:
+                filters &= Q(id=business_id)
+            
+            # Get filtered businesses
+            biz = Buisnesses.objects.filter(filters).order_by('name').first()
+            # Serialize businesses
+            response_data['data']['businesses'] = [
+                {
+                    'id': biz.id,
+                    'name': biz.name,
+                    'profile_pic':  BuisnessesSerializerMini(biz).data.get('image'),
+                    'building_name':biz.building_name,
+                    'business_type': biz.buisness_type,
+                    'description': biz.description,
+                    'keywords': list(Buisness_keywords.objects.filter(buisness=biz)
+                                   .values('keyword__keyword', 'id')),
+                    'general_categories': list(Buisness_General_cats.objects.filter(buisness=biz)
+                                               .values('gcat__cat_name', 'gcat__id')),
+                    'descriptive_categories': list(Buisness_Descriptive_cats.objects.filter(buisness=biz)
+                                            .values('dcat__cat_name', 'dcat__id')),
+                }
+            ]
+        
+        # Handle POST requests (edits)
+        elif request.method == 'POST':
+            try:
+                data = json.loads(request.body)
+                business_id = data.get('bid')
+                action = data.get('action')
+                
+                if not business_id:
+                    raise ValueError("Business ID is required")
+                
+                business = Buisnesses.objects.get(id=business_id)
+                print(action, data.get('cid'))
+                # Handle different actions
+                if action == 'delete_keyword':
+                    keyword_id = data.get('keyword_id')
+                    keyword_to_delete = get_object_or_404(Buisness_keywords, id=keyword_id)
+                    keyword_to_delete.delete()
+                    response_data['message'] = 'Keyword deleted successfully'
+                
+                elif action == 'add_keyword':
+                    keyword_text = data.get('keyword', '').strip()
+                    if keyword_text:
+                        keyword, created = Keywords.objects.get_or_create(keyword=keyword_text.lower())
+                        Buisness_keywords.objects.get_or_create(keyword=keyword, buisness=business)
+                        response_data['message'] = 'Keyword added successfully'
+                
+                elif action == 'add_general_cat':
+                    cat_id = data.get('cid')
+                    if cat_id:
+                        cat = get_object_or_404(General_cats, id=cat_id)
+                        Buisness_General_cats.objects.get_or_create(gcat=cat, buisness=business)
+                        response_data['message'] = 'General category added successfully'
+                
+                elif action == 'delete_general_cat':
+                
+                    cat_id = data.get('cid')
+                    if cat_id:  
+                        Buisness_General_cats.objects.filter(gcat_id=cat_id, buisness=business).delete()
+                        print('delete general cat', cat_id)
+                        response_data['message'] = 'General category deleted successfully'
+                
+                elif action == 'add_descriptive_cat':
+                    cat_id = data.get('cid')
+                    if cat_id:
+                        for i in cat_id:
+                            cat = get_object_or_404(Descriptive_cats, id=i)
+                            Buisness_Descriptive_cats.objects.get_or_create(dcat=cat, buisness=business)
+                        response_data['message'] = 'Descriptive category added successfully'
+                
+                elif action == 'delete_descriptive_cat':
+                    cat_id = data.get('cid')
+                    if cat_id:
+                        Buisness_Descriptive_cats.objects.filter(dcat_id=cat_id, buisness=business).delete()
+                        response_data['message'] = 'Descriptive category deleted successfully'
+                
+                else:
+                    response_data['status'] = 'error'
+                    response_data['message'] = 'Invalid action specified'
+                
+                # Return updated business data
+                response_data['data'] = {
+                    'keywords': list(Buisness_keywords.objects.filter(buisness=business)
+                               .values_list('keyword__keyword', flat=True)),
+                    'general_categories': list(Buisness_General_cats.objects.filter(buisness=business)
+                                        .values_list('gcat__cat_name', flat=True)),
+                    'descriptive_categories': list(Buisness_Descriptive_cats.objects.filter(buisness=business)
+                                                .values_list('dcat__cat_name', flat=True)),
+                }
+            
+            except json.JSONDecodeError:
+                response_data = {'status': 'error', 'message': 'Invalid JSON data'}
+            except Buisnesses.DoesNotExist:
+                response_data = {'status': 'error', 'message': 'Business not found'}
+            except Exception as e:
+                response_data = {'status': 'error', 'message': str(e)}
+    
+    except Exception as e:
+        response_data = {'status': 'error', 'message': str(e)}
+    
+    return JsonResponse(response_data)
+
+
+
+@api_view(['GET'])
+def business_search_view(request):
+    """
+    Renders the business search page that connects to the Elasticsearch API
+    """
+    # You can pass any initial data needed by the template here
+    context = {
+        'api_endpoint': '/users/esearch/',  # Your API endpoint
+        'default_location': 'New Delhi',    # Default location if needed
+    }
+    return render(request, 'search_page.html', context)
+
+
+
+
+
+
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from datetime import datetime, timedelta
+import re
+
+from usershome.models import Buisnesses, Plans, Plan_Varients
+
+
+def parse_duration(duration_str):
+    """Parses strings like '30 days', '6 months', '1 year' into timedelta."""
+    duration_str = duration_str.lower().strip()
+    if "day" in duration_str:
+        days = int(re.findall(r'\d+', duration_str)[0])
+        return timedelta(days=days)
+    elif "month" in duration_str:
+        months = int(re.findall(r'\d+', duration_str)[0])
+        return timedelta(days=30 * months)
+    elif "year" in duration_str:
+        years = int(re.findall(r'\d+', duration_str)[0])
+        return timedelta(days=365 * years)
+    else:
+        return timedelta(days=30)  # Default fallback
+
+
+@api_view(['POST'])
+def add_plan_to_buisness(request):
+    try:
+        buisness_id = request.data.get("business_id")
+        plan_id = request.data.get("plan_id")
+        variant_id = request.data.get("variant_id")
+        print(buisness_id,plan_id,variant_id)
+        if not buisness_id or not plan_id or not variant_id:
+            return Response({"error": "buisness_id, plan_id, and variant_id are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            buisness = Buisnesses.objects.get(id=buisness_id)
+        except Buisnesses.DoesNotExist:
+            return Response({"error": "Buisness not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            plan = Plans.objects.get(id=plan_id)
+        except Plans.DoesNotExist:
+            return Response({"error": "Plan not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            variant = Plan_Varients.objects.get(id=variant_id, plan=plan)
+        except Plan_Varients.DoesNotExist:
+            return Response({"error": "Plan variant not found or does not belong to the selected plan."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Calculate dates
+        start_date = datetime.today().date()
+        expiry_date = start_date + parse_duration(variant.duration)
+
+        # Set fields
+        buisness.plan = plan
+        buisness.plan_variant = variant
+        buisness.plan_start_date = start_date
+        buisness.plan_expiry_date = expiry_date
+
+        # Optionally adjust search priority based on plan
+        if plan.search_priority_3:
+            buisness.search_priority = 3
+        elif plan.search_priority_2:
+            buisness.search_priority = 2
+        elif plan.search_priority_1:
+            buisness.search_priority = 1
+        else:
+            buisness.search_priority = 0
+ 
+        if plan.bi_assured:
+            buisness.assured = True
+        if plan.bi_verification:
+            buisness.verified = True
+
+        buisness.save()
+
+        return Response({
+            "message": "Plan successfully added to the business.",
+            "buisness_id": buisness.id,
+            "plan": plan.plan_name,
+            "variant": variant.duration,
+            "plan_start_date": str(start_date),
+            "plan_expiry_date": str(expiry_date),
+            "search_priority": buisness.search_priority
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -74,16 +74,61 @@ class ServiceDocument(Document):
 
 
 
+
+
+
+
+
+
+# Business Descriptive Categories Document
+bdc_index_settings = {
+    "number_of_shards": 1,
+    "number_of_replicas": 0,
+    "analysis": {
+        "analyzer": {
+            "edge_ngram_analyzer": {
+                "type": "custom",
+                "tokenizer": "edge_ngram_tokenizer",
+                "filter": ["lowercase"]
+            }
+        },
+        "tokenizer": {
+            "edge_ngram_tokenizer": {
+                "type": "edge_ngram",
+                "min_gram": 2,
+                "max_gram": 20,
+                "token_chars": ["letter", "digit", "whitespace"]
+            }
+        },
+        "normalizer": {
+            "lowercase_normalizer": {
+                "type": "custom",
+                "filter": ["lowercase"]
+            }
+        }
+    }
+}
+
+
+
+
 @registry.register_document
 class BuisnessDocument(Document):
     name = fields.TextField(analyzer="edge_ngram_analyzer", search_analyzer="standard")
     
+  
     keywords = fields.ListField(
-        fields.TextField(analyzer="edge_ngram_analyzer", search_analyzer="standard")
+        fields.TextField(
+            analyzer='standard',
+            search_analyzer='standard',
+            fields={
+                'raw': fields.KeywordField(normalizer='lowercase_normalizer')
+            }
+        )
     )
     class Index:
         name = 'businesses_index'
-        settings = index_settings
+        settings = bdc_index_settings
 
     class Django:
         model = Buisnesses
@@ -98,14 +143,28 @@ class BuisnessDocument(Document):
             return [related_instance.buisness]  
         return []
 
-# Business Descriptive Categories Document
+
+
+
+
+
+
+
+
+
 @registry.register_document
 class BDesCatDocument(Document):
-    cat_name = fields.TextField(analyzer="edge_ngram_analyzer", search_analyzer="standard")
 
+    cat_name = fields.TextField(
+        analyzer='standard',
+        search_analyzer='standard',
+        fields={
+            'raw': fields.KeywordField(normalizer='lowercase_normalizer')
+        }
+    )
     class Index:
         name = 'bdcats_index'
-        settings = index_settings  # Use custom index settings
+        settings = bdc_index_settings  # Use custom index settings
 
     class Django:
         model = Buisness_Descriptive_cats
