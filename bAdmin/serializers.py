@@ -74,7 +74,7 @@ class BuisnessesAdminlistSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'building_name', 'locality', 'city', 'state',
             'verified', 'created_on', 'assured', 'plan', 'rating',
-            'image', 'buisness_type','description','pincode'
+            'image', 'buisness_type','description','pincode','qa_passed'
         ]
 
     def get_plan(self, obj):

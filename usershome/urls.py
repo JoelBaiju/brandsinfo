@@ -31,7 +31,6 @@ urlpatterns = [
     path('offers/edit/<int:id>', views.EditOfferView.as_view(), name='Edit-offer'),
     path('offers/delete/<int:id>/', views.DeleteOfferView.as_view(), name='delete-offer'),
     path('offers/', views.GetOffersView.as_view(), name='offers'),
-    path('addlocation/',views.Get_location_view),
     
 # ========================== Auth urls
     path('userdata/',auth_views.User_Data.as_view()),

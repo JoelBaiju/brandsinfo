@@ -1,0 +1,356 @@
+<!-- {% load static %} -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Partner Registration | Business Integra</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap">
+</head>
+
+<style>
+    :root {
+        --primary-color: #FF750C;
+        --text-color: rgb(37, 37, 37);
+        --background-color: aliceblue;
+    }
+    
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        background-color: var(--background-color);
+        color: var(--text-color);
+        min-height: 100vh;
+        overflow-x: hidden;
+        position: relative;
+    }
+    
+    header {
+        position: absolute;
+        top: 30px;
+        left: 40px;
+        z-index: 1;
+    }
+    
+    header img {
+        height: 25px;
+    }
+    
+    .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 20px;
+        box-sizing: border-box;
+        position: relative;
+        z-index: 1;
+    }
+    
+    h1 {
+        font-weight: 300;
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    p {
+        font-weight: 300;
+        font-size: 1.1rem;
+        max-width: 500px;
+        text-align: center;
+        margin-bottom: 2.5rem;
+        line-height: 1.6;
+    }
+    
+    button {
+        background-color: var(--primary-color);
+        border-radius: 8px;
+        color: white;
+        padding: 14px 32px;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    button:hover {
+        background-color: #ff6f00;
+        transform: translateY(-2px) scale(1.04);
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    button:active {
+        transform: translateY(0);
+    }
+    
+  
+    
+    .float {
+       
+        animation-name: float;
+    }
+    
+    .floatreverse {
+       
+        animation-name: floatReverse;
+    }
+    
+@keyframes float {
+    0%   { transform: translateY(-30px) scaleX(-1); }
+    50%  { transform: translateY(0px) scaleX(-1); }
+    100% { transform: translateY(-30px) scaleX(-1); }
+}
+
+@keyframes floatReverse {
+    0%   { transform: translateY(30px) rotate(180deg) scaleX(-1);}
+    50%  { transform: translateY(0px) rotate(180deg) scaleX(-1);} /* positive Y to match visually flipped direction */
+    100% { transform: translateY(30px) rotate(180deg) scaleX(-1); }
+}
+/* 
+@keyframes pulse {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.1); }
+    100% { transform: scale(1); }
+} */
+
+    
+    /* Responsive adjustments */
+
+    /* Very large screens (e.g., desktops > 1440px) */
+/* @media (min-width: 1440px) {
+    h1 {
+        font-size: 3rem;
+    }
+    p {
+        font-size: 1.25rem;
+    }
+    .bg-svg{
+        width: 5px;
+    }
+} */
+
+/* Medium devices (tablets and small laptops) */
+/* 
+@media (min-width: 769px) and (max-width: 1024px) {
+    h1 {
+        font-size: 2.2rem;
+    }
+    p {
+        font-size: 1.05rem;
+    }
+    .bg-svg {
+        width: 5px;
+    }
+} */
+
+
+
+/* Updated Background Container Setup */
+.bg_container {
+    /* margin: 5px; */
+    background-color: #fff4e8;
+    position: fixed; /* fixed to stay in place */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+   
+    /* overflow: scroll; */
+    z-index: -1; /* send to back */
+    pointer-events: none;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* Placeholders for each svg_container (for placement control) */
+.bg_container .svg_container1 {
+    /* background-color: aqua; */
+    width: 25rem;
+    height: 100%;
+    position: relative;
+    top: 0;
+    right: 0;
+    /* transform: translate(30%, -30%); */
+}
+
+.bg_container .svg_container2 {
+    width: 25rem;
+    height: 100%;
+    /* background-color: beige; */
+    position: relative;
+    bottom: 0;
+    left: 0;
+    /* transform: translate(-30%, 30%); */
+}
+
+
+
+
+/* Each SVG inside can keep its animation & scaling */
+.bg-svg {
+    height: auto;
+    position: absolute;
+   
+    /* background-color: bisque; */
+    opacity: 1;
+    animation-duration: 8s;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out;
+}
+
+.svg_pos-1{
+    top: 0;
+    left: 0;
+}
+.svg_pos-2{
+    bottom: 0;
+    right: 0;
+}
+
+
+
+
+.sphere {
+    width: 6rem;
+}
+.curve{
+    width: 30rem;
+}
+.curve1{
+    width: 20rem;
+}
+
+
+
+
+
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2rem;
+    }
+    
+    p {
+        font-size: 1rem;
+    }
+    
+    .curve {
+        width: 20rem;
+        
+    }
+    .curve1 {
+        width: 15rem;
+        
+    }
+    .sphere {
+        width: 4rem;
+        
+    }
+    
+    
+}
+</style>
+
+<body>
+    <header>
+        <img src="../../media/Bi_Logo/bi_name_logo.png" alt="Business Integra Logo">
+    </header>
+    
+    <!-- Background SVG Elements -->
+     <!-- <div>
+        <img class="bg-svg curve" src="../../media/Assets/curve.svg" alt="">
+        <img class="bg-svg curve1" src="../../media/Assets/curve1.svg" alt="">
+        <img class="bg-svg sphere" src="../../media/Assets/sphere.svg" alt="">
+     </div> -->
+     <div class="bg_container" >
+        <div class="svg_container1" style="position: relative;">
+            <img class="bg-svg svg_pos-1 float curve" style="transform: scaleX(-1);" src="../../media/Assets/curve1.svg" alt="">
+            <img class="bg-svg svg_pos-1 float curve1" style="transform: scaleX(-1);" src="../../media/Assets/curve.svg" alt="">
+            <img class="bg-svg svg_pos-1 sphere" style="transform: scaleX(-1) translateX(-15rem) translateY(15rem); " src="../../media/Assets/sphere.svg" alt="">
+        </div>
+        <div class="svg_container2">
+            <img class="bg-svg svg_pos-2 floatreverse curve" style="transform: rotate(180deg) scaleX(-1); " src="../../media/Assets/curve1.svg" alt="">
+            <img class="bg-svg svg_pos-2 floatreverse curve1" style="transform: rotate(180deg) scaleX(-1);" src="../../media/Assets/curve.svg" alt="">
+            <img class="bg-svg svg_pos-2 sphere" style="transform: rotate(180deg) scaleX(-1)  translateX(-15rem) translateY(15rem); " src="../../media/Assets/sphere.svg" alt="">
+        </div>
+     </div>
+    
+    <div class="container">
+        <h1>Welcome Dear Partner</h1>
+        <p>Complete your registration by adding your shop location. This will help customers find your business more easily.</p>  
+        <button id="add-location-btn">Add Location</button>  
+        <p>For the most accurate results, please ensure you are <span style="color: #e5670a; font-weight: 400;">physically present at your business location</span> before continuing. This helps us pinpoint your shop on the map so customers can easily find you.</p>
+    </div>
+<script>
+    document.querySelector('#add-location-btn').addEventListener('click', () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition, showError);
+        } else {
+            alert("Geolocation is not supported by this browser. Please enter your location manually.");
+        }
+    });
+
+    function showPosition(position) {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        const bbid = '{{ bid }}';
+
+        const btn = document.getElementById('add-location-btn');
+        btn.innerHTML = '<span class="loading">Processing...</span>';
+        btn.disabled = true;
+
+        const baseUrl = window.location.origin;
+        const apiUrl = `${baseUrl}/badmin/add_location/?lat=${latitude}&lon=${longitude}&bid=${bbid}`;
+
+        // Send location data via fetch (GET)
+        fetch(apiUrl, {
+            method: 'GET'
+        })
+        .then(response => {
+            if (!response.ok) throw new Error("Network response was not ok");
+                return response.text(); // ← handles HTML or plain text
+        })
+        .then(data => {
+            document.querySelector('h1').textContent = "Thank You!";
+            document.querySelectorAll('p')[0].textContent = "Your location has been successfully registered.";
+            document.querySelectorAll('p')[1].style.display = "none";
+            btn.style.display = "none";
+        })
+        .catch(error => {
+            alert("Something went wrong while submitting your location. Please try again.");
+            console.error(error);
+            btn.innerHTML = 'Try Again';
+            btn.disabled = false;
+        });
+    }
+
+    function showError(error) {
+        const btn = document.getElementById('add-location-btn');
+
+        switch(error.code) {
+            case error.PERMISSION_DENIED:
+                alert("Location access was denied. Please enable location permissions to continue.");
+                break;
+            case error.POSITION_UNAVAILABLE:
+                alert("Location information is currently unavailable. Please try again later.");
+                break;
+            case error.TIMEOUT:
+                alert("The request to get your location timed out. Please try again.");
+                break;
+            default:
+                console.error("Geolocation error:", error);
+                alert("An error occurred while getting your location. Please try again.");
+        }
+
+        btn.innerHTML = 'Try Again';
+        btn.disabled = false;
+    }
+</script>
+
+
+</body>
+</html>

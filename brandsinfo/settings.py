@@ -241,8 +241,8 @@ FIREBASE_API_KEY = 'AIzaSyBF52Ah0ERtBRalBWwAOgEMPUhjKrlpVvo'
 OPENAI_API_KEY = config('OPENAI_API_KEY')
 
 
-# DEV = True
-DEV = False
+DEV = True
+# DEV = False
     
 
 

@@ -291,23 +291,6 @@ class BuisnessesView_for_customers(generics.ListAPIView):
         
     
 
-def Get_location_view(request,bid):
-    if request is None:
-        return render(request,'addlocation.html',{'bid':bid})
-    lon = request.GET.get('lon')
-    lat = request.GET.get('lat')
-    bid = request.GET.get('bid')
-    
-    print(lon,lat,bid)
-    
-    if lon and lat and bid:
-        buisness = Buisnesses.objects.get(id=int(float(bid)))
-        buisness.latittude = lat
-        buisness.longitude = lon
-        buisness.save()
-        return render(request,'ThankYou.html',{'bid':bid})
-    
-    
 
 
 class BuisnessImages(generics.ListCreateAPIView):

@@ -866,6 +866,7 @@ def business_tune_api(request):
                 {
                     'id': biz.id,
                     'name': biz.name,
+                    'qa_passed':biz.qa_passed,
                     'profile_pic':  BuisnessesSerializerMini(biz).data.get('image'),
                     'building_name':biz.building_name,
                     'business_type': biz.buisness_type,
@@ -934,6 +935,13 @@ def business_tune_api(request):
                         Buisness_Descriptive_cats.objects.filter(dcat_id=cat_id, buisness=business).delete()
                         response_data['message'] = 'Descriptive category deleted successfully'
                 
+                elif action == 'pass_qa':
+                    if business:
+                        business.qa_passed=True
+                        business.save()
+                        response_data['message'] = 'QA Check Updated Successfully'
+                
+
                 else:
                     response_data['status'] = 'error'
                     response_data['message'] = 'Invalid action specified'
@@ -1069,3 +1077,34 @@ def add_plan_to_buisness(request):
 
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+
+
+def Get_location_view(request):
+    # if request is None:
+    #     return render(request,'addlocation.html',{'bid':bid})
+    lon = request.GET.get('lon')
+    lat = request.GET.get('lat')
+    bid = request.GET.get('bid')
+    
+    print(lon,lat,bid)
+    if request.method == 'GET':
+        return render(request , 'addlocation.html',{'bid':bid,})
+    if lon and lat and bid:
+        buisness = Buisnesses.objects.get(id=int(float(bid)))
+        if buisness.latittude == None and buisness.longitude == None :
+            buisness.latittude = lat
+            buisness.longitude = lon
+            buisness.save()
+            return Response('Added your location')
+    
+        else :
+            buisness.latittude = lat
+            buisness.longitude = lon
+            buisness.save()
+            return Response('Location already added')
+    
+    
