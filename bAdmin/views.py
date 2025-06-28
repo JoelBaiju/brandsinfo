@@ -1082,8 +1082,8 @@ def add_plan_to_buisness(request):
 
 
 
-
-def Get_location_view(request):
+@api_view(['GET'])
+def add_location(request):
     # if request is None:
     #     return render(request,'addlocation.html',{'bid':bid})
     lon = request.GET.get('lon')
@@ -1091,21 +1091,21 @@ def Get_location_view(request):
     bid = request.GET.get('bid')
     
     print(lon,lat,bid)
-    if request.method == 'GET':
-        return render(request , 'addlocation.html',{'bid':bid,})
+   
     if lon and lat and bid:
         buisness = Buisnesses.objects.get(id=int(float(bid)))
-        if buisness.latittude == None and buisness.longitude == None :
+        if buisness.latittude == None and buisness.longitude == None or buisness.latittude == '' and buisness.longitude == '':
             buisness.latittude = lat
             buisness.longitude = lon
             print("from buisness",buisness.latittude,buisness.longitude)
             buisness.save()
+            print('Added your location')
             return Response('Added your location')
     
         else :
-            buisness.latittude = lat
-            buisness.longitude = lon
-            buisness.save()
+            print('Location already added')
             return Response('Location already added')
+    if request.method == 'GET':
+        return render(request , 'addlocation.html',{'bid':bid,})
     
     

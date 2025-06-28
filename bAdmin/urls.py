@@ -21,7 +21,7 @@ urlpatterns = [
     path('add_p_subcats/',views.AddProductSubCatsView.as_view()),
     path('add_p_gcats/',views.AddProductGeneralCatsView.as_view()),
     
-    path('add_location/',views.Get_location_view),
+    path('add_location/',views.add_location),
 
 
     path('add_buisness/',views.add_buisness_from_admin),
