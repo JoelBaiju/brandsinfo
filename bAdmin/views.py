@@ -1098,6 +1098,7 @@ def Get_location_view(request):
         if buisness.latittude == None and buisness.longitude == None :
             buisness.latittude = lat
             buisness.longitude = lon
+            print("from buisness",buisness.latittude,buisness.longitude)
             buisness.save()
             return Response('Added your location')
     
