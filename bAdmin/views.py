@@ -1076,7 +1076,7 @@ def add_plan_to_buisness(request):
                                                plan_variant= variant,
                                                payment_mode= 'Handled by admin'
                                                )
-        send_plan_purchased_draft4sms(buisness.name,plan, expiry_date, buisness.user.username)
+        send_plan_purchased_draft4sms(buisness.name,plan.verbouse_name, expiry_date, buisness.user.username)
         return Response({
             "message": "Plan successfully added to the business.",
             "buisness_id": buisness.id,
