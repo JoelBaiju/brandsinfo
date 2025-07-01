@@ -393,7 +393,7 @@ AI_METADATA_PRIORITY = [
 
 
 REVIEW_AI_PRIORITY = [
-    # "gpt",         # First priority
+    "gpt",         # First priority
     "cohere"  # Fallback
     # "sarvam" # Add if needed later
 ]
