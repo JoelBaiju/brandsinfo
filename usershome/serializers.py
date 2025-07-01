@@ -162,6 +162,11 @@ class BuisnessVideosSerializer(serializers.ModelSerializer):
     class Meta:
         model = Buisness_Videos
         fields = ['id', 'video_file','hls_path']
+
+class BuisnessYoutubeVideosSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BuisnessYoutubeVideos
+        fields = '__all__'
         
 class BuisnessesSerializer(serializers.ModelSerializer):
     image       = serializers.ImageField(required=False)
@@ -172,6 +177,7 @@ class BuisnessesSerializer(serializers.ModelSerializer):
                     )
     image_gallery   = BuisnessPicsSerializer(many=True, read_only=True)
     plan = PlansSerializer( read_only=True)
+    video_gallery = BuisnessVideosSerializer(many=True, read_only=True)
 
     class Meta:
         model = Buisnesses
@@ -182,6 +188,7 @@ class BuisnessesSerializer(serializers.ModelSerializer):
                 'web_link','x_link','youtube_link','whatsapp_number',
                 'incharge_number','user','score','image',
                 'searched',  'no_of_enquiries','email','image_gallery','plan'
+                ,'video_gallery'
                 ]
         
         
@@ -190,6 +197,7 @@ class BuisnessesSerializer(serializers.ModelSerializer):
         representation['images'] = BuisnessPicsSerializer(
             instance.buisness_pics_set.all(), many=True
         ).data
+  
         return representation
     
     def create(self, validated_data):
@@ -210,6 +218,7 @@ class BuisnessesSerializerFull(serializers.ModelSerializer):
     image_gallery = BuisnessPicsSerializer(many=True, read_only=True)
     video_gallery  = BuisnessVideosSerializer(many=True, read_only=True)
     plan = PlansSerializer( read_only=True)
+    youtube_videos = BuisnessYoutubeVideosSerializer(read_only=True,many=True)
 
     
     class Meta:
@@ -220,7 +229,7 @@ class BuisnessesSerializerFull(serializers.ModelSerializer):
                 'no_of_views','instagram_link','facebook_link','web_link',
                 'x_link','youtube_link','whatsapp_number','incharge_number','user',
                 'score','image',  'no_of_enquiries','email','image_gallery','plan',
-                'video_gallery'
+                'video_gallery','youtube_videos'
                 ]
     
     def to_representation(self, instance):
@@ -230,6 +239,9 @@ class BuisnessesSerializerFull(serializers.ModelSerializer):
         ).data
         representation['video_gallery'] = BuisnessVideosSerializer(
             instance.buisness_videos.all(), many=True
+        ).data
+        representation['youtube_videos'] = BuisnessYoutubeVideosSerializer(
+            instance.youtube_videos.all(), many=True
         ).data
         return representation
 
@@ -247,6 +259,7 @@ class BuisnessesSerializerCustomers(serializers.ModelSerializer):
     review_rating   = ReviewRatingSerializerMini(source='reviews_ratings_set', many=True, read_only=True)
     plan = PlansSerializer( read_only=True)
     video_gallery = BuisnessVideosSerializer(many=True, read_only=True)
+    youtube_videos = BuisnessYoutubeVideosSerializer(read_only=True,many=True)
 
     class Meta:
         model   = Buisnesses
@@ -257,7 +270,8 @@ class BuisnessesSerializerCustomers(serializers.ModelSerializer):
                     'instagram_link','facebook_link','web_link','x_link',
                     'youtube_link','whatsapp_number','incharge_number','user',
                     'image','image_gallery','site_data','email','verified',
-                    'assured','review_rating','rating','plan','video_gallery'
+                    'assured','review_rating','rating','plan','video_gallery',
+                    'youtube_videos'
                  ]
     
    
@@ -275,8 +289,9 @@ class BuisnessesSerializerCustomers(serializers.ModelSerializer):
             representation['video_gallery'] = BuisnessVideosSerializer(
                 instance.buisness_videos.all(), many=True
             ).data
-        else:
-            representation['video_gallery'] = []  # Set to empty if not allowed
+            representation['youtube_videos'] = BuisnessYoutubeVideosSerializer(
+                instance.youtube_videos.all(), many=True
+            ).data
 
         
         sitemap_link = instance.sitemap_link.first() 

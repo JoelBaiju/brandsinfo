@@ -998,20 +998,24 @@ import re
 from usershome.models import Buisnesses, Plans, Plan_Varients
 
 
-def parse_duration(duration_str):
-    """Parses strings like '30 days', '6 months', '1 year' into timedelta."""
-    duration_str = duration_str.lower().strip()
-    if "day" in duration_str:
-        days = int(re.findall(r'\d+', duration_str)[0])
-        return timedelta(days=days)
-    elif "month" in duration_str:
-        months = int(re.findall(r'\d+', duration_str)[0])
-        return timedelta(days=30 * months)
-    elif "year" in duration_str:
-        years = int(re.findall(r'\d+', duration_str)[0])
-        return timedelta(days=365 * years)
-    else:
-        return timedelta(days=30)  # Default fallback
+def parse_duration(duration_val):
+    """Parses duration as int (days) or strings like '30 days', '6 months', '1 year' into timedelta."""
+    if isinstance(duration_val, int):
+        return timedelta(days=duration_val)
+    if isinstance(duration_val, str):
+        duration_str = duration_val.lower().strip()
+        if duration_str.isdigit():
+            return timedelta(days=int(duration_str))
+        if "day" in duration_str:
+            days = int(re.findall(r'\d+', duration_str)[0])
+            return timedelta(days=days)
+        elif "month" in duration_str:
+            months = int(re.findall(r'\d+', duration_str)[0])
+            return timedelta(days=30 * months)
+        elif "year" in duration_str:
+            years = int(re.findall(r'\d+', duration_str)[0])
+            return timedelta(days=365 * years)
+    return timedelta(days=30)  # Default fallback
 
 
 from communications.draft4sms import send_plan_purchased_draft4sms
@@ -1046,6 +1050,9 @@ def add_plan_to_buisness(request):
         # Calculate dates
         start_date = datetime.today().date()
         expiry_date = start_date + parse_duration(variant.duration)
+        print(expiry_date)
+        print(variant.duration)
+        print(start_date)
 
         # Set fields
         buisness.plan = plan

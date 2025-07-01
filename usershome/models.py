@@ -171,7 +171,9 @@ class Buisnesses(models.Model):
 
 from django.utils import timezone
 
-
+class BuisnessYoutubeVideos(models.Model):
+    business = models.ForeignKey(Buisnesses, on_delete=models.CASCADE , related_name='youtube_videos')
+    youtube_link = models.CharField(null=True , max_length=400  )
 
 class BusinessReviewTracker(models.Model):
     business = models.OneToOneField(Buisnesses, on_delete=models.CASCADE)

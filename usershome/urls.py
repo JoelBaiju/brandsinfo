@@ -124,7 +124,9 @@ urlpatterns = [
 # ========================== Video
     path('uploadvideo/', VideoUploadView.as_view(), name='upload-video'),
     path('deletevideo/<int:pk>/', views.VideoDelete.as_view(), name='delete-video'),
-    
+    path('youtube-video-delete/<int:pk>/', views.BuisnessYoutubeVideoDestroyView.as_view(), name='youtube-video-delete'),
+
+    path('youtube_video/', views.BuisnessYoutubeVideoCreateView.as_view(), name='youtube-video-create'),
     path('notifytest/', puchase_plan, name='p'),
 
     path('pcreds/',pcreds, name='pcreds'),

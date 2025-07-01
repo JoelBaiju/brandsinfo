@@ -78,9 +78,6 @@ class ServiceDocument(Document):
 
 
 
-
-
-# Business Descriptive Categories Document
 bdc_index_settings = {
     "number_of_shards": 1,
     "number_of_replicas": 0,
@@ -89,7 +86,12 @@ bdc_index_settings = {
             "edge_ngram_analyzer": {
                 "type": "custom",
                 "tokenizer": "edge_ngram_tokenizer",
-                "filter": ["lowercase"]
+                "filter": ["lowercase", "stop"]
+            },
+            "stop_analyzer": {
+                "type": "custom",
+                "tokenizer": "standard",
+                "filter": ["lowercase", "stop"]
             }
         },
         "tokenizer": {
@@ -110,38 +112,42 @@ bdc_index_settings = {
 }
 
 
-
-
 @registry.register_document
 class BuisnessDocument(Document):
-    name = fields.TextField(analyzer="edge_ngram_analyzer", search_analyzer="standard")
-    
-  
+    name = fields.TextField(
+        analyzer="edge_ngram_analyzer",
+        search_analyzer="stop_analyzer",
+        fields={
+            "raw": fields.KeywordField(normalizer="lowercase_normalizer")
+        }
+    )
+
     keywords = fields.ListField(
         fields.TextField(
-            analyzer='standard',
-            search_analyzer='standard',
+            analyzer='stop_analyzer',          # Avoid indexing stopwords
+            search_analyzer='stop_analyzer',
             fields={
                 'raw': fields.KeywordField(normalizer='lowercase_normalizer')
             }
         )
     )
+
     class Index:
         name = 'businesses_index'
         settings = bdc_index_settings
 
     class Django:
         model = Buisnesses
-        related_models = [Buisness_keywords]  # To auto-update the document when related model changes
+        related_models = [Buisness_keywords]
 
     def prepare_keywords(self, instance):
         return list(instance.buisness_keywords_set.values_list('keyword__keyword', flat=True))
 
-
     def get_instances_from_related(self, related_instance):
         if isinstance(related_instance, Buisness_keywords):
-            return [related_instance.buisness]  
+            return [related_instance.buisness]
         return []
+
 
 
 

@@ -986,7 +986,20 @@ class VideoDelete(generics.DestroyAPIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
             
-            
+
+from rest_framework.generics import CreateAPIView,DestroyAPIView
+
+class BuisnessYoutubeVideoCreateView(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = BuisnessYoutubeVideos.objects.all()
+    serializer_class = BuisnessYoutubeVideosSerializer
+
+
+class BuisnessYoutubeVideoDestroyView(DestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = BuisnessYoutubeVideos.objects.all()
+    serializer_class = BuisnessYoutubeVideosSerializer
+    lookup_field = 'pk'  # 
             
     
 @api_view(['POST'])

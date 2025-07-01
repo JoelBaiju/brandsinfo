@@ -119,3 +119,6 @@ admin.site.register(Buisness_pics,BuisnessPicsAdmin)
 admin.site.register(BusinessReviewTracker)
 
 admin.site.register(AutoReviewSchedulerLog)
+class BuisnessYoutubeVideosSerializer(admin.ModelAdmin):
+    list_display = ['id' , 'youtube_link' , "buisness"]
+admin.site.register(BuisnessYoutubeVideos)
