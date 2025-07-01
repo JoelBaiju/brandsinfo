@@ -645,8 +645,27 @@ class PhonePeTransaction(models.Model):
 
 
 
+class AdminDirectTransactions(models.Model):
+    user                        = models.ForeignKey('Extended_User', on_delete=models.CASCADE, related_name='admin_direct_transactions', verbose_name="User" , null=True )
+    amount                      = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0.01)], verbose_name="Amount (₹)", )
+    created_at                  = models.DateTimeField(auto_now_add=True, verbose_name="Created At")
+    buisness                    = models.ForeignKey('Buisnesses', on_delete=models.CASCADE, null=True, blank=True, related_name='admin_direct_transactions', verbose_name="Business")
+    plan                        = models.ForeignKey('Plans', on_delete=models.SET_NULL, null=True, blank=True, related_name='admin_direct_transactions', verbose_name="Subscription Plan")
+    plan_variant                = models.ForeignKey(Plan_Varients , on_delete=models.SET_NULL, null=True, blank=True, related_name='admin_direct_transactions', verbose_name="Plan Variant")
+    payment_completed_at        = models.DateTimeField(null=True, blank=True, verbose_name="Payment Completed At")
+    payment_mode                = models.CharField(max_length=50, null=True, blank=True, verbose_name="Payment Mode")
+
+
+
+
+
+
+
+
+
 class AutoReviewSchedulerLog(models.Model):
     date = models.DateField(unique=True)
 
     def __str__(self):
         return str(self.date)
+

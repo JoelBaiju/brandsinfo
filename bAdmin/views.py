@@ -838,6 +838,7 @@ import json
 from usershome.serializers import BuisnessesSerializerMini
 
 @api_view(["GET", "POST"])
+@permission_classes([IsAuthenticated])
 def business_tune_api(request):
     response_data = {'status': 'success', 'data': {}}
     
@@ -1013,7 +1014,11 @@ def parse_duration(duration_str):
         return timedelta(days=30)  # Default fallback
 
 
+from communications.draft4sms import send_plan_purchased_draft4sms
+
+
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def add_plan_to_buisness(request):
     try:
         buisness_id = request.data.get("business_id")
@@ -1064,7 +1069,14 @@ def add_plan_to_buisness(request):
             buisness.verified = True
 
         buisness.save()
-
+        AdminDirectTransactions.objects.create(user= buisness.user,
+                                               buisness=buisness,
+                                               amount = variant.price,
+                                               plan = plan,
+                                               plan_variant= variant,
+                                               payment_mode= 'Handled by admin'
+                                               )
+        send_plan_purchased_draft4sms(buisness.name,plan, expiry_date, buisness.user.username)
         return Response({
             "message": "Plan successfully added to the business.",
             "buisness_id": buisness.id,
