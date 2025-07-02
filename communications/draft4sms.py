@@ -68,11 +68,7 @@ def send_welcome_draft4sms(name , phone_number):
 
 def send_buisness_registered_draft4sms(name , phone_number):
     TEMPLATE_ID= "1107175085187780456"
-    message = f""" 
-                    Hi {name}, your business is now active on BrandsInfo. 
-                    Visit www.brandsinfo.in/pricing for available options.
-                    For assistance, contact support@brandsinfo.in 
-                """
+    message = f"Hi {name}, your business is now active on BrandsInfo. Visit www.brandsinfo.in/pricing for available options.For assistance, contact support@brandsinfo.in "
     encoded_message = urllib.parse.quote(message)
 
     url = (
@@ -95,10 +91,7 @@ def send_plan_purchased_draft4sms(name,plan,expiry , phone_number):
 
     TEMPLATE_ID="1107175084635114365"
    
-    message = f""" 
-                    Hi {name}, your {plan} package is active till {expiry}. 
-                    For further updates, stay connected with BrandsInfo. https://brandsinfo.in/ 
-                """
+    message = f" Hi {name}, your {plan} package is active till {expiry}. For further updates, stay connected with BrandsInfo. https://brandsinfo.in/ "
     encoded_message = urllib.parse.quote(message)
 
     url = (

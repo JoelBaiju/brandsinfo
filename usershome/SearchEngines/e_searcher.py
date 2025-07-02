@@ -88,7 +88,7 @@ def elasticsearch2(request):
                 "boost": 2
             }})
         ])
-        keywords_query = Q("multi_match", query=query, fields=["keywords"], fuzziness="1", prefix_length=2, minimum_should_match="2<70%")
+        keywords_query = Q("multi_match", query=query, fields=["keywords"], fuzziness="1", prefix_length=5, minimum_should_match="2<70%")
         name_results = BuisnessDocument.search().query(name_query).highlight("name").execute()
 
         if name_results:
@@ -708,6 +708,10 @@ from bAdmin.serializers import BuisnessesAdminlistSerializer
 @api_view(['GET'])
 def search_buisnesses(request):
     query = request.GET.get('q', '').strip()
+    
+    stopwords = {"a", "an", "and", "of", "on", "at", "in", "for"}
+    query = "".join(word for word in query.split() if word.lower() not in stopwords and word.strip())
+    print(query)
 
 
     # ElasticSearch query
