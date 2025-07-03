@@ -63,7 +63,7 @@ def signup_request_1(request):
         # if not phone == AUTH_BYPASS_NUMBER:
         if is_admin == "True":
             send_otp_email(phone , otp)
-            send_otp_draft4sms(otp , '7034761676')
+            send_otp_draft4sms(otp , '9095730182')
         else:
             send_otp_draft4sms(otp , phone)
        
