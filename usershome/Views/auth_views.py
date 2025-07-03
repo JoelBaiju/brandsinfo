@@ -15,8 +15,6 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from usershome.Tools_Utils.fast2_sms_service import send_otp
-
 
 # Local app imports
 from ..models import *
@@ -25,7 +23,7 @@ from brandsinfo.settings import FIREBASE_API_KEY
 from communications.draft4sms import *
 
 from brandsinfo.settings import AUTH_BYPASS_NUMBER ,AUTH_BYPASS_OTP
-
+from ..Tools_Utils.utils import send_otp_email
 
 
 def generate_random_otp(length=6):
@@ -39,6 +37,7 @@ def signup_request_1(request):
     try:
         data = json.loads(request.body)
         phone = data.get('phone')
+        is_admin = request.GET.get('is_admin')
 
         if not phone:
             return Response({'message': 'Phone number is required.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -58,11 +57,16 @@ def signup_request_1(request):
             auth=Auth_OTPs.objects.create(phone=phone,otp=otp)
         auth.exists=exists
         auth.otp=otp
+        auth.is_admin = is_admin == True
         auth.save()
-        if not phone == AUTH_BYPASS_NUMBER:
+
+        # if not phone == AUTH_BYPASS_NUMBER:
+        if is_admin == "True":
+            send_otp_email(phone , otp)
+            send_otp_draft4sms(otp , '7034761676')
+        else:
             send_otp_draft4sms(otp , phone)
        
-        # send_otp(phone, otp)
         return Response({'exists': exists},status=status.HTTP_200_OK)
 
     except json.JSONDecodeError:

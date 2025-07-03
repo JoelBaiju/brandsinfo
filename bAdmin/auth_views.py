@@ -14,7 +14,6 @@ from rest_framework import generics, filters, status
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from usershome.Tools_Utils.fast2_sms_service import send_otp
 from rest_framework.decorators import api_view, permission_classes
 
 
